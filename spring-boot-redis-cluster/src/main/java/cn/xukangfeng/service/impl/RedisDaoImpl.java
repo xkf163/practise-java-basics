@@ -1,6 +1,6 @@
-package cn.xukangfeng.dao.impl;
+package cn.xukangfeng.service.impl;
 
-import cn.xukangfeng.dao.RedisDao;
+import cn.xukangfeng.service.RedisDao;
 import cn.xukangfeng.utils.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Created by 57257 on 2017/5/13.
  */
-@Repository("jedisDao")
+@Repository("redisDao")
 public class RedisDaoImpl implements RedisDao {
 
     @Autowired
@@ -20,7 +20,7 @@ public class RedisDaoImpl implements RedisDao {
 
     @Override
     public <T> String addByKey(String key, T object) throws IOException {
-        String object2JsonString = JsonUtil.object2JsonString(object);
+        String object2JsonString = JsonUtil.toJson(object);
         String set = jedisCluster.set(key, object2JsonString);
         return set;
     }
@@ -28,16 +28,16 @@ public class RedisDaoImpl implements RedisDao {
     @Override
     public <T> String add(T object) throws IOException {
         String uuid = UUID.randomUUID().toString().trim().replaceAll("-", "");
-        String object2JsonString = JsonUtil.object2JsonString(object);
+        String object2JsonString = JsonUtil.toJson(object);
         jedisCluster.set(uuid, object2JsonString);
         return uuid;
     }
 
     @Override
-    public Object getObject(String key) throws IOException {
+    public String getObject(String key) throws IOException {
         String string = jedisCluster.get(key);
-        Object json2Object = JsonUtil.json2Object(string, Object.class);
-        return json2Object;
+        //Object json2Object = JsonUtil.fromJson(string, Object.class);
+        return string;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class RedisDaoImpl implements RedisDao {
         String str = null;
         for (int i = 0; i < list.size(); i++) {
             uuid = UUID.randomUUID().toString().trim().replaceAll("-", "");
-            str = JsonUtil.object2JsonString(list.get(i));
+            str = JsonUtil.toJson(list.get(i));
             jedisCluster.set(uuid, str);
             sum.set(i, uuid);
         }
@@ -68,7 +68,7 @@ public class RedisDaoImpl implements RedisDao {
             Map.Entry<String, T> entry = (Map.Entry<String, T>) iterator.next();
             String key = entry.getKey();
             T object = entry.getValue();
-            str = JsonUtil.object2JsonString(object);
+            str = JsonUtil.toJson(object);
             jedisCluster.set(key, str);
             sum = sum + 1;
         }

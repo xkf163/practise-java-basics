@@ -1,4 +1,4 @@
-package cn.xukangfeng.dao;
+package cn.xukangfeng.service;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +14,7 @@ public interface RedisDao {
 
     public <T> String add(T object)  throws IOException ;
 
-    public Object getObject(String key)  throws IOException;
+    public String getObject(String key)  throws IOException;
 
     public <T> List<String> addList(List<T> list)  throws IOException;
 
