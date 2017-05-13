@@ -1,0 +1,27 @@
+server:
+  port: 80
+spring:
+  ## 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/springbootdb?useUnicode=true&characterEncoding=utf8
+    username: root
+    password:
+    driver-class-name: com.mysql.jdbc.Driver
+  ##redis集群
+  redis:
+    cluster:
+      nodes:
+              - 192.168.0.99:6380
+              - 192.168.0.99:6381
+              - 192.168.0.99:6382
+              - 192.168.0.98:6380
+              - 192.168.0.98:6381
+              - 192.168.0.98:6382
+## Mybatis 配置
+mybatis:
+  type-aliases-package: domain
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+      map-underscore-to-camel-case: true
+      default-fetch-size: 100
+      default-statement-timeout: 30
