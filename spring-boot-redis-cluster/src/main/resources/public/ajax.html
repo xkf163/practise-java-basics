@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX DEMO</title>
+</head>
+<body>
+
+<h1>城市查询</h1>
+<label>名称</label>
+<input type="text" id="keyword"/>
+<button id="search">查询</button>
+<p id="queryResult"></p>
+
+
+<h1>城市新建</h1>
+<label>名称</label>
+<input type="text" id="cityName"/>
+<label>省份ID</label>
+<input type="text" id="provinceId"/>
+<label>描述</label>
+<input type="text" id="description"/>
+<button id="save">保存</button>
+<p id="saveResult"></p>
+
+<script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#search").click(function () {
+            $.ajax({
+                type: "GET",
+                url: "/ajax/"+$("#keyword").val()+"/city",
+                dataType: "json",
+                success: function (data) {
+                    if(data.id){
+                        $("#queryResult").html(data.cityName);
+                    }else{
+                        $("#queryResult").html("出现错误:"+data.cityName);
+                    }
+                },
+                error:function (jqXHR) {
+                    alert("发生错误:"+jqXHR.status);
+                }
+            });
+        });
+
+
+        $("#save").click(function () {
+            $.ajax({
+                type: "POST",
+                url: "/api/citys",
+                dataType:"json",
+                data: {
+                    cityName : $("#cityName").val(),
+                    provinceId : $("#provinceId").val(),
+                    description : $("#description").val(),
+                },
+                success:function (data) {
+                    if(data.id){
+                        $("#saveResult").html(data.cityName);
+                    }else{
+                        $("#saveResult").html("出现错误:"+data.cityName);
+                    }
+                },
+                error:function (jqXHR) {
+                    alert("发生错误:"+jqXHR.status);
+                }
+            });
+        });
+
+    });
+
+
+    /*
+
+
+    //原生js写法
+    document.getElementById("search1").onclick=function () {
+        var request = new XMLHttpRequest();
+        request.open("GET","/ajax/"+document.getElementById("keyword").value+"/city");
+        request.send();
+        request.onreadystatechange = function () {
+            if(request.readyState===4){
+                if(request.status===200){
+                    document.getElementById("queryResult").innerHTML = request.responseText;
+                }else{
+                    alert("发生错误"+request.status);
+                }
+            }
+        }
+    }
+
+
+    document.getElementById("save1").onclick = function () {
+        var request = new XMLHttpRequest();
+        var data = "cityName="+document.getElementById("cityName").value
+            +"&provinceId="+document.getElementById("provinceId").value
+            +"&description="+document.getElementById("description").value;
+        request.open("POST","/api/citys");
+        request.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        request.send(data);
+        request.onreadystatechange = function () {
+            if(request.readyState===4){
+                if(request.status===200){
+                    alert(request.responseText);
+                    document.getElementById("saveResult").innerHTML =request.responseText;
+                }else {
+                    alert("发生错误"+request.status);
+                }
+
+            }
+        }
+
+    }
+
+     */
+
+
+</script>
+
+</body>
+</html>
