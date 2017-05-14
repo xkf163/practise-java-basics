@@ -29,9 +29,10 @@ public class CityRestController {
     }
 
     @RequestMapping(value = "/api/citys")
-    public void add(){
+    public void add(@RequestParam(value = "cityName",required = true) String cityName){
         City city =new City();
-        city.setCityName(String.format("杭州" + (int)(Math.random()*100)));
+        //city.setCityName(String.format("杭州" + (int)(Math.random()*100)));
+        city.setCityName(cityName);
         city.setProvinceId((long)(Math.random()*100));
         cityService.add(city);
     }
