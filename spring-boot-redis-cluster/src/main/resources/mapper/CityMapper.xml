@@ -28,4 +28,10 @@
         WHERE id = #{id}
     </select>
 
+
+    <insert id="addCity" parameterType="cn.xukangfeng.domain.City" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO city(province_id,city_name,description)
+        VALUES (#{provinceId},#{cityName},#{description})
+    </insert>
+
 </mapper>

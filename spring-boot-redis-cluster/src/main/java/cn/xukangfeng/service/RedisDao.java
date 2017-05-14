@@ -1,5 +1,7 @@
 package cn.xukangfeng.service;
 
+import org.springframework.data.repository.NoRepositoryBean;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;

@@ -1,11 +1,14 @@
 package cn.xukangfeng.domain;
 
+import org.springframework.stereotype.Component;
+
 import java.io.Serializable;
 
 /**
  * Created by 57257 on 2017/5/13.
  * 城市类
  */
+@Component
 public class City implements Serializable{
 
     private static final long serialVersionUID = 3489127618103077078L;

@@ -32,36 +32,34 @@ public class CityServiceImpl implements CityService {
     @Override
     public City findCityById(Long id) {
 
-
         String key = "city_"+id;
-
         boolean exists = jedisCluster.exists(key);
-
         City city;
-
         if(exists){
             try {
                 String cityString = redisDao.getObject(key);
                 city = JsonUtil.fromJson(cityString , City.class);
                 System.out.println("city读取缓存");
-
                 return city;
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
         city = cityDao.findById(id);
-
         try {
             redisDao.addByKey(key, JsonUtil.toJson(city));
             System.out.println("city插入缓存");
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return city;
+    }
+
+    @Override
+    public void add(City city) {
+        int row = cityDao.addCity(city);
+        System.out.println("city数据库保存成功:row:"+row);
+        System.out.println("city数据库保存成功:getId:"+city.getId());
     }
 
     @Override

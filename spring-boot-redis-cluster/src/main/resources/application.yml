@@ -1,13 +1,12 @@
 server:
   port: 80
 spring:
-  ## 数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/springbootdb?useUnicode=true&characterEncoding=utf8
+    #WARN: Establishing SSL connection without server's identity verification is not recommended 锛氬姞useSSL=true娑堥櫎璀﹀憡
+    url: jdbc:mysql://192.168.0.103:3306/springbootdb?useUnicode=true&characterEncoding=utf8&useSSL=true
     username: root
-    password:
+    password: password
     driver-class-name: com.mysql.jdbc.Driver
-  ##redis集群
   redis:
     cluster:
       nodes:
@@ -17,7 +16,6 @@ spring:
               - 192.168.0.98:6380
               - 192.168.0.98:6381
               - 192.168.0.98:6382
-## Mybatis 配置
 mybatis:
   type-aliases-package: domain
   mapper-locations: classpath:mapper/*.xml

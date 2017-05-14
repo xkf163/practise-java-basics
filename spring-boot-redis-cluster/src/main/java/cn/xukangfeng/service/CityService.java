@@ -9,4 +9,5 @@ public interface CityService {
 
     City findCityById(Long id);
     City findCityByName(String cityName);
+    void add(City city);
 }
