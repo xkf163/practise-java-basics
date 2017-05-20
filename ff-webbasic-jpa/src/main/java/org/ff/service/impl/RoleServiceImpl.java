@@ -1,7 +1,9 @@
 package org.ff.service.impl;
 
 
+import org.ff.dao.RoleDao;
 import org.ff.service.RoleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -10,18 +12,17 @@ import java.util.*;
 @Service("roleService")
 public class RoleServiceImpl  implements RoleService {
 
-
-    @Value("${shiro.sql.roles}")
-    private String shiroSqlRoles;
+    @Autowired
+    private RoleDao roleDao;
 
     @Override
-    public Set<String> getRoleCodeSet(String username) {
-        Map<String,Object> params=new HashMap<String,Object>();
-        params.put("param",username);
-//        List list=super.findMapBySql(shiroSqlRoles,params);
-        List list=null;
-        Set<String> retSet=new HashSet<String>();
-        retSet.addAll(list);
-        return retSet;
+    public Set<String> findRoleCodeSetByUserName(String username) {
+        return roleDao.findRoleCodeSetByUserName(username);
     }
+
+    @Override
+    public Set<String> findRoleIdSetByUserName(String username) {
+        return roleDao.findRoleIdSetByUserName(username);
+    }
+
 }

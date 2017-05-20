@@ -13,6 +13,8 @@ import org.ff.utils.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,7 @@ import java.util.Set;
 ;
 
 @Controller
+@EnableConfigurationProperties
 public class LoginController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
@@ -39,13 +42,13 @@ public class LoginController {
     private UserService userService;
 
     @Value("${page.main}")
-    private static String MAIN_PAGE ;
+    private String MAIN_PAGE ;
 
     @Value("${page.login}")
-    private static String LOGIN_PAGE;
+    private String LOGIN_PAGE;
 
     @Value("${page.register}")
-    private static String REGISTER_PAGE;
+    private String REGISTER_PAGE;
 
     @RequestMapping(value = "/login")
     private String doLogin(HttpServletRequest request, Model model) {
@@ -72,7 +75,7 @@ public class LoginController {
             subject.login(token);
             //通过认证
             if (subject.isAuthenticated()) {
-                Set<String> roles = roleService.getRoleCodeSet(userName);
+                Set<String> roles = roleService.findRoleCodeSetByUserName(userName);
                 if (!roles.isEmpty()) {
                     subject.getSession().setAttribute("isAuthorized", true);
                     return MAIN_PAGE;

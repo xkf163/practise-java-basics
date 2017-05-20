@@ -33,7 +33,7 @@ public class Function extends BaseEntity {
     private String parentId;
 
 
-    @Column(name = "levelCode", length = 36)
+    @Column(name = "level_code", length = 36)
     private String levelCode;
 
 

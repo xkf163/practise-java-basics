@@ -29,6 +29,10 @@ public class Role extends BaseEntity {
     @Column(name = "sort")
     private Integer sort;
 
+
+
+
+
     public String getName() {
 
         return name;

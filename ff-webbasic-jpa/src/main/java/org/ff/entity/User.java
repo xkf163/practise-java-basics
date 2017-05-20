@@ -2,11 +2,10 @@ package org.ff.entity;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "tbl_user")
@@ -58,7 +57,7 @@ public class User extends BaseEntity {
     private String openAccount;
 
 
-    @Column(name = "isSuperAdmin")
+    @Column(name = "is_super_admin")
     private String isSuperAdmin;
 
 

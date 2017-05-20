@@ -13,6 +13,7 @@ import org.ff.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -48,8 +49,8 @@ public class ShiroRealm extends AuthorizingRealm {
         }
         //获取已认证的用户名（登录名）
         String username=(String)super.getAvailablePrincipal(principals);
-        Set<String> roleCodes=roleService.getRoleCodeSet(username);
-        Set<String> functionCodes=functionService.getFunctionCodeSet(roleCodes);
+        Set<String> roleCodes=roleService.findRoleCodeSetByUserName(username);
+        Set<String> functionCodes=functionService.findUrlSetByRoleCode(roleCodes);
         SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
         authorizationInfo.setRoles(roleCodes);
         authorizationInfo.setStringPermissions(functionCodes);

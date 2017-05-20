@@ -10,5 +10,9 @@ public interface RoleService {
      * @param username 登录名
      * @return 角色编码集合
      */
-    Set<String> getRoleCodeSet(String username);
+    Set<String> findRoleCodeSetByUserName(String username);
+
+
+    Set<String> findRoleIdSetByUserName(String username);
+
 }
