@@ -3,10 +3,18 @@ server:
 spring:
   datasource:
     #WARN: Establishing SSL connection without server's identity verification is not recommended ：加useSSL=true消除警告
-    url: jdbc:mysql://192.168.0.103:3306/springbootdb?useUnicode=true&characterEncoding=utf8&useSSL=true
+    url: jdbc:mysql://192.168.0.119:3306/springbootdb?useUnicode=true&characterEncoding=utf8
     username: root
-    password: password
+    password:
     driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: update
+      naming:
+        strategy: org.hibernate.cfg.ImprovedNamingStrategy
 #  redis:
 #    cluster:
 #      nodes:
