@@ -1,0 +1,20 @@
+[{
+  "id":1,
+  "text":"发行年代",
+  "children":[{
+    "text":"2017",
+    "checked":true,
+    "attributes":{
+      "url":"/pages/table",
+      "keys":2017
+    }
+  }]
+},{
+  "text":"国家/地区",
+  "state":"closed",
+  "children":[{
+    "text":"Java"
+  },{
+    "text":"C#"
+  }]
+}]

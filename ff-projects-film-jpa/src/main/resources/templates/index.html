@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Film Repository</title>
+    <link rel="stylesheet" type="text/css" href="./components/jquery-easyui-themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="./components/jquery-easyui-1.5.1/themes/icon.css">
+
+    <script type="text/javascript" src="./components/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="./components/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="./components/jquery-easyui-1.5.1/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="./js/jquery.cookie.js"></script>
+
+    <script  type="text/javascript">
+        /*遍历多媒体文件夹，符合条件的电影条目写入数据库*/
+        function gather() {
+            $.ajax({
+                url:"/gather",
+                type:"get",
+                data:"",
+                dataType: "json",
+                success:function (data) {
+
+                    $('#resText').empty();   //清空resText里面的所有内容
+                    var html = '没有新数据被添加！';
+                    $.each(data, function(commentIndex, comment){
+                        html += '<div class="comment">' + comment['fullPath'] +':'+ comment['mediaSize'] +'</div>';
+                    });
+                    $('#resText').html(html);
+                }
+            });
+        }
+
+        function transfer() {
+            $.ajax({
+                url:"/transfer",
+                type:"get",
+                data:"",
+                dataType: "json",
+                success:function (data) {
+
+                    $('#resText').empty();   //清空resText里面的所有内容
+                    $.each(data, function(commentIndex, comment){
+                        html += '<div class="comment">' + comment['name_chn'] +':'+ comment['year'] +'</div>';
+                    });
+                    $('#resText').html(html);
+                }
+            });
+        }
+
+        function tabClose() {
+            /*双击关闭TAB选项卡*/
+            $(".tabs-inner").dblclick(function(){
+                var subtitle = $(this).children(".tabs-closable").text();
+                $('#tabs').tabs('close',subtitle);
+            })
+        }
+
+        function addTab(title, url){
+            if ($('#tabs').tabs('exists', title)){
+                $('#tabs').tabs('select', title);//选中并刷新
+                var currTab = $('#tabs').tabs('getSelected');
+                var url = $(currTab.panel('options').content).attr('src');
+                if(url != undefined && currTab.panel('options').title != '首页') {
+                    $('#tabs').tabs('update',{
+                        tab:currTab,
+                        options:{
+                            content:createFrame(url)
+                        }
+                    });
+                }
+            } else {
+                $('#tabs').tabs('add',{
+                    title:title,
+                    content:createFrame(url),
+                    closable:true,
+                    tools:[{
+                        iconCls:"icon-mini-refresh",
+                        handler:function(){
+                            $('#tabs').tabs('getSelected').find("iframe")[0]
+                                .contentWindow.location.reload(true);
+                        }
+                    }]
+                });
+            }
+
+            tabClose();
+        }
+
+        function createFrame(url) {
+            var s = '<iframe scrolling="auto" frameborder="0" src="'+url+'" style="width:100%; height:99%;padding: 4px;"></iframe>';
+            return s;
+        }
+
+        $(document).ready(function(){
+
+            $('#userMenu').tree({
+                url: '/tree',
+                //method: 'post',
+                //queryParams: {"id" : 0},
+                //url: '/tree.json',
+                method: 'get',
+                animate: true,
+                checkbox: false,
+                onClick: function(node){
+                    //用node.id或者其他字段来取grid中的数据，并刷新grid
+                    //       refresh(node.id);
+//                    alert(node.text);
+                    if(node.id != '' & node.htmlUrl!=''){
+                        addTab(node.text, node.htmlUrl);
+                    }
+                }
+            });
+
+        });
+    </script>
+    <style type="text/css">
+        body {
+            margin:0px;
+            padding:0px;
+            width:100%;
+            height:100%;
+        }
+        #tabs .tabs-panels>.panel>.panel-body {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+
+<body class="easyui-layout">
+    <div data-options="region:'north'" border="false" style="height:60px;overflow-y: hidden;background-color: #E0ECFF;font-size: 14px;padding: 10px">
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-disk',size:'large',plain:'true'"></a>
+        IMDb, the world's most popular and authoritative source for movie, TV and celebrity content.
+        <div id="login" style="position:absolute;right: 5px;top: 5px;">
+            <span style="font-size: 12px;">欢迎您！</span> <a href="#" class="easyui-menubutton" menu="#login1" iconCls="icon-man">Tiago</a>
+        </div>
+        <div id="login1" style="width:150px;">
+            <div iconCls="icon-undo">Undo</div>
+            <div iconCls="icon-redo">Redo</div>
+            <div class="menu-sep"></div>
+            <div>Cut</div>
+            <div>Copy</div>
+            <div>Paste</div>
+            <div class="menu-sep"></div>
+            <div iconCls="icon-remove">注销</div>
+            <div>退出</div>
+        </div>
+    </div>
+
+
+    <!--<div data-options="region:'east',split:true,hideCollapsedContent:false" title="East" style="width:150px;"></div>-->
+    <div title="菜单栏" iconCls="icon-clapperboard" region="west" split="true" style="width:200px;" >
+        <div class="easyui-accordion" fit="true" border="false" >
+            <div title="用户菜单" iconCls="icon-tip" >
+                <ul id="userMenu" style="padding: 15px">
+                </ul>
+            </div>
+            <div title="系统配置" iconCls="icon-sum" >
+                <ul id="systemMenu">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="mainPage" region="center" border="true">
+        <div id="tabs" class="easyui-tabs" fit="true" border="false">
+
+            <div title="首页" fit="true" style="padding: 10px">
+                <button onclick="gather();">收集</button><br>
+                <button onclick="transfer();">转换</button>
+                <div id="resText" style="margin: 10px">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div region="south" border="false" style="height: 20px;line-height:20px;background-color: #E0ECFF;padding-left: 20px;">欢迎您</div>
+
+
+</body>
+</html>

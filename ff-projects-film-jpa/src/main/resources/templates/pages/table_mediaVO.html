@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>table</title>
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-1.5.1/themes/icon.css">
+
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+
+
+    <script type="text/javascript">
+        var url;
+        function newUser(){
+            $('#dlg').dialog('open').dialog('setTitle','New User');
+            $('#fm').form('clear');
+            url = 'save_user.php';
+        }
+        function editUser(){
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $('#dlg').dialog('open').dialog('setTitle','Edit User');
+                $('#fm').form('load',row);
+                url = 'update_user.php?id='+row.id;
+            }
+        }
+        function saveUser(){
+            $('#fm').form('submit',{
+                url: url,
+                onSubmit: function(){
+                    return $(this).form('validate');
+                },
+                success: function(result){
+                    var result = eval('('+result+')');
+                    if (result.success){
+                        $('#dlg').dialog('close');		// close the dialog
+                        $('#dg').datagrid('reload');	// reload the user data
+                    } else {
+                        $.messager.show({
+                            title: 'Error',
+                            msg: result.msg
+                        });
+                    }
+                }
+            });
+        }
+        function removeUser(){
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $.messager.confirm('Confirm','Are you sure you want to remove this user?',function(r){
+                    if (r){
+                        $.post('remove_user.php',{id:row.id},function(result){
+                            if (result.success){
+                                $('#dg').datagrid('reload');	// reload the user data
+                            } else {
+                                $.messager.show({	// show error message
+                                    title: 'Error',
+                                    msg: result.msg
+                                });
+                            }
+                        },'json');
+                    }
+                });
+            }
+        }
+
+
+
+        var toolbar = [{
+            text:'新增',
+            iconCls:'icon-add',
+            handler:function(){newUser()}
+        },{
+            text:'编辑',
+            iconCls:'icon-edit',
+            handler:function(){editUser()}
+        },'-',{
+            text:'删除',
+            iconCls:'icon-remove',
+            handler:function(){removeUser()}
+        }];
+
+        function deal_dept(value,row,rowIndex) {
+            if(row.media!=undefined){
+                return row.media.name;
+            }
+        }
+
+        function doSearch() {
+            $("#dg").datagrid('reload',{
+                name:$("#name").val(),
+                diskNo:$("#diskNo").val(),
+                startDate:$("#startDate").val(),
+                endDate:$("#endDate").val()
+            });
+        }
+
+        $(document).ready(function () {
+            $("#dg").datagrid({
+                url:'${dataUrl}',
+                toolbar: '#toolbar',
+                pagination:true,
+                rownumbers:true,
+                striped:true,
+                border:false,
+                fit:true,//自动补全
+                fitColumns:true,
+                sortName:'nameChn',
+                multiSort:true,
+                remoteSort:true,
+                pageSize:25,
+                pageList:[25,50,100,200],
+                columns:[[
+                    {field:'ck',checkbox:'true'},
+                    {field:'nameChn',title:'片名',width:50,sortable:true},
+                    {field:"name",title:'文件(夹)名',width:180,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.name;
+                            } else {
+                                return value;
+                            }
+                        }
+                    },
+                    {field:'mediaSize',title:'大小',width:50,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.mediaSize;
+                            } else {
+                                return value;
+                            }
+                        }
+                    },
+                    {field:'diskNo',title:'盘符',width:10,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.diskNo;
+                            } else {
+                                return value;
+                            }
+                        }
+                    },
+                    {field:'fullPath',title:'全路径',width:250,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.fullPath;
+                            } else {
+                                return value;
+                            }
+                        }
+                    },
+                    {field:'gatherDate',title:'下载时间',width:50,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.gatherDate;
+                            } else {
+                                return value;
+                            }
+                        }},
+                    {field:'createDate',title:'记录新建时间',width:50,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.createDate;
+                            } else {
+                                return value;
+                            }
+                        }
+                    },
+                    {field:'updateDate',title:'记录更新时间',width:50,
+                        formatter: function(value,row,index){
+                            if (row.media){
+                                return row.media.updateDate;
+                            } else {
+                                return value;
+                            }
+                        }
+                    }
+                ]],
+                loadFilter: function(data){
+                    var ret={};
+                    ret.rows=data.content;
+                    ret.total=data.totalElements;
+                    return ret;
+                }
+            });
+        });
+
+
+    </script>
+
+</head>
+<body>
+
+
+<div class="easyui-layout" fit="true">
+    <div region="north" border="true" id="search" title="查询条件" iconCls="icon-search" split="true" style="height:70px;font-size: 12px;padding: 5px">
+        <span>片名:</span>
+        <input id="name" style="line-height:18px;border:1px solid #ccc">
+        <span>盘符:</span>
+        <input id="diskNo" style="line-height:18px;border:1px solid #ccc">
+        创建时间从：<input type="text" id="startDate" editable="true" class="easyui-datebox"  style="width:110px;">
+        到：<input type="text" id="endDate" editable="true" class="easyui-datebox"  style="width:110px;">
+        <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
+    </div>
+    <div region="center" border="true" iconCls="icon-filter" title="查询列表" split="true">
+        <table id="dg" class="easyui-datagrid"></table>
+    </div>
+</div>
+<div id="toolbar"  style="background:#E0ECFF;width:100%;">
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add">新增</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit">编辑</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove">移除</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save">保存</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-cancel">删除</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-search">查询</a>
+    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+</div>
+<div id="tab-tools">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'" onclick="addPanel()"></a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'" onclick="removePanel()"></a>
+</div>
+<div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
+     closed="true" buttons="#dlg-buttons">
+    <div class="ftitle">User Information</div>
+    <form id="fm" method="post" novalidate>
+        <div class="fitem">
+            <label>First Name:</label>
+            <input name="firstname" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label>Last Name:</label>
+            <input name="lastname" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label>Phone:</label>
+            <input name="phone">
+        </div>
+        <div class="fitem">
+            <label>Email:</label>
+            <input name="email" class="easyui-validatebox" validType="email">
+        </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveUser()">Save</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">Cancel</a>
+</div>
+
+
+</body>
+</html>

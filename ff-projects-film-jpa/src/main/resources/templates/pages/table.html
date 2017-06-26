@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>table</title>
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-1.5.1/themes/icon.css">
+
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+
+</head>
+<body>
+<table id="dg" class="easyui-datagrid">
+</table>
+
+<!--<div id="toolbar"  style="background:#E0ECFF;width:100%;">-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add">新增</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit">编辑</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove">移除</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save">保存</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-cancel">删除</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-search">查询</a>-->
+<!--<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>-->
+<!--</div>-->
+
+
+<div id="tab-tools">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'" onclick="addPanel()"></a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'" onclick="removePanel()"></a>
+</div>
+
+<div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
+     closed="true" buttons="#dlg-buttons">
+    <div class="ftitle">User Information</div>
+    <form id="fm" method="post" novalidate>
+        <div class="fitem">
+            <label>First Name:</label>
+            <input name="firstname" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label>Last Name:</label>
+            <input name="lastname" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label>Phone:</label>
+            <input name="phone">
+        </div>
+        <div class="fitem">
+            <label>Email:</label>
+            <input name="email" class="easyui-validatebox" validType="email">
+        </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveUser()">Save</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">Cancel</a>
+</div>
+
+<script type="text/javascript">
+    var url;
+    function newUser(){
+        $('#dlg').dialog('open').dialog('setTitle','New User');
+        $('#fm').form('clear');
+        url = 'save_user.php';
+    }
+    function editUser(){
+        var row = $('#dg').datagrid('getSelected');
+        if (row){
+            $('#dlg').dialog('open').dialog('setTitle','Edit User');
+            $('#fm').form('load',row);
+            url = 'update_user.php?id='+row.id;
+        }
+    }
+    function saveUser(){
+        $('#fm').form('submit',{
+            url: url,
+            onSubmit: function(){
+                return $(this).form('validate');
+            },
+            success: function(result){
+                var result = eval('('+result+')');
+                if (result.success){
+                    $('#dlg').dialog('close');		// close the dialog
+                    $('#dg').datagrid('reload');	// reload the user data
+                } else {
+                    $.messager.show({
+                        title: 'Error',
+                        msg: result.msg
+                    });
+                }
+            }
+        });
+    }
+    function removeUser(){
+        var row = $('#dg').datagrid('getSelected');
+        if (row){
+            $.messager.confirm('Confirm','Are you sure you want to remove this user?',function(r){
+                if (r){
+                    $.post('remove_user.php',{id:row.id},function(result){
+                        if (result.success){
+                            $('#dg').datagrid('reload');	// reload the user data
+                        } else {
+                            $.messager.show({	// show error message
+                                title: 'Error',
+                                msg: result.msg
+                            });
+                        }
+                    },'json');
+                }
+            });
+        }
+    }
+
+
+
+    var toolbar = [{
+        text:'新增',
+        iconCls:'icon-add',
+        handler:function(){newUser()}
+    },{
+        text:'编辑',
+        iconCls:'icon-edit',
+        handler:function(){editUser()}
+    },'-',{
+        text:'删除',
+        iconCls:'icon-remove',
+        handler:function(){removeUser()}
+    }];
+
+
+    $(function () {
+        $("#dg").datagrid({
+            tooltar: '#toolbar',
+            url:'${dataUrl}',
+            pagination:true,
+            rownumbers:true,
+            striped:true,
+            border:false,
+            fit:true,//自动补全
+            fitColumns:true,
+            pageSize:30,
+            pageList:[30,60,100,200],
+            columns:[[
+                {field:'ck',checkbox:'true'},
+                {field:'name',title:'文件(夹)名',width:150},
+                {field:'mediaSize',title:'大小',width:50},
+                {field:'diskNo',title:'盘符',width:10},
+                {field:'fullPath',title:'全路径',width:250},
+                {field:'gatherDate',title:'收集时间',width:50},
+                {field:'createDate',title:'记录新建时间',width:50},
+                {field:'updateDate',title:'记录更新时间',width:50}
+            ]],
+            loadFilter: function(data){
+                var ret={};
+                ret.rows=data.content;
+                ret.total=data.totalElements;
+                return ret;
+            }
+        });
+    });
+
+
+</script>
+
+</body>
+</html>
