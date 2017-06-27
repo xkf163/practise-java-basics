@@ -15,4 +15,6 @@ public interface GatherService {
 
      List<MediaVO> Media2MediaVO();
 
+     void pickUp();
+
 }

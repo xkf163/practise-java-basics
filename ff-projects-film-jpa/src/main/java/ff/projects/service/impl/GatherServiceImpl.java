@@ -1,10 +1,8 @@
 package ff.projects.service.impl;
 
 import com.querydsl.core.types.Predicate;
-import ff.projects.entity.Media;
-import ff.projects.entity.MediaVO;
-import ff.projects.entity.QMedia;
-import ff.projects.entity.QMediaVO;
+import ff.projects.entity.*;
+import ff.projects.repository.FilmRepository;
 import ff.projects.repository.MediaRepository;
 import ff.projects.repository.MediaVORepository;
 import ff.projects.service.GatherService;
@@ -46,6 +44,10 @@ public class GatherServiceImpl implements GatherService {
 
     @Autowired
     MediaVORepository mediaVORepository;
+
+
+    @Autowired
+    FilmRepository filmRepository;
 
     List<Media> oldMediaList;
 
@@ -321,6 +323,23 @@ public class GatherServiceImpl implements GatherService {
             }
         }
         return flag;
+
+    }
+
+
+    /**
+     * 提取并转换爬虫爬取的第一手数据
+     * 转换成FilmVO PersonVO
+     */
+    @Override
+    public void pickUp(){
+
+        List<Film> filmList = filmRepository.findAll();
+        Film f = filmList.get(0);
+
+        System.out.println(f.getInfo());
+
+
 
     }
 

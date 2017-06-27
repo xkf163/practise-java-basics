@@ -12,5 +12,4 @@ import java.util.List;
  */
 @Repository
 public interface MediaRepository extends JpaRepository<Media,Long>, QueryDslPredicateExecutor<Media> {
-    List<Media> findByFullPath(String fullPath);
 }

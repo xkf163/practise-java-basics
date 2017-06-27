@@ -1,5 +1,6 @@
 package ff.projects.controller;
 
+import ff.projects.crawler.DouBanProcessor;
 import ff.projects.entity.Media;
 import ff.projects.entity.MediaVO;
 import ff.projects.repository.MediaRepository;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import us.codecraft.webmagic.Spider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.swing.*;
@@ -26,6 +28,9 @@ public class IndexController {
 
     @Autowired
     GatherService gatherService;
+
+    @Autowired
+    DouBanProcessor douBanProcessor;
 
     @RequestMapping(method = RequestMethod.GET,value = "/")
     public String index(HttpServletRequest request){
@@ -64,5 +69,17 @@ public class IndexController {
     }
 
 
+    @GetMapping(value = "/crawler")
+    public String crawler(){
+//        Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
+        Spider.create(douBanProcessor).addUrl("https://movie.douban.com/").thread(5).run();
+        return "redirect:/";
+    }
+
+    @GetMapping(value = "/pickup")
+    public void pickUp(){
+        gatherService.pickUp();
+
+    }
 
 }
