@@ -2,10 +2,9 @@ package ff.projects.service.impl;
 
 import com.querydsl.core.types.Predicate;
 import ff.projects.entity.*;
-import ff.projects.repository.FilmRepository;
-import ff.projects.repository.MediaRepository;
-import ff.projects.repository.MediaVORepository;
+import ff.projects.repository.*;
 import ff.projects.service.GatherService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
@@ -19,10 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +41,8 @@ public class GatherServiceImpl implements GatherService {
     @Autowired
     MediaVORepository mediaVORepository;
 
+    @Autowired
+    MediaVOFilmVORepository mediaVOFilmVORepository;
 
     @Autowired
     FilmRepository filmRepository;
@@ -333,13 +331,198 @@ public class GatherServiceImpl implements GatherService {
      */
     @Override
     public void pickUp(){
+        QMediaVO qMediaVO = QMediaVO.mediaVO;
+        List<MediaVO> mediaVOList = (List<MediaVO>) mediaVORepository.findAll(qMediaVO.media.deleted.eq(0));
 
-        List<Film> filmList = filmRepository.findAll();
-        Film f = filmList.get(0);
+        QFilm qFilm = QFilm.film;
 
-        System.out.println(f.getInfo());
+        int i=0;
+        for(MediaVO mediaVO : mediaVOList){
+
+            if("变形金刚".equals(mediaVO.getNameChn())){
+                System.out.println(mediaVO.getNameChn());
+            }
+
+            Film filmVO = null;
+            Predicate predicateA = qFilm.subject.trim().eq(mediaVO.getNameChn().trim()).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+            Predicate predicateB = qFilm.subjectMain.contains(mediaVO.getNameChn().trim()).or(qFilm.subjectOther.contains(mediaVO.getNameChn().trim())).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+            List<Film> filmList = (List<Film>) filmRepository.findAll(predicateA);
+            if(filmList.size() == 1){
+                i++;
+                filmVO = filmList.get(0);
+                System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+                MediaVOFilmVO mf = new MediaVOFilmVO();
+                mf.setFilmVOId(filmVO.getId());
+                mf.setMediaVOId(mediaVO.getId());
+
+                try {
+                    mediaVOFilmVORepository.save(mf);
+                }catch (Exception e){
+                    //e.printStackTrace();
+                }
+
+            }
+            //找不到，模糊查询
+            if(filmList.size() == 0){
+                filmList = (List<Film>) filmRepository.findAll(predicateB);
+                if(filmList.size() == 1){
+                    i++;
+                    filmVO = filmList.get(0);
+                    System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+                    MediaVOFilmVO mf = new MediaVOFilmVO();
+                    mf.setFilmVOId(filmVO.getId());
+                    mf.setMediaVOId(mediaVO.getId());
+
+                    try {
+                        mediaVOFilmVORepository.save(mf);
+                    }catch (Exception e) {
+                        //e.printStackTrace();
+                    }
+                }
+            }
 
 
+
+
+        }
+
+        System.out.println("end................");
+    }
+
+
+    @Autowired
+    PersonVOFilmVORepository personVOFilmVORepository;
+
+
+    @Autowired
+    PersonRepository personRepository;
+
+
+    /**
+     * 人物和电影对应关系创建
+     */
+    @Override
+    public void relation(){
+
+        QMediaVO qMediaVO = QMediaVO.mediaVO;
+        List<MediaVO> mediaVOList = (List<MediaVO>) mediaVORepository.findAll(qMediaVO.media.deleted.eq(0));
+
+        QFilm qFilm = QFilm.film;
+        QPerson qPerson = QPerson.person;
+        QPersonVOFilmVO qPersonVOFilmVO = QPersonVOFilmVO.personVOFilmVO;
+
+        int i=0;
+        for(MediaVO mediaVO : mediaVOList){
+            Film filmVO = null;
+            Predicate predicate = qFilm.subjectMain.contains(mediaVO.getNameChn()).and(qFilm.year.eq(mediaVO.getYear()));
+            List<Film> filmList = (List<Film>) filmRepository.findAll(predicate);
+            if(filmList.size() == 1){
+                i++;
+                filmVO = filmList.get(0);
+                System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+
+                String filmId = String.valueOf(filmVO.getId());
+                String asD = filmVO.getDirectors();
+                String asA = filmVO.getActors();
+
+                if(!"".equals(asA)){
+                    String[] asAA = asA.split(",");
+                    for (String personDoubanNo :asAA){
+
+                        Predicate predicateP =  qPerson.doubanNo.eq(personDoubanNo);
+                        Person person = personRepository.findOne(predicateP);
+
+                        if(null != person){
+                            PersonVOFilmVO personVOFilmVO = null;
+                            Predicate predicateA = qPersonVOFilmVO.person.eq(person);
+                            List<PersonVOFilmVO> personVOFilmVOList = (List<PersonVOFilmVO>) personVOFilmVORepository.findAll(predicateA);
+                            if(personVOFilmVOList.size() == 0){
+                                personVOFilmVO = new PersonVOFilmVO();
+                                personVOFilmVO.setPerson(person);
+                                personVOFilmVO.setAsActor(filmId);
+                                personVOFilmVO.setAsActorNumber(1);
+                            }else if(personVOFilmVOList.size() == 1){
+                                personVOFilmVO = personVOFilmVOList.get(0);
+                                String dFilmIds = personVOFilmVO.getAsActor();
+                                if(null!=dFilmIds){
+                                    String[] dFilmIds_array = dFilmIds.split(",");
+                                    if(!Arrays.asList(dFilmIds_array).contains(filmId)){
+
+                                        List<String> strings = new ArrayList<>();
+                                        for (String string : dFilmIds_array){
+                                            strings.add(string);
+                                        }
+                                        strings.add(filmId);
+                                        dFilmIds_array = strings.toArray(new String[strings.size()]);
+                                        personVOFilmVO.setAsActorNumber(strings.size());
+                                    }
+                                    personVOFilmVO.setAsActor(StringUtils.join(dFilmIds_array,","));
+                                }else {
+                                    personVOFilmVO.setAsActor(filmId);
+                                    personVOFilmVO.setAsActorNumber(1);
+                                }
+                            }
+                            personVOFilmVORepository.save(personVOFilmVO);
+                        }
+                    }
+
+
+                }
+
+                if(!"".equals(asD)){
+
+                    String[] asDA = asD.split(",");
+                    for (String personDoubanNo :asDA){
+
+                        Predicate predicateP =  qPerson.doubanNo.eq(personDoubanNo);
+                        Person person = personRepository.findOne(predicateP);
+
+
+                        if(null != person){
+                            PersonVOFilmVO personVOFilmVO = null;
+                            Predicate predicateA = qPersonVOFilmVO.person.eq(person);
+                            List<PersonVOFilmVO> personVOFilmVOList = (List<PersonVOFilmVO>) personVOFilmVORepository.findAll(predicateA);
+                            if(personVOFilmVOList.size() == 0){
+                                personVOFilmVO = new PersonVOFilmVO();
+                                personVOFilmVO.setPerson(person);
+                                personVOFilmVO.setAsDirector(filmId);
+                                personVOFilmVO.setAsDirectorNumber(1);
+                            }else if(personVOFilmVOList.size() == 1){
+                                personVOFilmVO = personVOFilmVOList.get(0);
+                                String dFilmIds = personVOFilmVO.getAsDirector();
+                                if(null!=dFilmIds){
+                                    String[] dFilmIds_array = dFilmIds.split(",");
+                                    if(!Arrays.asList(dFilmIds_array).contains(filmId)){
+
+                                        List<String> strings = new ArrayList<>();
+                                        for (String string : dFilmIds_array){
+                                            strings.add(string);
+                                        }
+                                        strings.add(filmId);
+                                        dFilmIds_array = strings.toArray(new String[strings.size()]);
+                                        personVOFilmVO.setAsDirectorNumber(strings.size());
+                                    }
+                                    personVOFilmVO.setAsDirector(StringUtils.join(dFilmIds_array,","));
+                                }else {
+                                    personVOFilmVO.setAsDirector(filmId);
+                                    personVOFilmVO.setAsDirectorNumber(1);
+                                }
+                            }
+                            personVOFilmVORepository.save(personVOFilmVO);
+                        }
+
+
+                    }
+
+                }
+
+
+
+            }
+        }
+
+
+        System.out.println("ending....."+i);
 
     }
 

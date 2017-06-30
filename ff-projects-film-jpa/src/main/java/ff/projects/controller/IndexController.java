@@ -1,9 +1,12 @@
 package ff.projects.controller;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import ff.projects.crawler.DouBanPatchProcessor;
 import ff.projects.crawler.DouBanProcessor;
-import ff.projects.entity.Media;
-import ff.projects.entity.MediaVO;
-import ff.projects.repository.MediaRepository;
+import ff.projects.entity.*;
+import ff.projects.repository.MediaVORepository;
 import ff.projects.service.GatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import us.codecraft.webmagic.Spider;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.swing.*;
 import java.io.File;
@@ -24,13 +29,19 @@ import java.util.List;
 public class IndexController {
 
     @Autowired
-    MediaRepository mediaRepository;
+    MediaVORepository mediaVORepository;
 
     @Autowired
     GatherService gatherService;
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Autowired
     DouBanProcessor douBanProcessor;
+
+    @Autowired
+    DouBanPatchProcessor douBanPatchProcessor;
 
     @RequestMapping(method = RequestMethod.GET,value = "/")
     public String index(HttpServletRequest request){
@@ -70,16 +81,64 @@ public class IndexController {
 
 
     @GetMapping(value = "/crawler")
-    public String crawler(){
-//        Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
-        Spider.create(douBanProcessor).addUrl("https://movie.douban.com/").thread(5).run();
+    public String crawler(HttpServletRequest request,@RequestParam (value = "url" ,defaultValue = "https://movie.douban.com") String gatherUrl,
+             @RequestParam (value = "thread" ,defaultValue = "1") String thread){
+//      Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
+        Spider.create(douBanProcessor).addUrl(gatherUrl).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
     }
 
-    @GetMapping(value = "/pickup")
-    public void pickUp(){
-        gatherService.pickUp();
+
+    @GetMapping(value = "/crawler/patch")
+    public String crawlerPatch(HttpServletRequest request,@RequestParam (value = "url" ,defaultValue = "https://movie.douban.com") String gatherUrl,
+                          @RequestParam (value = "thread" ,defaultValue = "5") String thread){
+//      Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
+
+        String rootUrl = "https://movie.douban.com/subject_search?search_text=";
+        //查询语句准备
+        QMediaVO qMediaVO = QMediaVO.mediaVO;
+        QMediaVOFilmVO qMediaVOFilmVO = QMediaVOFilmVO.mediaVOFilmVO;
+
+
+
+        Predicate predicate = qMediaVO.id.notIn(JPAExpressions.select(qMediaVOFilmVO.mediaVOId).from(qMediaVOFilmVO)).and(qMediaVO.media.deleted.eq(0));
+        List<String> stringList = (List<String>) new JPAQueryFactory(entityManager).selectFrom(qMediaVO).select(qMediaVO.nameChn.prepend(rootUrl)).where(predicate).fetch();
+
+        String[] urls = stringList.toArray(new String[stringList.size()]);
+
+        Spider.create(douBanProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
+        return "redirect:/";
+    }
+
+
+    @GetMapping(value = "/crawler/patch/1/{thread}")
+    public String crawlerPatchA(@PathVariable (name = "thread") String thread){
+
+        String rootUrl = "https://movie.douban.com/subject/";
+        //查询语句准备
+        QFilm qFilm = QFilm.film;
+        Predicate predicate = qFilm.subjectOther.isNull().and(qFilm.doubanRating.isNull());
+        List<String> stringList = (List<String>) new JPAQueryFactory(entityManager).selectFrom(qFilm).select(qFilm.doubanNo.prepend(rootUrl).append("/")).where(predicate).orderBy(qFilm.id.asc()).fetch();
+        String[] urls = stringList.toArray(new String[stringList.size()]);
+        Spider.create(douBanPatchProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
+        return "redirect:/";
 
     }
+
+
+    @GetMapping(value = "/pickup")
+    public String pickUp(){
+        gatherService.pickUp();
+        return "redirect:/";
+    }
+
+
+    @GetMapping(value = "/relation")
+    public String relation(){
+        gatherService.relation();
+        return "redirect:/";
+    }
+
+
 
 }

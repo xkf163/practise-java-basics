@@ -45,11 +45,11 @@ public class TreeNodeController {
             treeNode.setDataUrl("/mediavo/years/"+String.valueOf(year));
             treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
             treeNodeSet.add(treeNode);
-            System.out.println(year);
+//            System.out.println(year);
         }
 
         TreeNode pTreeNode = new TreeNode();
-        pTreeNode.setText("发行年代");
+        pTreeNode.setText("发行年份");
         pTreeNode.setDataUrl("/mediavo/years");
         pTreeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+pTreeNode.getDataUrl());
         pTreeNode.setChildren(treeNodeSet);
@@ -78,7 +78,7 @@ public class TreeNodeController {
         });
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMM");
         for (Date date : gatherDateListNew){
-            System.out.println(sdf.format(date));
+//            System.out.println(sdf.format(date));
             gatherDateSet.add(sdf.format(date));
         }
 
@@ -109,11 +109,14 @@ public class TreeNodeController {
         treeNode.setDataUrl("/mediavo/repetitive/");
         treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
+
         treeNode = new TreeNode();
         treeNode.setText("废弃");
         treeNode.setDataUrl("/mediavo/deleted/1");
         treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
+
+
 
         pTreeNode = new TreeNode();
         pTreeNode.setText("数据整理");
@@ -122,6 +125,44 @@ public class TreeNodeController {
         pTreeNode.setChildren(treeNodeSet);
         pTreeNode.setState("closed");
         treeNodeList.add(pTreeNode);
+
+
+        //数据整理
+        treeNodeSet = new LinkedHashSet<>();
+        treeNode = new TreeNode();
+        treeNode.setText("已关联");
+        treeNode.setDataUrl("/filmvo/years/");
+        treeNode.setHtmlUrl("/pages/table_filmVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
+
+        treeNode = new TreeNode();
+        treeNode.setText("未关联");
+        treeNode.setDataUrl("/mediavo/unrelation/");
+        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
+
+        treeNode = new TreeNode();
+        treeNode.setText("导演列表");
+        treeNode.setDataUrl("/person/directors");
+        treeNode.setHtmlUrl("/pages/table_personVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
+
+        treeNode = new TreeNode();
+        treeNode.setText("演员列表");
+        treeNode.setDataUrl("/person/actors");
+        treeNode.setHtmlUrl("/pages/table_personVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
+
+        pTreeNode = new TreeNode();
+        pTreeNode.setText("影片详情");
+        pTreeNode.setDataUrl("");
+        pTreeNode.setHtmlUrl("");
+        pTreeNode.setChildren(treeNodeSet);
+        pTreeNode.setState("closed");
+        treeNodeList.add(pTreeNode);
+
+
+
 
         return treeNodeList;
     }
