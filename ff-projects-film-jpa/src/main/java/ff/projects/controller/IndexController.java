@@ -5,6 +5,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.crawler.DouBanPatchProcessor;
 import ff.projects.crawler.DouBanProcessor;
+import ff.projects.crawler.DouBanSingelProcessor;
 import ff.projects.entity.*;
 import ff.projects.repository.MediaVORepository;
 import ff.projects.service.GatherService;
@@ -39,6 +40,9 @@ public class IndexController {
 
     @Autowired
     DouBanProcessor douBanProcessor;
+
+    @Autowired
+    DouBanSingelProcessor douBanSingelProcessor;
 
     @Autowired
     DouBanPatchProcessor douBanPatchProcessor;
@@ -84,14 +88,14 @@ public class IndexController {
     public String crawler(HttpServletRequest request,@RequestParam (value = "url" ,defaultValue = "https://movie.douban.com") String gatherUrl,
              @RequestParam (value = "thread" ,defaultValue = "1") String thread){
 //      Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
-        Spider.create(douBanProcessor).addUrl(gatherUrl).thread(Integer.parseInt(thread)).run();
+        Spider.create(douBanSingelProcessor).addUrl(gatherUrl).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
     }
 
 
     @GetMapping(value = "/crawler/patch")
-    public String crawlerPatch(HttpServletRequest request,@RequestParam (value = "url" ,defaultValue = "https://movie.douban.com") String gatherUrl,
-                          @RequestParam (value = "thread" ,defaultValue = "5") String thread){
+    public String crawlerPatch(HttpServletRequest request,@RequestParam (value = "url",required = false) String gatherUrl,
+                          @RequestParam (value = "thread" ,defaultValue = "1") String thread){
 //      Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
 
         String rootUrl = "https://movie.douban.com/subject_search?search_text=";
@@ -106,20 +110,37 @@ public class IndexController {
 
         String[] urls = stringList.toArray(new String[stringList.size()]);
 
+        if(null!=gatherUrl){
+            urls = new String[1];
+            urls[0]=gatherUrl;
+        }
+
         Spider.create(douBanProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
     }
 
-
+    /**
+     * 补救：豆瓣评分 评分人数
+     * @param thread
+     * @param gatherUrl
+     * @return
+     */
     @GetMapping(value = "/crawler/patch/1/{thread}")
-    public String crawlerPatchA(@PathVariable (name = "thread") String thread){
+    public String crawlerPatchA(@PathVariable (name = "thread") String thread,@RequestParam (value = "url",required = false) String gatherUrl){
 
         String rootUrl = "https://movie.douban.com/subject/";
         //查询语句准备
         QFilm qFilm = QFilm.film;
-        Predicate predicate = qFilm.subjectOther.isNull().and(qFilm.doubanRating.isNull());
-        List<String> stringList = (List<String>) new JPAQueryFactory(entityManager).selectFrom(qFilm).select(qFilm.doubanNo.prepend(rootUrl).append("/")).where(predicate).orderBy(qFilm.id.asc()).fetch();
+        Predicate predicate = qFilm.subjectOther.isNull().or(qFilm.doubanRating.isNull());
+        List<String> stringList = (List<String>) new JPAQueryFactory(entityManager).selectFrom(qFilm).select(qFilm.doubanNo.prepend(rootUrl).append("/")).where(predicate).orderBy(qFilm.year.desc()).fetch();
+        System.out.println("---> "+stringList.size());
         String[] urls = stringList.toArray(new String[stringList.size()]);
+        if(null!=gatherUrl){
+            urls = new String[1];
+            urls[0]=gatherUrl;
+        }
+
+
         Spider.create(douBanPatchProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
 

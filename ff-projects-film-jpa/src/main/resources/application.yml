@@ -21,8 +21,9 @@ spring:
       enabled: true
     restart:
       additional-paths: src/main/java
+  profiles:
+    active: dev
 server:
-  port: 80
   session:
     timeout: 1000
   tomcat:
@@ -33,6 +34,5 @@ system:
   mainPage: redirect:/
   loginPage: pages/login
   registerPage: register
-
 
 

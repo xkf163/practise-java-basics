@@ -6,6 +6,7 @@ import ff.projects.repository.*;
 import ff.projects.service.GatherService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,6 @@ public class GatherServiceImpl implements GatherService {
     private String[] folderKeys  = new String[] {"720P","1080P","DTS","CMCT","TLF","CHD","HDS","HDSKY","FRDS","EPIC","HDAREA","ATOMS","TRUEHD","X264","X265","DVDRIP"};
     private String[] filePostfix = new String[]{"MKV","TS","AVI"};
     private List<Media> mediaEntries;
-    private List<Media> mediaEntriesTotal;
     @Autowired
     MediaRepository mediaRepository;
 
@@ -104,22 +104,8 @@ public class GatherServiceImpl implements GatherService {
     @Transactional
     @Modifying
     public List<Media> gatherMedia2DB(File fileDir) {
-        mediaEntriesTotal = new ArrayList<>();
-        mediaEntriesTotal.addAll(gatherMedia2DBing(fileDir));
-        return mediaEntriesTotal;
-    }
 
-
-    /**
-     * 收集medias主方法
-     * @param fileDir
-     * @return
-     */
-    public List<Media> gatherMedia2DBing(File fileDir) {
-
-        mediaEntries = new ArrayList<>();
-
-        /*
+  /*
          * step1:获取选择的路径：如j:\201702 或者 j:\;拆分出盘符及文件夹
          */
         String rootFullPath = fileDir.getAbsolutePath();
@@ -133,6 +119,33 @@ public class GatherServiceImpl implements GatherService {
         QMediaVO mediaVO = QMediaVO.mediaVO;
         Predicate predicate = media.diskNo.eq(rootDisk).and(media.fullPath.like(rootFolder+"%")).and(media.deleted.eq(0));
         oldMediaList = (List<Media>) mediaRepository.findAll(predicate);
+
+         /*
+          *  step3: 剩余oldmediaList里的数据都是失效，deleted标记1
+         */
+        System.out.println("oldmedialist: "+oldMediaList.size());
+        for (Media media1 : oldMediaList){
+            media1.setDeleted(1);
+            media1.setUpdateDate(new Date());
+            mediaRepository.saveAndFlush(media1);
+        }
+
+        predicate = media.diskNo.eq(rootDisk).and(media.fullPath.like(rootFolder+"%")).and(media.deleted.eq(1));
+        oldMediaList = (List<Media>) mediaRepository.findAll(predicate);
+
+        mediaEntries = new ArrayList<>();
+
+        gatherMedia2DBing(fileDir);
+        return mediaEntries;
+    }
+
+
+    /**
+     * 收集medias主方法
+     * @param fileDir
+     * @return
+     */
+    public void gatherMedia2DBing(File fileDir) {
 
 //        JPAUpdateClause jpaUpdateClause = new JPAUpdateClause(entityManager,media);
 //
@@ -149,7 +162,7 @@ public class GatherServiceImpl implements GatherService {
                     deal(f,true);
                 }else{
                     System.out.println("不是多媒体文件夹："+f.getName());
-                    mediaEntriesTotal.addAll(gatherMedia2DBing(f));
+                    gatherMedia2DBing(f);
                 }
             }else if(f.isFile()){
                 if( fileFilter(f.getName()) && !f.isHidden() ){
@@ -159,16 +172,6 @@ public class GatherServiceImpl implements GatherService {
             }
         }
 
-        /*
-          *  step3: 剩余oldmediaList里的数据都是失效，deleted标记1
-         */
-        System.out.println("oldmedialist: "+oldMediaList.size());
-        for (Media media1 : oldMediaList){
-            media1.setDeleted(1);
-            media1.setUpdateDate(new Date());
-            mediaRepository.save(media1);
-        }
-        return mediaEntries;
     }
 
 
@@ -203,7 +206,9 @@ public class GatherServiceImpl implements GatherService {
                 m.setWhetherFolder(folder?1:0);
                 m.setWhetherAlive(1);
                 m.setWhetherTransfer(1);
+                m.setDeleted(0);
                 mediaRepository.save(m);
+
                 mediaEntries.add(m);
 
             System.out.println("------insert----------"+m.getFullPath());
@@ -212,7 +217,8 @@ public class GatherServiceImpl implements GatherService {
 
             System.out.println("------update----------"+oldMedia.getFullPath());
             oldMediaList.remove(oldMedia);
-            oldMedia.setId(oldMedia.getId());
+
+            oldMedia.setDeleted(0);
             oldMedia.setUpdateDate(new Date());
             mediaRepository.save(oldMedia);
         }
@@ -229,7 +235,7 @@ public class GatherServiceImpl implements GatherService {
 
 
         QMedia qMedia = QMedia.media;
-        Predicate predicate = qMedia.deleted.eq(0).and(qMedia.fullPath.eq(fullPath));
+        Predicate predicate = qMedia.deleted.eq(1).and(qMedia.fullPath.eq(fullPath));
         List<Media> list = (List<Media>) mediaRepository.findAll(predicate);
         if(list!=null && list.size()>0){
             return list.get(0);
@@ -327,62 +333,182 @@ public class GatherServiceImpl implements GatherService {
 
     /**
      * 提取并转换爬虫爬取的第一手数据
-     * 转换成FilmVO PersonVO
+     * 转换成FilmVOPersonVO
      */
     @Override
     public void pickUp(){
         QMediaVO qMediaVO = QMediaVO.mediaVO;
         List<MediaVO> mediaVOList = (List<MediaVO>) mediaVORepository.findAll(qMediaVO.media.deleted.eq(0));
-
         QFilm qFilm = QFilm.film;
-
+        Predicate[] predicateArray = new Predicate[6];
         int i=0;
         for(MediaVO mediaVO : mediaVOList){
 
-            if("变形金刚".equals(mediaVO.getNameChn())){
-                System.out.println(mediaVO.getNameChn());
-            }
+            //mediaVO = mediaVORepository.findOne((long) 957);
 
-            Film filmVO = null;
-            Predicate predicateA = qFilm.subject.trim().eq(mediaVO.getNameChn().trim()).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
-            Predicate predicateB = qFilm.subjectMain.contains(mediaVO.getNameChn().trim()).or(qFilm.subjectOther.contains(mediaVO.getNameChn().trim())).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
-            List<Film> filmList = (List<Film>) filmRepository.findAll(predicateA);
-            if(filmList.size() == 1){
-                i++;
-                filmVO = filmList.get(0);
-                System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
-                MediaVOFilmVO mf = new MediaVOFilmVO();
-                mf.setFilmVOId(filmVO.getId());
-                mf.setMediaVOId(mediaVO.getId());
+            i++;
+            //1: subject精确匹配
+            predicateArray[0]=qFilm.subject.trim().eq(mediaVO.getNameChn().trim()).and(qFilm.year.eq(mediaVO.getYear()));
+            //2:
+            predicateArray[1]=qFilm.subject.trim().eq(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
+            //3:
+            predicateArray[2]=qFilm.subject.trim().eq(mediaVO.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
 
-                try {
-                    mediaVOFilmVORepository.save(mf);
-                }catch (Exception e){
-                    //e.printStackTrace();
+            //predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameChn().trim())).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
+            //3: 0
+            predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim()).and(qFilm.subjectOther.contains(mediaVO.getNameChn().trim()))).and(qFilm.year.eq(mediaVO.getYear()));
+            //2: 2>1
+            predicateArray[4]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(mediaVO.getNameEng().trim()).and(qFilm.subjectOther.contains(mediaVO.getNameChn().trim()))).and(qFilm.year.eq(mediaVO.getYear()));
+
+            predicateArray[5]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectOther.trim().notEqualsIgnoreCase(mediaVO.getNameEng().trim()).and(qFilm.subjectOther.contains(mediaVO.getNameChn().trim()))).and(qFilm.year.eq(mediaVO.getYear()));
+
+            for (int j = 0; j<predicateArray.length; j++){
+                Film filmVO = null;
+                MediaVOFilmVO mf = null;
+                if(j>4){
+                    System.out.println(j);
                 }
-
-            }
-            //找不到，模糊查询
-            if(filmList.size() == 0){
-                filmList = (List<Film>) filmRepository.findAll(predicateB);
+                List<Film> filmList = (List<Film>) filmRepository.findAll(predicateArray[j]);
                 if(filmList.size() == 1){
-                    i++;
                     filmVO = filmList.get(0);
                     System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
-                    MediaVOFilmVO mf = new MediaVOFilmVO();
+                    mf = new MediaVOFilmVO();
                     mf.setFilmVOId(filmVO.getId());
                     mf.setMediaVOId(mediaVO.getId());
-
-                    try {
-                        mediaVOFilmVORepository.save(mf);
-                    }catch (Exception e) {
-                        //e.printStackTrace();
-                    }
+                    mediaVOFilmVORepository.save(mf);
+                    break;
                 }
+
             }
 
-
-
+//            if("刺杀希特勒".equals(mediaVO.getNameChn())){
+//                System.out.println(mediaVO.getNameChn());
+//            }
+//
+//            Film filmVO = null;
+//            Predicate predicateA = qFilm.subject.trim().eq(mediaVO.getNameChn().trim()).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+//
+//            Predicate predicateAB = qFilm.subjectMain.stringValue().contains(mediaVO.getNameEng().trim()).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+//
+//            Predicate predicateABC = qFilm.subjectOther.stringValue().contains(mediaVO.getNameEng().trim()).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+//
+//            Predicate predicateB = qFilm.subjectMain.stringValue().eq(mediaVO.getNameChn().trim()).or(qFilm.subjectOther.stringValue().eq(mediaVO.getNameChn().trim())).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+//
+//            Predicate predicateC = qFilm.subjectMain.stringValue().like('%'+mediaVO.getNameChn().trim()+'%').or(qFilm.subjectOther.stringValue().like('%'+mediaVO.getNameChn().trim()+'%')).and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+//            Predicate predicateD = qFilm.subjectMain.stringValue().like("%/ "+mediaVO.getNameChn().trim()+" /%").or(qFilm.subjectMain.stringValue().like(mediaVO.getNameChn().trim()+" /%")).or(qFilm.subjectMain.stringValue().like("%/ "+mediaVO.getNameChn().trim()))
+//                    .or(qFilm.subjectOther.stringValue().like("%/ "+mediaVO.getNameChn().trim()+" /%")).or(qFilm.subjectOther.stringValue().like(mediaVO.getNameChn().trim()+" /%")).or(qFilm.subjectOther.stringValue().like("%/ "+mediaVO.getNameChn().trim()))
+//                    .and(qFilm.year.shortValue().eq(mediaVO.getYear()));
+//
+//
+//
+//            List<Film> filmList = (List<Film>) filmRepository.findAll(predicateA);
+//            if(filmList.size() == 1){
+//                i++;
+//                filmVO = filmList.get(0);
+//                System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+//                MediaVOFilmVO mf = new MediaVOFilmVO();
+//                mf.setFilmVOId(filmVO.getId());
+//                mf.setMediaVOId(mediaVO.getId());
+//                try {
+//                    mediaVOFilmVORepository.save(mf);
+//                }catch (Exception e){
+//                    //e.printStackTrace();
+//                }
+//            }
+//
+//            //找不到，模糊查询
+//            if(filmList.size() != 1){
+//                filmList = (List<Film>) filmRepository.findAll(predicateAB);
+//                if(filmList.size() == 1){
+//                    i++;
+//                    filmVO = filmList.get(0);
+//                    System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+//                    MediaVOFilmVO mf = new MediaVOFilmVO();
+//                    mf.setFilmVOId(filmVO.getId());
+//                    mf.setMediaVOId(mediaVO.getId());
+//                    try {
+//                        mediaVOFilmVORepository.save(mf);
+//                    }catch (Exception e) {
+//                        //e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            //找不到，模糊查询
+//            if(filmList.size() != 1){
+//                filmList = (List<Film>) filmRepository.findAll(predicateABC);
+//                if(filmList.size() == 1){
+//                    i++;
+//                    filmVO = filmList.get(0);
+//                    System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+//                    MediaVOFilmVO mf = new MediaVOFilmVO();
+//                    mf.setFilmVOId(filmVO.getId());
+//                    mf.setMediaVOId(mediaVO.getId());
+//
+//                    try {
+//                        mediaVOFilmVORepository.save(mf);
+//                    }catch (Exception e) {
+//                        //e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            //找不到，模糊查询
+//            if(filmList.size() != 1){
+//                filmList = (List<Film>) filmRepository.findAll(predicateB);
+//                if(filmList.size() == 1){
+//                    i++;
+//                    filmVO = filmList.get(0);
+//                    System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+//                    MediaVOFilmVO mf = new MediaVOFilmVO();
+//                    mf.setFilmVOId(filmVO.getId());
+//                    mf.setMediaVOId(mediaVO.getId());
+//
+//                    try {
+//                        mediaVOFilmVORepository.save(mf);
+//                    }catch (Exception e) {
+//                        //e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            //找不到，模糊查询
+//            if(filmList.size() != 1){
+//                filmList = (List<Film>) filmRepository.findAll(predicateC);
+//                if(filmList.size() == 1){
+//                    i++;
+//                    filmVO = filmList.get(0);
+//                    System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+//                    MediaVOFilmVO mf = new MediaVOFilmVO();
+//                    mf.setFilmVOId(filmVO.getId());
+//                    mf.setMediaVOId(mediaVO.getId());
+//
+//                    try {
+//                        mediaVOFilmVORepository.save(mf);
+//                    }catch (Exception e) {
+//                        //e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            //找不到，模糊查询
+//            if(filmList.size() != 1){
+//                filmList = (List<Film>) filmRepository.findAll(predicateD);
+//                if(filmList.size() == 1){
+//                    i++;
+//                    filmVO = filmList.get(0);
+//                    System.out.println(i+": "+mediaVO.getMedia().getName()+" -> "+filmVO.getSubjectMain());
+//                    MediaVOFilmVO mf = new MediaVOFilmVO();
+//                    mf.setFilmVOId(filmVO.getId());
+//                    mf.setMediaVOId(mediaVO.getId());
+//
+//                    try {
+//                        mediaVOFilmVORepository.save(mf);
+//                    }catch (Exception e) {
+//                        //e.printStackTrace();
+//                    }
+//                }
+//            }
 
         }
 
@@ -390,13 +516,12 @@ public class GatherServiceImpl implements GatherService {
     }
 
 
-    @Autowired
-    PersonVOFilmVORepository personVOFilmVORepository;
-
 
     @Autowired
     PersonRepository personRepository;
 
+    @Autowired
+    PersonVOFilmVORepository personVOFilmVORepository;
 
     /**
      * 人物和电影对应关系创建
@@ -410,11 +535,21 @@ public class GatherServiceImpl implements GatherService {
         QFilm qFilm = QFilm.film;
         QPerson qPerson = QPerson.person;
         QPersonVOFilmVO qPersonVOFilmVO = QPersonVOFilmVO.personVOFilmVO;
+        QMediaVOFilmVO qMediaVOFilmVO = QMediaVOFilmVO.mediaVOFilmVO;
+
+
 
         int i=0;
         for(MediaVO mediaVO : mediaVOList){
             Film filmVO = null;
-            Predicate predicate = qFilm.subjectMain.contains(mediaVO.getNameChn()).and(qFilm.year.eq(mediaVO.getYear()));
+            System.out.println("mediaVO.getId(): "+mediaVO.getId());
+            Predicate predicate1 = qMediaVOFilmVO.mediaVOId.eq(mediaVO.getId());
+            MediaVOFilmVO qMediaVOFilmVO1 = mediaVOFilmVORepository.findOne(predicate1);
+            if(null == qMediaVOFilmVO1){
+                continue;
+            }
+
+            Predicate predicate = qFilm.id.eq(qMediaVOFilmVO1.getFilmVOId());
             List<Film> filmList = (List<Film>) filmRepository.findAll(predicate);
             if(filmList.size() == 1){
                 i++;
@@ -516,8 +651,6 @@ public class GatherServiceImpl implements GatherService {
 
                 }
 
-
-
             }
         }
 
@@ -525,6 +658,27 @@ public class GatherServiceImpl implements GatherService {
         System.out.println("ending....."+i);
 
     }
+
+    /**
+     *
+     * @param personId
+     * @return
+     */
+    @Override
+     public  List<Film> listFilmsByPersonId(String personId, String type){
+//        personId ="9112";
+
+         PersonVOFilmVO personVOFilmVO1 = personVOFilmVORepository.findOne(Long.parseLong(personId));
+         String films = personVOFilmVO1.getAsDirector();
+         if("2".equals(type)){
+             films = personVOFilmVO1.getAsActor();
+         }
+         String[] filmArray = films.split(",");
+
+         QFilm qFilm = QFilm.film;
+         Predicate predicate1 = qFilm.id.stringValue().in(Arrays.asList(filmArray));
+         return (List<Film>) filmRepository.findAll(predicate1,new Sort("year"));
+     }
 
 
 }

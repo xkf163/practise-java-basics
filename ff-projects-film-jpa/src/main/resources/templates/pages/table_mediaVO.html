@@ -108,7 +108,6 @@
                 border:false,
                 fit:true,//自动补全
                 fitColumns:true,
-                sortName:'nameChn',
                 multiSort:true,
                 remoteSort:true,
                 pageSize:25,
@@ -134,14 +133,14 @@
                             }
                         }
                     },
-                    {field:'diskNo',title:'盘符',width:10,
+                    {field:'media.diskNo',title:'盘符',width:10,
                         formatter: function(value,row,index){
                             if (row.media){
                                 return row.media.diskNo;
                             } else {
                                 return value;
                             }
-                        }
+                        },sortable:true
                     },
                     {field:'fullPath',title:'全路径',width:250,
                         formatter: function(value,row,index){

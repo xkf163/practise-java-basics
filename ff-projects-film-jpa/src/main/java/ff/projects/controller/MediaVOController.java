@@ -171,7 +171,7 @@ public class MediaVOController {
         Pageable pageable = new PageRequest(Integer.parseInt(page)-1, Integer.parseInt(size), new Sort(Sort.Direction.DESC,"nameChn"));
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
         List<String> listRepeat = queryFactory.selectFrom(mediaVO)
-                .groupBy(mediaVO.nameChn)
+                .groupBy(mediaVO.nameChn,mediaVO.year)
                 .select(mediaVO.nameChn)
                 .where(mediaVO.media.deleted.eq(0))
                 .having(mediaVO.nameChn.count().gt(1))

@@ -1,5 +1,6 @@
 package ff.projects.service;
 
+import ff.projects.entity.Film;
 import ff.projects.entity.Media;
 import ff.projects.entity.MediaVO;
 
@@ -19,4 +20,7 @@ public interface GatherService {
 
      void relation();
 
-}
+     List<Film> listFilmsByPersonId(String personId, String type);
+
+
+     }
