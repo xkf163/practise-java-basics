@@ -3,6 +3,7 @@ package org.ff.dao;
 import org.ff.entity.Function;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
 /**
  * Created by 57257 on 2017/5/20.
  */
+@Repository
 public interface FunctionDao extends JpaRepository<Function , Integer> {
 
 
