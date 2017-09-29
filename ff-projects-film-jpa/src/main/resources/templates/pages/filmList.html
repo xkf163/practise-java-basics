@@ -1,0 +1,80 @@
+<!DOCTYPE>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>table</title>
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-1.5.1/themes/icon.css">
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+
+            $('.easyui-tooltip').tooltip({
+                content: $('<div></div>'),
+                onShow: function(){
+                    $(this).tooltip('arrow').css('left', 20);
+                    $(this).tooltip('tip').css('left', $(this).offset().left);
+                },
+                onUpdate: function(content){
+                    content.panel({
+                        width: 400,
+                        height: 'auto',
+                        border: false,
+                        href: '/films/'+$(this).attr("id")+"/media", //获取电影对应的filepath
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<style>
+    body{
+        margin: 0px;
+        padding: 0px;
+    }
+</style>
+
+<body>
+
+<table id="dg" class="easyui-datagrid"
+       data-options="singleSelect:true,collapsible:true,border:false,">
+    <thead>
+    <tr>
+        <th data-options="field:'productid',width:30">序号</th>
+        <th data-options="field:'listprice',width:200,align:'right'">片名</th>
+        <th data-options="field:'unitcost',width:60,align:'right'">年代</th>
+        <th data-options="field:'attr1',width:200,align:'right'">国家/地区</th>
+        <th data-options="field:'status',width:60,align:'center'">豆瓣评分</th>
+        <th data-options="field:'comments',width:60,align:'center'">评价人数</th>
+        <th data-options="field:'url',width:80,align:'center'">豆瓣号</th>
+    </tr>
+    </thead>
+    <tbody>
+    <#list filmList as f>
+        <tr>
+            <td>${f_index+1}</td>
+            <td><span class="easyui-tooltip" id="${f.id?c}">${f.subject}</span></td>
+            <td>${f.year}</td>
+            <td>${f.country}</td>
+
+            <#if (f.doubanRating)??>
+                <td>${f.doubanRating?string('0.0')}</td>
+            <#else>
+                <td>null</td>
+            </#if>
+            <#if (f.doubanSum)??>
+                <td>${f.doubanSum}</td>
+                <#else>
+                    <td>null</td>
+            </#if>
+            <td><a style="text-decoration: none" href="https://movie.douban.com/subject/${f.doubanNo}/" target="_blank">${f.doubanNo}</a></td>
+        </tr>
+    </#list>
+    </tbody>
+</table>
+
+</body>
+</html>
