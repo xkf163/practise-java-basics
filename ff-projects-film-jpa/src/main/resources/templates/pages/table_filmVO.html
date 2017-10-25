@@ -138,30 +138,19 @@
 
 <body>
 <div class="easyui-layout" fit="true">
-    <div region="north" border="true" id="search" title="查询条件" iconCls="icon-search" split="true"
-         style="height:70px;font-size: 12px;padding: 5px">
-        <span>片名:</span>
-        <input id="name" style="line-height:18px;border:1px solid #ccc">
-        <span>盘符:</span>
-        <input id="diskNo" style="line-height:18px;border:1px solid #ccc">
-        创建时间从：<input type="text" id="startDate" editable="true" class="easyui-datebox" style="width:110px;">
-        到：<input type="text" id="endDate" editable="true" class="easyui-datebox" style="width:110px;">
-        <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'"
-           onclick="doSearch()">查询</a>
-    </div>
     <div region="center" border="true" iconCls="icon-filter" title="查询列表" split="true">
         <table id="dg" class="easyui-datagrid"></table>
     </div>
 </div>
 <div id="toolbar" style="background:#E0ECFF;width:100%;">
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add">新增</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit">编辑</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove">移除</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save">保存</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-cancel">删除</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-search">查询</a>
-    <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+    <span>片名:</span>
+    <input id="name" style="line-height:18px;border:1px solid #ccc">
+    <span>盘符:</span>
+    <input id="diskNo" style="line-height:18px;border:1px solid #ccc">
+    创建时间从：<input type="text" id="startDate" editable="true" class="easyui-datebox" style="width:110px;">
+    到：<input type="text" id="endDate" editable="true" class="easyui-datebox" style="width:110px;">
+    <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'"
+       onclick="doSearch()">查询</a>
 </div>
 <div id="tab-tools">
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"

@@ -12,8 +12,10 @@
     <script type="text/javascript" src="./js/jquery.cookie.js"></script>
 
     <script  type="text/javascript">
+
         /*遍历多媒体文件夹，符合条件的电影条目写入数据库*/
         function gather() {
+
             $.ajax({
                 url:"/gather",
                 type:"get",
@@ -164,7 +166,7 @@
 
 
 <body class="easyui-layout">
-    <div data-options="region:'north'" border="false" style="height:60px;overflow-y: hidden;background-color: #E0ECFF;font-size: 14px;padding: 10px">
+    <div data-options="region:'north'" border="false" style="height:50px;overflow-y: hidden;background-color: #E0ECFF;font-size: 14px;padding: 8px">
         <a class="easyui-linkbutton" data-options="iconCls:'icon-disk',size:'large',plain:'true'"></a>
         IMDb, the world's most popular and authoritative source for movie, TV and celebrity content.
         <div id="login" style="position:absolute;right: 5px;top: 5px;">
@@ -185,7 +187,7 @@
 
 
     <!--<div data-options="region:'east',split:true,hideCollapsedContent:false" title="East" style="width:150px;"></div>-->
-    <div title="收藏馆" iconCls="icon-library_occupied" region="west" split="true" style="width:200px;" >
+    <div title="收藏馆" iconCls="icon-library_occupied" region="west" split="true" style="width:170px;" >
         <div class="easyui-accordion" fit="true" border="false" >
             <div title="用户菜单" iconCls="icon-tip" >
                 <ul id="userMenu" style="padding: 15px">
@@ -205,7 +207,7 @@
 
             <div title="首页" fit="true" style="padding: 10px">
                 <ul>
-                    <li><button onclick="gather();">收集</button></li><br>
+                    <li><button onclick="BrowseFolder();">收集</button></li><br>
                     <li><button onclick="transfer();">转换</button></li><br>
                     <li><button onclick="pickup();">关联Media&Film</button></li><br>
                     <li><button onclick="relation();">关联Person&Film</button></li><br>

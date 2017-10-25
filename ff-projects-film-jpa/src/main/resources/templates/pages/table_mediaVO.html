@@ -110,21 +110,13 @@
                 fitColumns:true,
                 multiSort:true,
                 remoteSort:true,
-                pageSize:25,
-                pageList:[25,50,100,200],
+                pageSize:20,
+                pageList:[20,50,100,200],
                 columns:[[
                     {field:'ck',checkbox:'true'},
-                    {field:'nameChn',title:'片名',width:50,sortable:true},
-                    {field:"name",title:'文件(夹)名',width:180,
-                        formatter: function(value,row,index){
-                            if (row.media){
-                                return row.media.name;
-                            } else {
-                                return value;
-                            }
-                        }
-                    },
-                    {field:'mediaSize',title:'大小',width:50,
+                    {field:'nameChn',title:'片名',width:60,sortable:true},
+                    {field:'year',title:'年代',width:15},
+                    {field:'mediaSize',title:'大小',width:30,
                         formatter: function(value,row,index){
                             if (row.media){
                                 return row.media.mediaSize;
@@ -133,7 +125,7 @@
                             }
                         }
                     },
-                    {field:'media.diskNo',title:'盘符',width:10,
+                    {field:'media.diskNo',title:'盘',width:10,
                         formatter: function(value,row,index){
                             if (row.media){
                                 return row.media.diskNo;
@@ -142,7 +134,7 @@
                             }
                         },sortable:true
                     },
-                    {field:'fullPath',title:'全路径',width:250,
+                    {field:'fullPath',title:'全路径',width:220,
                         formatter: function(value,row,index){
                             if (row.media){
                                 return row.media.fullPath;
@@ -159,19 +151,15 @@
                                 return value;
                             }
                         }},
-                    {field:'createDate',title:'记录新建时间',width:50,
-                        formatter: function(value,row,index){
-                            if (row.media){
-                                return row.media.createDate;
-                            } else {
-                                return value;
-                            }
-                        }
-                    },
                     {field:'updateDate',title:'记录更新时间',width:50,
                         formatter: function(value,row,index){
                             if (row.media){
-                                return row.media.updateDate;
+                                if(row.media.updateDate){
+                                    return row.media.updateDate;
+                                }else{
+                                    return row.media.createDate;
+                                }
+
                             } else {
                                 return value;
                             }
@@ -195,20 +183,11 @@
 
 
 <div class="easyui-layout" fit="true">
-    <div region="north" border="true" id="search" title="查询条件" iconCls="icon-search" split="true" style="height:70px;font-size: 12px;padding: 5px">
-        <span>片名:</span>
-        <input id="name" style="line-height:18px;border:1px solid #ccc">
-        <span>盘符:</span>
-        <input id="diskNo" style="line-height:18px;border:1px solid #ccc">
-        创建时间从：<input type="text" id="startDate" editable="true" class="easyui-datebox"  style="width:110px;">
-        到：<input type="text" id="endDate" editable="true" class="easyui-datebox"  style="width:110px;">
-        <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
-    </div>
     <div region="center" border="true" iconCls="icon-filter" title="查询列表" split="true">
         <table id="dg" class="easyui-datagrid"></table>
     </div>
 </div>
-<div id="toolbar"  style="background:#E0ECFF;width:100%;">
+<div id="toolbar1"  style="background:#E0ECFF;width:100%;">
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add">新增</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit">编辑</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove">移除</a>
@@ -217,6 +196,15 @@
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-search">查询</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+</div>
+<div id="toolbar"  style="background:#E0ECFF;width:100%;">
+    <span>片名:</span>
+    <input id="name" style="line-height:18px;border:1px solid #ccc">
+    <span>盘符:</span>
+    <input id="diskNo" style="line-height:18px;border:1px solid #ccc">
+    创建时间从：<input type="text" id="startDate" editable="true" class="easyui-datebox"  style="width:110px;">
+    到：<input type="text" id="endDate" editable="true" class="easyui-datebox"  style="width:110px;">
+    <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
 </div>
 <div id="tab-tools">
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'" onclick="addPanel()"></a>
