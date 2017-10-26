@@ -1,18 +1,14 @@
 package ff.projects.controller;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.common.TreeNode;
-import ff.projects.entity.QMediaVO;
-import ff.projects.repository.MediaVORepository;
-import ff.projects.service.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by F on 2017/6/23.
@@ -22,13 +18,13 @@ public class TreeNodeController {
 
 
     @Autowired
-    TreeService treeService;
+    //TreeService treeService;
 
     @GetMapping(value = "/tree")
     public List<TreeNode> listTree(){
         List<TreeNode> treeNodeList = new ArrayList<>();
-        treeNodeList.add(treeService.getTreeGroupByGatherDate());
-        treeNodeList.add(treeService.getTreeGroupByMovieReleaseYear());
+        //treeNodeList.add(treeService.getTreeGroupByGatherDate());
+        //treeNodeList.add(treeService.getTreeGroupByMovieReleaseYear());
 
 
         Set<TreeNode> treeNodeSet = null;
@@ -40,19 +36,19 @@ public class TreeNodeController {
         treeNode = new TreeNode();
         treeNode.setText("重复下载");
         treeNode.setDataUrl("/mediavo/repetitive/");
-        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
+        treeNode.setHtmlUrl("/pages/table_mediaVO?toolbarType=toolbar_buttonWithqueryWithoutDate&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
         treeNode = new TreeNode();
         treeNode.setText("增删改查");
         treeNode.setDataUrl("/mediavo/deleted/1");
-        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
+        treeNode.setHtmlUrl("/pages/table_mediaVO?toolbarType=toolbar_add&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
         treeNode = new TreeNode();
         treeNode.setText("回收站");
         treeNode.setDataUrl("/mediavo/deleted/1");
-        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
+        treeNode.setHtmlUrl("/pages/table_mediaVO?toolbarType=toolbar_recycle&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
         pTreeNode = new TreeNode();
