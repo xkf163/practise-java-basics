@@ -3,7 +3,10 @@ package ff.projects.controller;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import ff.projects.entity.*;
+import ff.projects.entity.MediaVO;
+import ff.projects.entity.QMedia;
+import ff.projects.entity.QMediaVO;
+import ff.projects.entity.QMediaVOFilmVO;
 import ff.projects.repository.MediaVORepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -165,18 +171,29 @@ public class MediaVOController {
      * @return
      */
     @PostMapping(value = "/mediavo/repetitive")
-    public Page<MediaVO> listRepetitive(@RequestParam(value = "page",defaultValue = "1",required = false) String page, @RequestParam(value = "rows",defaultValue = "10",required = false) String size){
+    public Page<MediaVO> listRepetitive(@RequestParam(value = "page",defaultValue = "1",required = false) String page,
+                                        @RequestParam(value = "name",defaultValue = "",required = false) String name,
+                                        @RequestParam(value = "diskNo",defaultValue = "",required = false) String diskNo,
+                                        @RequestParam(value = "rows",defaultValue = "10",required = false) String size){
         QMediaVO mediaVO = QMediaVO.mediaVO;
-//        QMedia media = QMedia.media;
+        //查询语句动态准备
+        List<Predicate> criteria = new ArrayList<>();
+        if (!"".equals(name)){
+            criteria.add(mediaVO.nameChn.contains(name));
+        }
+        if (!"".equals(diskNo)){
+            criteria.add(mediaVO.media.diskNo.eq(diskNo.toUpperCase()));
+        }
+        criteria.add(mediaVO.media.deleted.eq(0));
         Pageable pageable = new PageRequest(Integer.parseInt(page)-1, Integer.parseInt(size), new Sort(Sort.Direction.DESC,"nameChn"));
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
         List<String> listRepeat = queryFactory.selectFrom(mediaVO)
                 .groupBy(mediaVO.nameChn,mediaVO.year)
                 .select(mediaVO.nameChn)
-                .where(mediaVO.media.deleted.eq(0))
+                .where(criteria.toArray(new Predicate[criteria.size()]))
                 .having(mediaVO.nameChn.count().gt(1))
                 .fetch();
-
+        //再次搜索：带分页
         Predicate predicate = mediaVO.nameChn.in(listRepeat).and(mediaVO.media.deleted.eq(0));
         return mediaVORepository.findAll(predicate,pageable);
     }

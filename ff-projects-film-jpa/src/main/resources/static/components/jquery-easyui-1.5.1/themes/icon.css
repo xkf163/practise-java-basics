@@ -109,3 +109,21 @@
 .icon-library_occupied{
 	background:url('icons/library_occupied.png') no-repeat center center;
 }
+.icon-folder{
+	background:url('icons/folder.png') no-repeat center center;
+}
+.icon-note{
+	background:url('icons/note.png') no-repeat center center;
+}
+.icon-record{
+	background:url('icons/record.gif') no-repeat center center;
+}
+
+
+.icon-twotone-grow{
+	background:url('icons/twotone/grow.gif') no-repeat center center;
+}
+
+.icon-twotone-home{
+	background:url('icons/twotone/home.gif') no-repeat center center;
+}
