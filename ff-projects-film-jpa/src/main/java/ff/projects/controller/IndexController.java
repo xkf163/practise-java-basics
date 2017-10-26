@@ -53,10 +53,17 @@ public class IndexController {
     }
 
 
+    /**
+     * @Author: xukangfeng
+     * @Description 目录树节点URL跳转Controller
+     * @Date : 16:33 2017/10/26
+     */
     @RequestMapping(method = RequestMethod.GET,value = "/pages/{path}")
     public String pageIndex(Model model,HttpServletRequest request,@PathVariable String path){
         String dataUrl = request.getParameter("dataUrl");
+        String toolbarType = request.getParameter("toolbarType");
         model.addAttribute("dataUrl",dataUrl);
+        model.addAttribute("toolbarType",toolbarType==null?"toolbar_default":toolbarType);
         return "pages/"+path;
     }
 

@@ -101,7 +101,7 @@
         $(document).ready(function () {
             $("#dg").datagrid({
                 url:'${dataUrl}',
-                toolbar: '#toolbar',
+                toolbar: '#${toolbarType}',
                 pagination:true,
                 rownumbers:true,
                 striped:true,
@@ -132,7 +132,7 @@
                             } else {
                                 return value;
                             }
-                        },sortable:true
+                        }
                     },
                     {field:'fullPath',title:'全路径',width:220,
                         formatter: function(value,row,index){
@@ -175,19 +175,24 @@
             });
         });
 
+        function SubmitKeyClick() //文本框输入完成按回车键触发button按钮
+        {
+            if(event.keyCode==13)
+            {
+                event.keyCode=9;
+                event.returnValue=false;
+                doSearch();
+            }
+        }
 
     </script>
 
 </head>
-<body>
+<body style="margin: 0px;padding: 0px" onkeydown="SubmitKeyClick();">
 
+<table id="dg" class="easyui-datagrid" ></table>
 
-<div class="easyui-layout" fit="true">
-    <div region="center" border="true" iconCls="icon-filter" title="查询列表" split="true">
-        <table id="dg" class="easyui-datagrid"></table>
-    </div>
-</div>
-<div id="toolbar1"  style="background:#E0ECFF;width:100%;">
+<div id="toolbar_button"  style="background:#E0ECFF;width:100%;">
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add">新增</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit">编辑</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove">移除</a>
@@ -197,15 +202,24 @@
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-search">查询</a>
     <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
 </div>
-<div id="toolbar"  style="background:#E0ECFF;width:100%;">
+<div id="toolbar_default"  style="background:#E0ECFF;width:100%;padding: 2px">
     <span>片名:</span>
-    <input id="name" style="line-height:18px;border:1px solid #ccc">
+    <input id="name" class="easyui-textbox"  style="line-height:18px;border:1px solid #ccc">
     <span>盘符:</span>
-    <input id="diskNo" style="line-height:18px;border:1px solid #ccc">
+    <input id="diskNo" class="easyui-textbox" style="line-height:18px;border:1px solid #ccc">
     创建时间从：<input type="text" id="startDate" editable="true" class="easyui-datebox"  style="width:110px;">
     到：<input type="text" id="endDate" editable="true" class="easyui-datebox"  style="width:110px;">
     <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
 </div>
+
+<div id="toolbar_queryWithoutDate"  style="background:#E0ECFF;width:100%;padding: 2px">
+    <span>片名:</span>
+    <input id="name" class="easyui-textbox"  style="line-height:18px;border:1px solid #ccc">
+    <span>盘符:</span>
+    <input id="diskNo" class="easyui-textbox"  style="line-height:18px;border:1px solid #ccc">
+    <a href="#" class="easyui-linkbutton" plain="true" data-options="iconCls:'icon-search'" onclick="doSearch()">查询</a>
+</div>
+
 <div id="tab-tools">
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'" onclick="addPanel()"></a>
     <a href="javascript:void(0)" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'" onclick="removePanel()"></a>

@@ -23,5 +23,20 @@ public class TreeNode implements Serializable {
 
     private Set<TreeNode>  children;
 
+    public TreeNode() {
+    }
 
+    public TreeNode(String text, String htmlUrl, String dataUrl) {
+        this.text = text;
+        this.htmlUrl = htmlUrl;
+        this.dataUrl = dataUrl;
+    }
+
+    public TreeNode(String text, String state, String htmlUrl, String dataUrl, Set<TreeNode> children) {
+        this.text = text;
+        this.state = state;
+        this.htmlUrl = htmlUrl;
+        this.dataUrl = dataUrl;
+        this.children = children;
+    }
 }

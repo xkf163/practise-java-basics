@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.common.TreeNode;
 import ff.projects.entity.QMediaVO;
 import ff.projects.repository.MediaVORepository;
+import ff.projects.service.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,111 +20,43 @@ import java.util.*;
 @RestController
 public class TreeNodeController {
 
-    @PersistenceContext
-    EntityManager entityManager;
 
     @Autowired
-    MediaVORepository mediaVORepository;
+    TreeService treeService;
 
     @GetMapping(value = "/tree")
     public List<TreeNode> listTree(){
         List<TreeNode> treeNodeList = new ArrayList<>();
-        Set<TreeNode> treeNodeSet = new LinkedHashSet<>();
-        QMediaVO mediaVO = QMediaVO.mediaVO;
-        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+        treeNodeList.add(treeService.getTreeGroupByGatherDate());
+        treeNodeList.add(treeService.getTreeGroupByMovieReleaseYear());
 
 
+        Set<TreeNode> treeNodeSet = null;
+        TreeNode pTreeNode = null;
+        TreeNode treeNode = null;
 
-
-
-        //收集时间
-        List<Date> gatherDateList = queryFactory
-                .selectFrom(mediaVO)
-                .select(mediaVO.media.gatherDate)
-                .fetch();
-        List<Date> gatherDateListNew = new ArrayList<>(new HashSet<Date>(gatherDateList));
-//        Collections.sort(gatherDateListNew);
-        Set<String> gatherDateSet = new TreeSet<>(new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                if(Integer.parseInt(o1) < Integer.parseInt(o2)){
-                    return 1;
-                }else if(Integer.parseInt(o1) == Integer.parseInt(o2)) {
-                    return 0;
-                }
-                return -1;
-            }
-        });
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMM");
-        for (Date date : gatherDateListNew){
-//            System.out.println(sdf.format(date));
-            gatherDateSet.add(sdf.format(date));
-        }
-
-        treeNodeSet = new LinkedHashSet<>();
-        Iterator<String> iterator = gatherDateSet.iterator();
-        while (iterator.hasNext()){
-            String yearMonth = iterator.next();
-            TreeNode treeNode = new TreeNode();
-            treeNode.setText(yearMonth);
-            treeNode.setDataUrl("/mediavo/gatherdate/"+yearMonth);
-            treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
-            treeNodeSet.add(treeNode);
-        }
-        TreeNode pTreeNode = new TreeNode();
-
-        pTreeNode.setText("条目收集年月");
-        pTreeNode.setDataUrl("/mediavo/gatherdates");
-        pTreeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+pTreeNode.getDataUrl());
-        pTreeNode.setChildren(treeNodeSet);
-        pTreeNode.setState("closed");
-        treeNodeList.add(pTreeNode);
-
-        TreeNode treeNode = new TreeNode();
-        treeNodeSet = new LinkedHashSet<>();
-        //发行年份
-        List<Short>  list = queryFactory
-                .selectFrom(mediaVO)
-                .select(mediaVO.year)
-                .distinct()
-                .orderBy(mediaVO.year.desc())
-                .fetch();
-        for(Short year : list){
-            treeNode = new TreeNode();
-            treeNode.setText(String.valueOf(year));
-            treeNode.setDataUrl("/mediavo/years/"+String.valueOf(year));
-            treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
-            treeNodeSet.add(treeNode);
-//            System.out.println(year);
-        }
-
-        pTreeNode = new TreeNode();
-        pTreeNode.setText("条目发行年份");
-        pTreeNode.setDataUrl("/mediavo/years");
-        pTreeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+pTreeNode.getDataUrl());
-        pTreeNode.setChildren(treeNodeSet);
-        pTreeNode.setState("closed");
-        treeNodeList.add(pTreeNode);
-
-
-        //数据整理
+        //树3：操作平台------------s------------------
         treeNodeSet = new LinkedHashSet<>();
         treeNode = new TreeNode();
-        treeNode.setText("去重");
+        treeNode.setText("重复下载");
         treeNode.setDataUrl("/mediavo/repetitive/");
         treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
         treeNode = new TreeNode();
-        treeNode.setText("废弃");
+        treeNode.setText("增删改查");
         treeNode.setDataUrl("/mediavo/deleted/1");
         treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
-
+        treeNode = new TreeNode();
+        treeNode.setText("回收站");
+        treeNode.setDataUrl("/mediavo/deleted/1");
+        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
 
         pTreeNode = new TreeNode();
-        pTreeNode.setText("条目数据整理");
+        pTreeNode.setText("操作平台");
         pTreeNode.setDataUrl("");
         pTreeNode.setHtmlUrl("");
         pTreeNode.setChildren(treeNodeSet);

@@ -48,6 +48,8 @@ public class FunctionServiceImpl implements FunctionService {
                 functionCodeSet.add(function.getCode());
             }
         }
+
+
         return functionCodeSet;
     }
 }
