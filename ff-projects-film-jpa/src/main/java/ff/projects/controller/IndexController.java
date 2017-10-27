@@ -68,21 +68,6 @@ public class IndexController {
     }
 
 
-    @GetMapping(value = "/gather")
-    @ResponseBody
-    public List<Media> gather() {
-        List<Media> lists = new ArrayList<>();
-        JFileChooser jfc = new JFileChooser();
-        jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int intRetVal = jfc.showDialog(new JLabel(), "选择根文件夹");
-        File file = jfc.getSelectedFile();
-        System.out.println(intRetVal);
-        if( intRetVal == JFileChooser.APPROVE_OPTION){
-            lists= gatherService.gatherMedia2DB(jfc.getSelectedFile());
-        }
-        System.out.println("over。。。");
-        return lists;
-    }
 
     @GetMapping(value = "/transfer")
     @ResponseBody
@@ -100,31 +85,6 @@ public class IndexController {
     }
 
 
-    @GetMapping(value = "/crawler/patch")
-    public String crawlerPatch(HttpServletRequest request,@RequestParam (value = "url",required = false) String gatherUrl,
-                          @RequestParam (value = "thread" ,defaultValue = "1") String thread){
-//      Spider.create(douBanProcessor).addUrl("https://movie.douban.com/subject/5308265/?from=aaa").thread(5).run();
-
-        String rootUrl = "https://movie.douban.com/subject_search?search_text=";
-        //查询语句准备
-        QMediaVO qMediaVO = QMediaVO.mediaVO;
-        QMediaVOFilmVO qMediaVOFilmVO = QMediaVOFilmVO.mediaVOFilmVO;
-
-
-
-        Predicate predicate = qMediaVO.id.notIn(JPAExpressions.select(qMediaVOFilmVO.mediaVOId).from(qMediaVOFilmVO)).and(qMediaVO.media.deleted.eq(0));
-        List<String> stringList = (List<String>) new JPAQueryFactory(entityManager).selectFrom(qMediaVO).select(qMediaVO.nameChn.prepend(rootUrl)).where(predicate).fetch();
-
-        String[] urls = stringList.toArray(new String[stringList.size()]);
-
-        if(null!=gatherUrl){
-            urls = new String[1];
-            urls[0]=gatherUrl;
-        }
-
-        Spider.create(douBanProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
-        return "redirect:/";
-    }
 
     /**
      * 补救：豆瓣评分 评分人数

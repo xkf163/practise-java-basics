@@ -202,7 +202,28 @@
     <div id="mainPage" region="center" border="true">
         <div id="tabs" class="easyui-tabs" fit="true" border="false">
 
-            <div title="首页" fit="true" style="padding: 10px">
+            <div title="首页" fit="true" style="padding: 5px">
+
+                <div class="easyui-panel" title=" 遍历硬盘 " style="width:700px;height:150px;padding: 10px">
+                    <p>PC文件夹路径：</p>
+                    <input class="easyui-filebox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
+                    <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
+                </div>
+                <div style="margin:10px 0 10px 0;"></div>
+
+                <div class="easyui-panel" title=" 网页爬取 " style="width:700px;height:250px;padding: 10px">
+                    <p>爬取方式：</p>
+                    <p>eg.</p>
+                    <input class="easyui-textbox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
+                    <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
+                    <div style="margin:5px 0 5px 0;"></div>
+                    <input class="easyui-textbox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
+                    <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
+
+                </div>
+                <div style="margin:10px 0 10px 0;"></div>
+
+
                 <ul>
                     <li><button onclick="BrowseFolder();">收集</button></li><br>
                     <li><button onclick="transfer();">转换</button></li><br>

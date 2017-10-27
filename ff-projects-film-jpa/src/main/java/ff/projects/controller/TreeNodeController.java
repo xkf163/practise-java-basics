@@ -1,6 +1,7 @@
 package ff.projects.controller;
 
 import ff.projects.common.TreeNode;
+import ff.projects.service.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,13 +19,13 @@ public class TreeNodeController {
 
 
     @Autowired
-    //TreeService treeService;
+    TreeService treeService;
 
     @GetMapping(value = "/tree")
     public List<TreeNode> listTree(){
         List<TreeNode> treeNodeList = new ArrayList<>();
-        //treeNodeList.add(treeService.getTreeGroupByGatherDate());
-        //treeNodeList.add(treeService.getTreeGroupByMovieReleaseYear());
+        treeNodeList.add(treeService.getTreeGroupByGatherDate());
+        treeNodeList.add(treeService.getTreeGroupByMovieReleaseYear());
 
 
         Set<TreeNode> treeNodeSet = null;
@@ -41,7 +42,7 @@ public class TreeNodeController {
 
         treeNode = new TreeNode();
         treeNode.setText("增删改查");
-        treeNode.setDataUrl("/mediavo/deleted/1");
+        treeNode.setDataUrl("/mediavo/years");
         treeNode.setHtmlUrl("/pages/table_mediaVO?toolbarType=toolbar_add&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
