@@ -123,6 +123,15 @@
             tabClose();
         }
 
+
+
+        function submitForm(){
+            $('#ff').form('submit');
+        }
+        function clearForm(){
+            $('#ff').form('clear');
+        }
+
         function createFrame(url) {
             var s = '<iframe scrolling="auto" frameborder="0" src="'+url+'" style="width:100%; height:100%"></iframe>';
             return s;
@@ -212,13 +221,14 @@
                 <div style="margin:10px 0 10px 0;"></div>
 
                 <div class="easyui-panel" title=" 网页爬取 " style="width:700px;height:250px;padding: 10px">
-                    <p>爬取方式：</p>
-                    <p>eg.</p>
-                    <input class="easyui-textbox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
-                    <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
+                    <form id="ff" method="post" class="easyui-form" action="/crawler">
+                        <p>通用爬虫：/crawler?url=?1&thread=1</p>
+                        页面地址：<input class="easyui-textbox" style="width:50%" name="url" data-options="required:true,prompt:'如https://movie.douban.com/subject/25712016/'"/>
+                        线程数：<input class="easyui-textbox" style="width:10%" name="thread" value="1" data-options="required:true"/>
+                        <a href="javascript:void(0);" onclick="submitForm();" class="easyui-linkbutton" style="width: 50px">开始爬</a>
+                    </form>
                     <div style="margin:5px 0 5px 0;"></div>
-                    <input class="easyui-textbox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
-                    <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
+
 
                 </div>
                 <div style="margin:10px 0 10px 0;"></div>
