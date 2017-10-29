@@ -66,8 +66,6 @@ public class CrawlerController {
 
     @Autowired
     DouBanSingelProcessor douBanSingelProcessor;
-
-
     /**
      * @Author: xukangfeng
      * @Description 通用爬取方法
@@ -75,10 +73,11 @@ public class CrawlerController {
      * @param : url 豆瓣单个电影页面地址
      * @param : thread 线程树
      */
-    @PostMapping(value = "/crawler")
-    public String crawler(@RequestParam (value = "url" ,defaultValue = "https://movie.douban.com") String gatherUrl,
+    @PostMapping(value = "/crawler/one")
+    public String crawler(@RequestParam (value = "url" ,required = true) String singleFilmUrl,
                           @RequestParam (value = "thread" ,defaultValue = "1") String thread){
-        Spider.create(douBanSingelProcessor).addUrl(gatherUrl).thread(Integer.parseInt(thread)).run();
+        //douBanSingelProcessor.setSingleCrawler(false);
+        Spider.create(douBanSingelProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
     }
 

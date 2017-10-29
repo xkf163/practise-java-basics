@@ -220,19 +220,28 @@
                 </div>
                 <div style="margin:10px 0 10px 0;"></div>
 
-                <div class="easyui-panel" title=" 网页爬取 " style="width:700px;height:250px;padding: 10px">
-                    <form id="ff" method="post" class="easyui-form" action="/crawler">
-                        <p>通用爬虫：/crawler?url=?1&thread=1</p>
-                        页面地址：<input class="easyui-textbox" style="width:50%" name="url" data-options="required:true,prompt:'如https://movie.douban.com/subject/25712016/'"/>
-                        线程数：<input class="easyui-textbox" style="width:10%" name="thread" value="1" data-options="required:true"/>
-                        <a href="javascript:void(0);" onclick="submitForm();" class="easyui-linkbutton" style="width: 50px">开始爬</a>
+                <div class="easyui-panel" title=" 网页爬取 " style="width:700px;height:300px;padding: 15px">
+                    <form id="ff" method="post" class="easyui-form" action="/crawler/one">
+                        <div style="margin-bottom:10px">
+                            <div>起始页面地址：</div>
+                            <input class="easyui-textbox" style="width:50%" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="required:true" />
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <div>线程数：</div>
+                            <input class="easyui-textbox" style="width:10%" name="thread" value="2" data-options="required:true"/>
+                        </div>
+                        <div style="margin-bottom:10px">
+                            延伸爬取：<input type="checkbox" name="mutil" value="1"/>
+                        </div>
+                        <div>
+                            <a href="javascript:void(0);" onclick="submitForm();" class="easyui-linkbutton" style="width: 80px">开 爬</a>
+                        </div>
+
                     </form>
                     <div style="margin:5px 0 5px 0;"></div>
 
-
                 </div>
                 <div style="margin:10px 0 10px 0;"></div>
-
 
                 <ul>
                     <li><button onclick="BrowseFolder();">收集</button></li><br>

@@ -31,7 +31,7 @@ public class DouBanProcessor implements PageProcessor {
     @Autowired
     PersonRepository personRepository;
 
-
+    private boolean singleCrawler = true;
 
     public static final String URL_TOP= "https://movie\\.douban\\.com/top250\\?start=\\d+\\&filter=";
 

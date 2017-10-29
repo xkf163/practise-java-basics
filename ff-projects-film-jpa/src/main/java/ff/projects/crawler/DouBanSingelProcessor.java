@@ -7,6 +7,7 @@ import ff.projects.entity.QFilm;
 import ff.projects.entity.QPerson;
 import ff.projects.repository.FilmRepository;
 import ff.projects.repository.PersonRepository;
+import ff.projects.service.FilmService;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import us.codecraft.webmagic.selector.Selectable;
 
 /**
  * Created by F on 2017/7/1.
+ * 单个电影及人物信息爬虫
  */
 @Service
 @Data
@@ -36,10 +38,12 @@ public class DouBanSingelProcessor  implements PageProcessor {
     public static final String URL_PERSON_FULL= "https://movie\\.douban\\.com/celebrity/\\d+/";
 
     @Autowired
-    FilmRepository filmRepository;
+    FilmService filmService;
 
     @Autowired
     PersonRepository personRepository;
+
+    private boolean singleCrawler = true;
 
     private Site site = Site
             .me()
@@ -75,82 +79,28 @@ public class DouBanSingelProcessor  implements PageProcessor {
             .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.86 Safari/537.36");
 
 
+
     @Override
     public void process(Page page) {
 
-        if (page.getUrl().regex(URL_ENTITY).match()  || page.getUrl().regex(URL_ENTITY_SHORT).match() ) {
-            Film f = new Film();
-            //影片页
-            page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
-            f.setSubject(page.getResultItems().get("subject").toString());
+        System.out.println("##########doubansingleprocess singleCrawler:"+this.singleCrawler);
 
-            if(page.getUrl().regex(URL_ENTITY).match()){
-                f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
-            }else{
-                f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
-            }
+        if (page.getUrl().regex(URL_ENTITY).match() || page.getUrl().regex(URL_ENTITY_SHORT).match() ) {
 
-            Selectable selectableInfo =page.getHtml().xpath("//div[@id='info']") ;
-            String imdbNo = selectableInfo.regex("<a href=\"http://www.imdb.com/title/tt\\d+\" target=\"_blank\" rel=\"nofollow\">(tt\\d+)</a>").toString();
-            f.setImdbNo(imdbNo);
-
+            //从网页中提取filmObject
+            Film f = filmService.refineFilmSubjectFromCrawler(page);
             //判断数据库里是否存在
-            Film film = null;
-            QFilm qFilm = QFilm.film;
-            Predicate predicate = qFilm.subject.eq(f.getSubject()).and(qFilm.doubanNo.eq(f.getDoubanNo()));
-            film = filmRepository.findOne(predicate);
-
+            Film film = filmService.findBySubjectAndDoubanNo(f);
             if (null == film) {
-
-                page.putField("subjectMain", page.getHtml().xpath("//div[@id='content']/h1//span[@property='v:itemreviewed']/text()"));
-                page.putField("year", page.getHtml().xpath("//div[@id='content']/h1//span[@class='year']/text()").regex("\\((.*)\\)"));
-//            page.putField("imdb", page.getHtml().xpath("//div[@id='info']").regex("<a href=\"http://www.imdb.com/title/tt\\d+\" target=\"_blank\" rel=\"nofollow\">(tt\\d+)</a>"));
-                page.putField("introduce", page.getHtml().xpath("//div[@class='related-info']//div[@class='indent']//span[@property='v:summary']/text()"));
-                page.putField("info", selectableInfo);
-                f.setSubjectMain(page.getResultItems().get("subjectMain").toString());
-                f.setYear(Short.parseShort(page.getResultItems().get("year").toString()));
-                f.setInfo(page.getResultItems().get("info").toString());
-                f.setIntroduce(page.getResultItems().get("introduce").toString());
-
-                //豆瓣评分
-                Selectable selectableRating =page.getHtml().xpath("//div[@typeof='v:Rating']") ;
-                PlainText object = (PlainText) selectableRating.xpath("//strong/text()");
-                if(null != object && !"".equals(object.getFirstSourceText())){
-                    f.setDoubanRating(Float.parseFloat(selectableRating.xpath("//strong/text()").toString()));
-                    f.setDoubanSum(Long.parseLong(selectableRating.xpath("//span[@property='v:votes']/text()").toString()));
-                }
-
-                f.setDirectors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:directedBy']/@href").regex("/celebrity/(\\d+)/").all().toArray(),","));
-                f.setActors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:starring']/@href").regex("/celebrity/(\\d+)/").all().toArray(),","));
-                f.setGenre(StringUtils.join(selectableInfo.xpath("//span[@property='v:genre']/text()").all().toArray(),","));
-                f.setInitialReleaseDate(StringUtils.join(selectableInfo.xpath("//span[@property='v:initialReleaseDate']/text()").all().toArray(),","));
-                f.setRuntime(StringUtils.join(selectableInfo.xpath("//span[@property='v:runtime']/@content").all().toArray(),","));
-
-
-                String country_temp = selectableInfo.regex("<span class=\"pl\">制片国家/地区:</span> (.*)\n" +
-                        " <br>").toString();
-                if(null != country_temp && !"".equals(country_temp)){
-                    String country = country_temp.substring(0,country_temp.indexOf("\n"));
-                    f.setCountry(country);
-                }
-
-
-                String subject_temp = selectableInfo.regex("<span class=\"pl\">又名:</span> (.*)\n" +
-                        " <br>").toString();
-                if (null != subject_temp && !"".equals(subject_temp)) {
-                    if(subject_temp.indexOf("\n")>0){
-                        String subjectOther = subject_temp.substring(0, subject_temp.indexOf("\n"));
-                        f.setSubjectOther(subjectOther);
-                    }else {
-                        f.setSubjectOther(subject_temp);
-                    }
-                }
-
-
-                filmRepository.save(f);
+                f = filmService.refineFilmFromCrawler(page);
+                filmService.save(f);
             }
-
+            //保存人物的URL放入队列中待爬取
             page.addTargetRequests(page.getHtml().links().regex(URL_PERSON).all());
+            if(!this.singleCrawler){
+                page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY_SHORT).all());
+                page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY).all());
+            }
 
 
         }else if(page.getUrl().regex(URL_PERSON_FULL).match()){
@@ -191,11 +141,18 @@ public class DouBanSingelProcessor  implements PageProcessor {
                 personRepository.save(p);
             }
             //page.addTargetRequests(page.getHtml().links().regex(URL_PERSON_FULL).all());
+            if(!this.singleCrawler){
+                page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY_SHORT).all());
+                page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY).all());
+            }
 
         } else {
-            //列表页
+            //列表页等其他页面
             //page.addTargetRequests(page.getHtml().xpath("//div[@id='screening']").links().regex(URL_ENTITY_A).all());
-            page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY_SHORT).all());
+            if(!this.singleCrawler){
+                page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY_SHORT).all());
+                page.addTargetRequests(page.getHtml().links().regex(URL_ENTITY).all());
+            }
 
         }
 
