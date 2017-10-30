@@ -49,7 +49,7 @@ public class FilmServiceImpl implements FilmService {
         Film f = new Film();
         //影片页
         page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
-        f.setSubject(page.getResultItems().get("subject").toString());
+        f.setSubject(page.getResultItems().get("subject").toString().trim());
 
         //豆瓣编号
         f.setDoubanNo(page.getUrl().regex("/subject/(\\d+)/").toString());

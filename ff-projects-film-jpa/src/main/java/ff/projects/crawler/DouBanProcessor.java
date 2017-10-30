@@ -1,12 +1,7 @@
 package ff.projects.crawler;
 
-import com.querydsl.core.types.Predicate;
 import ff.projects.entity.Film;
 import ff.projects.entity.Person;
-import ff.projects.entity.QFilm;
-import ff.projects.entity.QPerson;
-import ff.projects.repository.FilmRepository;
-import ff.projects.repository.PersonRepository;
 import ff.projects.service.FilmService;
 import ff.projects.service.PersonService;
 import lombok.Data;
@@ -16,8 +11,6 @@ import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
-import us.codecraft.webmagic.selector.PlainText;
-import us.codecraft.webmagic.selector.Selectable;
 
 /**
  * Created by F on 2017/7/1.
@@ -93,7 +86,7 @@ public class DouBanProcessor implements PageProcessor {
                 f = filmService.refineFilmFromCrawler(page);
                 //导演和主演列表为空就skip,不保存
                 //发现集数不为空，判断是电视剧，也不保存
-                if ("".equals(f.getActors()) || "".equals(f.getDirectors()) || !"".equals(f.getEpisodeNumber())){
+                if (StringUtils.isBlank(f.getActors()) || StringUtils.isBlank(f.getDirectors()) || f.getEpisodeNumber()!=null){
                     //skip this page
                     page.setSkip(true);
                 }else {
