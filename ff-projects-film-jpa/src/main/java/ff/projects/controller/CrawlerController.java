@@ -48,8 +48,6 @@ public class CrawlerController {
         return lists;
     }
 
-
-
     @PersistenceContext
     EntityManager entityManager;
 

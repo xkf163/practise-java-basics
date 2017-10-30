@@ -110,6 +110,13 @@ public class FilmServiceImpl implements FilmService {
             }
         }
 
+        //集数
+        String episodeNumber = selectableInfo.regex("<span class=\"pl\">集数:</span> (.*)\n" +
+                " <br>").toString();
+        if (null != episodeNumber && !"".equals(episodeNumber)) {
+            f.setEpisodeNumber(episodeNumber);
+        }
+
         return f;
     }
 

@@ -58,4 +58,7 @@ public class Film implements Serializable{
 
     private String country;
 
+    @Transient
+    private String episodeNumber;
+
 }

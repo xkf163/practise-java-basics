@@ -91,7 +91,14 @@ public class DouBanProcessor implements PageProcessor {
             Film film = filmService.findBySubjectAndDoubanNo(f);
             if (null == film) {
                 f = filmService.refineFilmFromCrawler(page);
-                filmService.save(f);
+                //导演和主演列表为空就skip,不保存
+                //发现集数不为空，判断是电视剧，也不保存
+                if ("".equals(f.getActors()) || "".equals(f.getDirectors()) || !"".equals(f.getEpisodeNumber())){
+                    //skip this page
+                    page.setSkip(true);
+                }else {
+                    filmService.save(f);
+                }
             }
             //从页面发现后续的url地址来抓取
             //1)当前电影所有人物的url
