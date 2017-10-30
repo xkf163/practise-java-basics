@@ -18,12 +18,8 @@ import us.codecraft.webmagic.selector.Selectable;
 @Service
 public class FilmServiceImpl implements FilmService {
 
-
     @Autowired
     FilmRepository filmRepository;
-
-    public static final String URL_ENTITY= "https://movie\\.douban\\.com/subject/\\d+/\\?from=.*";
-
 
     @Override
     public Film refineFilmSubjectFromCrawler(Page page) {
@@ -31,12 +27,19 @@ public class FilmServiceImpl implements FilmService {
         //影片页
         page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
         f.setSubject(page.getResultItems().get("subject").toString());
+
+//        if (page.getResultItems().get("name") == null) {
+//            //skip this page
+//            page.setSkip(true);
+//        }
+
         //豆瓣编号
-        if (page.getUrl().regex(URL_ENTITY).match()) {
-            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
-        } else {
-            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
-        }
+        f.setDoubanNo(page.getUrl().regex("/subject/(\\d+)/").toString());
+//        if (page.getUrl().regex(URL_ENTITY).match()) {
+//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
+//        } else {
+//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
+//        }
         return f;
     }
 
@@ -47,12 +50,14 @@ public class FilmServiceImpl implements FilmService {
         //影片页
         page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
         f.setSubject(page.getResultItems().get("subject").toString());
+
         //豆瓣编号
-        if (page.getUrl().regex(URL_ENTITY).match()) {
-            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
-        } else {
-            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
-        }
+        f.setDoubanNo(page.getUrl().regex("/subject/(\\d+)/").toString());
+//        if (page.getUrl().regex(URL_ENTITY).match()) {
+//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
+//        } else {
+//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
+//        }
         //影片简介
         Selectable selectableInfo = page.getHtml().xpath("//div[@id='info']");
         page.putField("info", selectableInfo);

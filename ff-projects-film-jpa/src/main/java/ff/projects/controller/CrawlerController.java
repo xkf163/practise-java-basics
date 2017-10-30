@@ -3,9 +3,7 @@ package ff.projects.controller;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import ff.projects.crawler.DouBanPatchProcessor;
 import ff.projects.crawler.DouBanProcessor;
-import ff.projects.crawler.DouBanSingelProcessor;
 import ff.projects.entity.Media;
 import ff.projects.entity.QFilm;
 import ff.projects.entity.QMediaVO;
@@ -34,9 +32,6 @@ public class CrawlerController {
     @Autowired
     GatherService gatherService;
 
-
-
-
     @GetMapping(value = "/gather")
     @ResponseBody
     public List<Media> gather() {
@@ -59,25 +54,21 @@ public class CrawlerController {
     EntityManager entityManager;
 
     @Autowired
-    DouBanPatchProcessor douBanPatchProcessor;
-
-    @Autowired
     DouBanProcessor douBanProcessor;
-
-    @Autowired
-    DouBanSingelProcessor douBanSingelProcessor;
     /**
      * @Author: xukangfeng
      * @Description 通用爬取方法
      * @Date : 22:05 2017/10/27
      * @param : url 豆瓣单个电影页面地址
-     * @param : thread 线程树
+     * @param : thread 线程数
      */
-    @PostMapping(value = "/crawler/one")
+    @PostMapping(value = "/crawling")
     public String crawler(@RequestParam (value = "url" ,required = true) String singleFilmUrl,
+                          @RequestParam (value = "mutil" ,defaultValue = "0") String mutil,
                           @RequestParam (value = "thread" ,defaultValue = "1") String thread){
-        //douBanSingelProcessor.setSingleCrawler(false);
-        Spider.create(douBanSingelProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread)).run();
+        if ("1".equals(mutil))
+            douBanProcessor.setSingleCrawler(false);
+        Spider.create(douBanProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
     }
 
@@ -140,7 +131,7 @@ public class CrawlerController {
         }
 
 
-        Spider.create(douBanPatchProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
+        Spider.create(douBanProcessor).addUrl(urls).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
 
     }

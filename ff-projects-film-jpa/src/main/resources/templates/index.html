@@ -213,24 +213,24 @@
 
             <div title="首页" fit="true" style="padding: 5px">
 
-                <div class="easyui-panel" title=" 遍历硬盘 " style="width:700px;height:150px;padding: 10px">
+                <div class="easyui-panel" title=" 遍历硬盘 " style="width:700px;height:120px;padding: 5px">
                     <p>PC文件夹路径：</p>
                     <input class="easyui-filebox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
                     <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
                 </div>
                 <div style="margin:10px 0 10px 0;"></div>
 
-                <div class="easyui-panel" title=" 网页爬取 " style="width:700px;height:300px;padding: 15px">
-                    <form id="ff" method="post" class="easyui-form" action="/crawler/one">
-                        <div style="margin-bottom:10px">
+                <div class="easyui-panel" title="豆瓣爬虫配置" style="width:700px;height:200px;padding: 15px">
+                    <form id="ff" method="post" class="easyui-form" action="/crawling">
+                        <div style="margin-bottom:5px">
                             <div>起始页面地址：</div>
                             <input class="easyui-textbox" style="width:50%" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="required:true" />
                         </div>
-                        <div style="margin-bottom:10px">
+                        <div style="margin-bottom:5px">
                             <div>线程数：</div>
                             <input class="easyui-textbox" style="width:10%" name="thread" value="2" data-options="required:true"/>
                         </div>
-                        <div style="margin-bottom:10px">
+                        <div style="margin-bottom:5px">
                             延伸爬取：<input type="checkbox" name="mutil" value="1"/>
                         </div>
                         <div>
