@@ -63,9 +63,12 @@ public class CrawlerController {
     @PostMapping(value = "/crawling")
     public String crawler(@RequestParam (value = "url" ,required = true) String singleFilmUrl,
                           @RequestParam (value = "mutil" ,defaultValue = "0") String mutil,
+                          @RequestParam (value = "homepage" ,defaultValue = "0") String homepage,
                           @RequestParam (value = "thread" ,defaultValue = "1") String thread){
         if ("1".equals(mutil))
             douBanProcessor.setSingleCrawler(false);
+        if ("1".equals(homepage))
+            singleFilmUrl= "https://movie.douban.com/";
         Spider.create(douBanProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread)).run();
         return "redirect:/";
     }

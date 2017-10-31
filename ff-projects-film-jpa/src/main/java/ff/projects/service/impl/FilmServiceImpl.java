@@ -22,42 +22,50 @@ public class FilmServiceImpl implements FilmService {
     FilmRepository filmRepository;
 
     @Override
-    public Film refineFilmSubjectFromCrawler(Page page) {
+    public Film extractFilmFirstFromCrawler(Page page) {
         Film f = new Film();
         //影片页
+        //1）片名
         page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
         f.setSubject(page.getResultItems().get("subject").toString());
 
-//        if (page.getResultItems().get("name") == null) {
-//            //skip this page
-//            page.setSkip(true);
-//        }
 
-        //豆瓣编号
+        Selectable selectableInfo = page.getHtml().xpath("//div[@id='info']");
+        //2）导演
+        f.setDirectors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:directedBy']/@href").regex("/celebrity/(\\d+)/").all().toArray(), ","));
+        //3）演员
+        f.setActors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:starring']/@href").regex("/celebrity/(\\d+)/").all().toArray(), ","));
+
+        //4）豆瓣编号
         f.setDoubanNo(page.getUrl().regex("/subject/(\\d+)/").toString());
-//        if (page.getUrl().regex(URL_ENTITY).match()) {
-//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
-//        } else {
-//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
-//        }
+        //5、6）豆瓣评分及评分人数
+        Selectable selectableRating = page.getHtml().xpath("//div[@typeof='v:Rating']");
+        PlainText object = (PlainText) selectableRating.xpath("//strong/text()");
+        if (null != object && !"".equals(object.getFirstSourceText())) {
+            f.setDoubanRating(Float.parseFloat(selectableRating.xpath("//strong/text()").toString()));
+            f.setDoubanSum(Long.parseLong(selectableRating.xpath("//span[@property='v:votes']/text()").toString()));
+        }
+        //7)集数
+        String episodeNumber = selectableInfo.regex("<span class=\"pl\">集数:</span> (.*)\n" +
+                " <br>").toString();
+        if (null != episodeNumber && !"".equals(episodeNumber)) {
+            f.setEpisodeNumber(episodeNumber);
+        }
+
         return f;
     }
 
     @Override
-    public Film refineFilmFromCrawler(Page page) {
+    public Film extractFilmSecondFromCrawler(Page page,Film f) {
 
-        Film f = new Film();
         //影片页
-        page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
-        f.setSubject(page.getResultItems().get("subject").toString().trim());
+        //片名
+        //page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
+        //f.setSubject(page.getResultItems().get("subject").toString().trim());
 
         //豆瓣编号
-        f.setDoubanNo(page.getUrl().regex("/subject/(\\d+)/").toString());
-//        if (page.getUrl().regex(URL_ENTITY).match()) {
-//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/\\?from=.*").toString());
-//        } else {
-//            f.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/subject/(\\d+)/").toString());
-//        }
+        //f.setDoubanNo(page.getUrl().regex("/subject/(\\d+)/").toString());
+
         //影片简介
         Selectable selectableInfo = page.getHtml().xpath("//div[@id='info']");
         page.putField("info", selectableInfo);
@@ -75,16 +83,16 @@ public class FilmServiceImpl implements FilmService {
         page.putField("introduce", page.getHtml().xpath("//div[@class='related-info']//div[@class='indent']//span[@property='v:summary']/text()"));
         f.setIntroduce(page.getResultItems().get("introduce").toString());
         //豆瓣评分及评分人数
-        Selectable selectableRating = page.getHtml().xpath("//div[@typeof='v:Rating']");
-        PlainText object = (PlainText) selectableRating.xpath("//strong/text()");
-        if (null != object && !"".equals(object.getFirstSourceText())) {
-            f.setDoubanRating(Float.parseFloat(selectableRating.xpath("//strong/text()").toString()));
-            f.setDoubanSum(Long.parseLong(selectableRating.xpath("//span[@property='v:votes']/text()").toString()));
-        }
+//        Selectable selectableRating = page.getHtml().xpath("//div[@typeof='v:Rating']");
+//        PlainText object = (PlainText) selectableRating.xpath("//strong/text()");
+//        if (null != object && !"".equals(object.getFirstSourceText())) {
+//            f.setDoubanRating(Float.parseFloat(selectableRating.xpath("//strong/text()").toString()));
+//            f.setDoubanSum(Long.parseLong(selectableRating.xpath("//span[@property='v:votes']/text()").toString()));
+//        }
         //导演
-        f.setDirectors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:directedBy']/@href").regex("/celebrity/(\\d+)/").all().toArray(), ","));
+        //f.setDirectors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:directedBy']/@href").regex("/celebrity/(\\d+)/").all().toArray(), ","));
         //演员
-        f.setActors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:starring']/@href").regex("/celebrity/(\\d+)/").all().toArray(), ","));
+        //f.setActors(StringUtils.join(selectableInfo.xpath("//a[@rel='v:starring']/@href").regex("/celebrity/(\\d+)/").all().toArray(), ","));
         //影片类别
         f.setGenre(StringUtils.join(selectableInfo.xpath("//span[@property='v:genre']/text()").all().toArray(), ","));
         //发行日期
@@ -110,12 +118,7 @@ public class FilmServiceImpl implements FilmService {
             }
         }
 
-        //集数
-        String episodeNumber = selectableInfo.regex("<span class=\"pl\">集数:</span> (.*)\n" +
-                " <br>").toString();
-        if (null != episodeNumber && !"".equals(episodeNumber)) {
-            f.setEpisodeNumber(episodeNumber);
-        }
+
 
         return f;
     }
@@ -132,6 +135,24 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public void save(Film film) {
         filmRepository.save(film);
+    }
+
+    @Override
+    public boolean needCrawler(Film f) {
+        //几种不需要保存的条件：
+        //1）导演和主演列表为空就skip,不保存
+        //2）发现集数不为空，判断是电视剧，
+        //3）暂无评分 也不保存
+        if (StringUtils.isBlank(f.getActors()) || StringUtils.isBlank(f.getDirectors()) || f.getEpisodeNumber()!=null || f.getDoubanRating()==null){
+            //skip this page
+            return false;
+        }
+        //4)判断数据库里是否存在
+        Film film = findBySubjectAndDoubanNo(f);
+        if (null != film){
+            return false;
+        }
+        return true;
     }
 
 }

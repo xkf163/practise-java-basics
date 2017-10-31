@@ -23,7 +23,7 @@ public class PersonServiceImpl implements PersonService {
     PersonRepository personRepository;
 
     @Override
-    public Person refinePersonFromCrawler(Page page) {
+    public Person extractFilmSecondFromCrawler(Page page) {
 
         Person p = new Person();
         //姓名
@@ -33,9 +33,11 @@ public class PersonServiceImpl implements PersonService {
         p.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/celebrity/(\\d+)/").toString());
 
         //人物脚本信息
-        page.putField("nameExtend", page.getHtml().xpath("//div[@id='content']/h1/text()"));
-        page.putField("introduce", page.getHtml().xpath("//div[@id='intro']//div[@class='bd']//span[@class='all hidden']/text()"));
-
+        page.putField("nameExtend", page.getHtml().xpath("//div[@id='content']/h1/text()").toString());
+        page.putField("introduce", page.getHtml().xpath("//div[@id='intro']//div[@class='bd']//span[@class='all hidden']/text()").toString());
+        if(page.getResultItems().get("introduce") == null){
+            page.putField("introduce", page.getHtml().xpath("//*[@id=\"intro\"]/div[@class='bd']/text()").toString());
+        }
         //人物简介字符串集合
         Selectable selectableInfo =  page.getHtml().xpath("//div[@class='article']//div[@class='info']//li");
         page.putField("info", selectableInfo);
@@ -46,8 +48,8 @@ public class PersonServiceImpl implements PersonService {
         String profession = StringUtils.join( selectableInfo.regex("<li> <span>职业</span>: (.*) </li>").all().toArray(),",");
         String imdbNo = StringUtils.join( selectableInfo.regex("<li> <span>imdb编号</span>: (.*) </li>").regex("<a href=\"http://www.imdb.com/name/nm\\d+\" target=\"_blank\">(nm\\d+)</a>").all().toArray(),",");
 
-        p.setNameExtend(page.getResultItems().get("nameExtend").toString());
-        p.setIntroduce(page.getResultItems().get("introduce").toString());
+        p.setNameExtend(page.getResultItems().get("nameExtend"));
+        p.setIntroduce(page.getResultItems().get("introduce"));
         p.setInfo(page.getResultItems().get("info").toString());
 
         p.setBirthDay(birthday);
@@ -60,7 +62,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Person refinePersonNameFromCrawler(Page page) {
+    public Person extractFilmFirstFromCrawler(Page page) {
         Person p = new Person();
         page.putField("name", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
         p.setName(page.getResultItems().get("name").toString());
@@ -78,5 +80,15 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public void save(Person person) {
         personRepository.save(person);
+    }
+
+    @Override
+    public boolean needCrawler(Person person) {
+
+        Person p = findByNameAndDoubanNO(person);
+        if(null == p){
+            return true;
+        }
+        return false;
     }
 }

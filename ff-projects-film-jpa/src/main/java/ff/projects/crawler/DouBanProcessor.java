@@ -24,10 +24,16 @@ public class DouBanProcessor implements PageProcessor {
 //  https://movie.douban.com/subject/1291839/?from=subject-page
     public static final String URL_FILM_FROM_SUBJECT_PAGE=  "/subject/\\d+/\\?from=subject-page";
 
+    //豆瓣首页抓取用
+    public static final String URL_FILM_FROM_SHOWING=  "/subject/\\d+/\\?from=showing";
+    //https://movie.douban.com/subject/24753477/?tag=%E7%83%AD%E9%97%A8&from=gaia
+    public static final String URL_FILM_FROM_HOT=  "/subject/\\d+/\\?tag=.*&from=.*";
+
     //celebrity/1022721/
     public static final String URL_PERSON= "/celebrity/\\d+/";
     public static final String URL_PERSON_FULL= "https://movie\\.douban\\.com/celebrity/\\d+/";
 
+    public static final String URL_HOMEPAGE= "https://movie\\.douban\\.com";
     @Autowired
     FilmService filmService;
 
@@ -77,49 +83,52 @@ public class DouBanProcessor implements PageProcessor {
 
         //电影页面
         if (page.getUrl().regex(URL_FILM).match() ) {
+            //从网页中提取filmObject，只是部分字段，用于判断是否需要保存此object。
+            Film f = filmService.extractFilmFirstFromCrawler(page);
+            if (filmService.needCrawler(f)) {
+                //完整提取film信息
+                f = filmService.extractFilmSecondFromCrawler(page,f);
+                filmService.save(f);
 
-            //从网页中提取filmObject
-            Film f = filmService.refineFilmSubjectFromCrawler(page);
-            //判断数据库里是否存在
-            Film film = filmService.findBySubjectAndDoubanNo(f);
-            if (null == film) {
-                f = filmService.refineFilmFromCrawler(page);
-                //导演和主演列表为空就skip,不保存
-                //发现集数不为空，判断是电视剧，也不保存
-                if (StringUtils.isBlank(f.getActors()) || StringUtils.isBlank(f.getDirectors()) || f.getEpisodeNumber()!=null){
-                    //skip this page
-                    page.setSkip(true);
-                }else {
-                    filmService.save(f);
+                //从页面发现后续的url地址来抓取
+                //1)当前电影所有人物的url
+                page.addTargetRequests(page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).all());
+                if(!this.singleCrawler){
+                    //2）后续的电影url，有10个
+                    page.addTargetRequests(page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE).all());
                 }
+            }else{
+                //skip this page
+                page.setSkip(true);
             }
-            //从页面发现后续的url地址来抓取
-            //1)当前电影所有人物的url
-            page.addTargetRequests(page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).all());
-            if(!this.singleCrawler){
-                //2）后续的电影url，有10个
-                page.addTargetRequests(page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE).all());
-            }
-
 
         }else if(page.getUrl().regex(URL_PERSON).match()){
 
-            Person p = personService.refinePersonNameFromCrawler(page);
-            Person person = personService.findByNameAndDoubanNO(p);
-            if(null == person){
-                p = personService.refinePersonFromCrawler(page);
+            Person p = personService.extractFilmFirstFromCrawler(page);
+            if(personService.needCrawler(p)){
+                //完整提取person信息
+                p = personService.extractFilmSecondFromCrawler(page);
                 personService.save(p);
+
+                if(!this.singleCrawler){
+                    //最受欢迎5部
+                    page.addTargetRequests(page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM).all());
+                    //合作2次以上的影人
+                    page.addTargetRequests(page.getHtml().xpath("//div[@id='partners']").css("div.pic").links().regex(URL_PERSON).all());
+                }
+            }else {
+                page.setSkip(true);
             }
 
-            if(!this.singleCrawler){
-                //最受欢迎5部
-                page.addTargetRequests(page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM).all());
-                //合作2次以上的影人
-                page.addTargetRequests(page.getHtml().xpath("//div[@id='partners']").css("div.pic").links().regex(URL_PERSON).all());
-            }
+        }else if(page.getUrl().regex(URL_HOMEPAGE).match()){
+            //入口是豆瓣主页
+            //1)正在热映
+            page.addTargetRequests(page.getHtml().xpath("//*[@id=\"screening\"]/div[2]/ul/li/ul/li[2]").links().regex(URL_FILM_FROM_SHOWING).all());
+            //2)最近热门电影:貌似是动态生成，抓不到
+            //page.addTargetRequests(page.getHtml().xpath("//div[@class='slide-page']").links().regex(URL_FILM_FROM_HOT).all());
 
         } else {
-//            错误：URL不符合规则
+//            错误：URL不符合规则,直接退出
         }
 
     }

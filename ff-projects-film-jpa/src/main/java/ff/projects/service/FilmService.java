@@ -9,11 +9,14 @@ import us.codecraft.webmagic.Page;
 public interface FilmService {
 
     //从网页中提取Film Object
-    Film refineFilmFromCrawler(Page page);
+    Film extractFilmSecondFromCrawler(Page page,Film film);
 
-    Film refineFilmSubjectFromCrawler(Page page);
+    Film extractFilmFirstFromCrawler(Page page);
 
     Film findBySubjectAndDoubanNo(Film film);
 
     void save(Film film);
+
+    //根据几个不为空字段来判断film是否需要保存，false直接跳过该电影后续抓取
+    boolean needCrawler(Film film);
 }

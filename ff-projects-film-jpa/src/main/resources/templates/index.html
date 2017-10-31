@@ -220,7 +220,7 @@
                 </div>
                 <div style="margin:10px 0 10px 0;"></div>
 
-                <div class="easyui-panel" title="豆瓣爬虫配置" style="width:700px;height:200px;padding: 15px">
+                <div class="easyui-panel" title="豆瓣爬虫配置" style="width:700px;height:230px;padding: 15px">
                     <form id="ff" method="post" class="easyui-form" action="/crawling">
                         <div style="margin-bottom:5px">
                             <div>起始页面地址：</div>
@@ -232,6 +232,9 @@
                         </div>
                         <div style="margin-bottom:5px">
                             延伸爬取：<input type="checkbox" name="mutil" value="1"/>
+                        </div>
+                        <div style="margin-bottom:5px">
+                            首页进入：<input type="checkbox" name="homepage" value="1"/>
                         </div>
                         <div>
                             <a href="javascript:void(0);" onclick="submitForm();" class="easyui-linkbutton" style="width: 80px">开 爬</a>
