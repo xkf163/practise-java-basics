@@ -29,24 +29,7 @@ import java.util.List;
 @Controller
 public class CrawlerController {
 
-    @Autowired
-    GatherService gatherService;
 
-    @GetMapping(value = "/gather")
-    @ResponseBody
-    public List<Media> gather() {
-        List<Media> lists = new ArrayList<>();
-        JFileChooser jfc = new JFileChooser();
-        jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int intRetVal = jfc.showDialog(new JLabel(), "选择根文件夹");
-        File file = jfc.getSelectedFile();
-        System.out.println(intRetVal);
-        if( intRetVal == JFileChooser.APPROVE_OPTION){
-            lists= gatherService.gatherMedia2DB(jfc.getSelectedFile());
-        }
-        System.out.println("over。。。");
-        return lists;
-    }
 
     @PersistenceContext
     EntityManager entityManager;
