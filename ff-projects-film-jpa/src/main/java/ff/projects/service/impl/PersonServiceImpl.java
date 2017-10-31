@@ -33,8 +33,8 @@ public class PersonServiceImpl implements PersonService {
         p.setDoubanNo(page.getUrl().regex("https://movie\\.douban\\.com/celebrity/(\\d+)/").toString());
 
         //人物脚本信息
-        page.putField("nameExtend", page.getHtml().xpath("//div[@id='content']/h1/text()").toString());
-        page.putField("introduce", page.getHtml().xpath("//div[@id='intro']//div[@class='bd']//span[@class='all hidden']/text()").toString());
+        page.putField("nameExtend", page.getHtml().xpath("//div[@id='content']/h1/text()"));
+        page.putField("introduce", page.getHtml().xpath("//div[@id='intro']//div[@class='bd']//span[@class='all hidden']/text()"));
         if(page.getResultItems().get("introduce") == null){
             page.putField("introduce", page.getHtml().xpath("//*[@id=\"intro\"]/div[@class='bd']/text()").toString());
         }
@@ -48,8 +48,8 @@ public class PersonServiceImpl implements PersonService {
         String profession = StringUtils.join( selectableInfo.regex("<li> <span>职业</span>: (.*) </li>").all().toArray(),",");
         String imdbNo = StringUtils.join( selectableInfo.regex("<li> <span>imdb编号</span>: (.*) </li>").regex("<a href=\"http://www.imdb.com/name/nm\\d+\" target=\"_blank\">(nm\\d+)</a>").all().toArray(),",");
 
-        p.setNameExtend(page.getResultItems().get("nameExtend"));
-        p.setIntroduce(page.getResultItems().get("introduce"));
+        p.setNameExtend(page.getResultItems().get("nameExtend").toString());
+        p.setIntroduce(page.getResultItems().get("introduce").toString());
         p.setInfo(page.getResultItems().get("info").toString());
 
         p.setBirthDay(birthday);

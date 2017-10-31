@@ -1,16 +1,14 @@
 package ff.projects.controller;
 
 import ff.projects.entity.Media;
-import ff.projects.service.GatherService;
 import ff.projects.service.ScanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.swing.*;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,15 +22,11 @@ public class ScanController {
     @Autowired
     ScanService scanService;
 
-    @GetMapping(value = "/scanning")
+    @PostMapping(value = "/scanning")
     @ResponseBody
-    public List<Media> gather() {
-        List<Media> lists = new ArrayList<>();
+    public List<Media> gather(@RequestParam(required = true) String parentFolder  ) {
+        File file = new File(parentFolder);
+        return scanService.gatherMedia2DB(file);
 
-        File file = new File("J:/201610");
-        lists= scanService.gatherMedia2DB(file);
-
-        System.out.println("over。。。");
-        return lists;
     }
 }

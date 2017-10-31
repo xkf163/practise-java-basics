@@ -15,7 +15,7 @@
         function gather() {
             $.ajax({
                 url:"/scanning",
-                type:"get",
+                type:"post",
                 data:"",
                 dataType: "json",
                 success:function (data) {
@@ -30,6 +30,14 @@
             });
         }
 
+        function gathering() {
+            $('#scan').form('submit');
+        }
+        
+        function foldering() {
+            alert("aaaaaa");
+        }
+        
         function transfer() {
             $.ajax({
                 url:"/transfer",
@@ -213,10 +221,13 @@
 
             <div title="首页" fit="true" style="padding: 5px">
 
-                <div class="easyui-panel" title=" 遍历硬盘 " style="width:700px;height:120px;padding: 5px">
-                    <p>PC文件夹路径：</p>
-                    <input class="easyui-filebox" name="file1" data-options="prompt:'选择文件'" style="width:80%">
-                    <a href="javascript:void(0);" onclick="gather();" class="easyui-linkbutton" style="width: 50px">开 始</a>
+                <div class="easyui-panel" title="遍历硬盘文件夹" style="width:700px;height:120px;padding: 15px">
+                    <span>文件夹入口：</span>
+                    <form id="scan" action="/scanning"  method="post" style="margin-top:5px">
+                        <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\电影\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 50%" />
+                        <a href="javascript:void(0);" onclick="gathering();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
+
+                    </form>
                 </div>
                 <div style="margin:10px 0 10px 0;"></div>
 

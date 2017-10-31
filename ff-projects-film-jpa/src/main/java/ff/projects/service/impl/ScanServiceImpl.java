@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Author:xukangfeng
@@ -39,57 +38,78 @@ public class ScanServiceImpl implements ScanService {
     @PersistenceContext
     EntityManager entityManager;
 
-    private List<Media> oldMediaEntries = new ArrayList<>();
-    private List<Media> newMediaEntries = new ArrayList<>();
+    private List<Media> oldMediaEntriesList ;
+    private List<Media> newMediaEntriesList ;
+    private Map<String,Media> oldMediaEntriesMap ;
 
     @Override
     @Transactional
     @Modifying
     public List<Media> gatherMedia2DB(File fileDir) {
+
+        oldMediaEntriesList = new ArrayList<>();
+        newMediaEntriesList = new ArrayList<>();
+        oldMediaEntriesMap = new HashMap<>();
         /*
-         * step1:获取选择的路径：如j:\201702 或者 j:\;拆分出盘符及文件夹
+         * step1:获取选择的路径：如j:\201702\1.txt 或者 j:\;拆分出盘符及文件夹
          */
         String rootFullPath = fileDir.getAbsolutePath();
         String rootDisk = rootFullPath.substring(0,rootFullPath.indexOf(":"));
         String rootFolder =  rootFullPath.substring(rootFullPath.indexOf(":")+1,rootFullPath.length());
-
+        System.out.println(rootDisk +","+ rootFolder);
         /*
          * step2: 根据这两个关键字去搜索数据库现有的条目，并把deleted删除标记位赋值为1，即认为是删除的
          */
         QMedia media = QMedia.media;
         Predicate predicate = media.diskNo.eq(rootDisk).and(media.fullPath.like(rootFolder+"%")).and(media.deleted.eq(0));
-        oldMediaEntries = (List<Media>) mediaRepository.findAll(predicate);
+        oldMediaEntriesList = (List<Media>) mediaRepository.findAll(predicate);
 
         //查询语句动态准备
         List<Predicate> criteria = new ArrayList<>();
         criteria.add(predicate);
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
-        Map<String,Long> mediasFullPathList;
-        mediasFullPathList = queryFactory.selectFrom(media)
-                                .select(media)
+        oldMediaEntriesList = queryFactory.selectFrom(media)
                                 .where(criteria.toArray(new Predicate[criteria.size()]))
-                                .fetch().stream().map(tuple -> {
-                        Map<String, Long> map = new HashMap<>();
-                        map.put(tuple.getFullPath(),tuple.getId());
-                        return map;
-                })
-                .collect(Collectors.toMap());
+                                .fetch();
+
+        for (Media media1 : oldMediaEntriesList){
+            oldMediaEntriesMap.put(media1.getFullPath(),media1);
+        }
+
+        gatherMedia2DBing(fileDir);
 
          /*
           *  step3: 剩余oldmediaList里的数据都是失效，deleted标记1
          */
-        System.out.println("oldMediaEntries: "+oldMediaEntries.size());
-        for (Media media1 : oldMediaEntries){
+        System.out.println("oldMediaEntries: "+oldMediaEntriesList.size());
+        int size =  oldMediaEntriesList.size();
+        for (int i = 0; i < size; i++) {
+            Media media1  = oldMediaEntriesList.get(i);
             media1.setDeleted(1);
             media1.setUpdateDate(new Date());
-            mediaRepository.saveAndFlush(media1);
+            entityManager.persist(media1);
+            if (i % 50 == 0 || i==(size-1)) { // 每1000条数据执行一次，或者最后不足1000条时执行
+                entityManager.flush();
+                entityManager.clear();
+            }
         }
 
-        predicate = media.diskNo.eq(rootDisk).and(media.fullPath.like(rootFolder+"%")).and(media.deleted.eq(1));
-        oldMediaEntries = (List<Media>) mediaRepository.findAll(predicate);
 
-        gatherMedia2DBing(fileDir);
-        return newMediaEntries;
+        /*
+         * step4:新加的newmedialist里保存到数据库中
+         */
+        System.out.println("newMediaEntries: "+newMediaEntriesList.size());
+        size =  newMediaEntriesList.size();
+        for (int i = 0; i < size; i++) {
+            Media media1  = newMediaEntriesList.get(i);
+            entityManager.persist(media1);
+            if (i % 50 == 0 || i==(size-1)) { // 每1000条数据执行一次，或者最后不足1000条时执行
+                entityManager.flush();
+                entityManager.clear();
+            }
+        }
+
+        return newMediaEntriesList;
     }
 
 
@@ -99,12 +119,6 @@ public class ScanServiceImpl implements ScanService {
      * @return
      */
     public void gatherMedia2DBing(File fileDir) {
-
-//        JPAUpdateClause jpaUpdateClause = new JPAUpdateClause(entityManager,media);
-//
-//        long s = jpaUpdateClause.where(predicate).set(media.deleted,Boolean.TRUE).execute();
-//        entityManager.flush();
-//        System.out.println("mediaList.size()："+mediaList.size()+" execute: "+s);
 
         File[] mediaFiles = fileDir.listFiles();
         System.out.println(fileDir+" 该目录文件数量:"+mediaFiles.length);
@@ -119,7 +133,7 @@ public class ScanServiceImpl implements ScanService {
                 }
             }else if(f.isFile()){
                 if( fileFilter(f.getName()) && !f.isHidden() ){
-                    System.out.println("是文件");
+                    System.out.println("        是文件："+f.getName());
                     deal(f,false);
                 }
             }
@@ -129,24 +143,28 @@ public class ScanServiceImpl implements ScanService {
 
 
     public void deal(File f,boolean folder) {
-        String fullPath = f.getAbsolutePath();
 
-        FileTime fileTime= null;
-        try {
-            fileTime = Files.readAttributes(Paths.get(fullPath), BasicFileAttributes.class).creationTime();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String fullPathAll = f.getAbsolutePath();
+        String fullPath = fullPathAll.substring(fullPathAll.indexOf(":")+1,fullPathAll.length());
+        String diskNo = fullPathAll.substring(0,fullPathAll.indexOf(":"));
 
-        Calendar cd = Calendar.getInstance();
-        Media oldMedia = whetherExist(fullPath.substring(fullPath.indexOf(":")+1,fullPath.length()));
-        if(null == oldMedia ){
+        if (oldMediaEntriesMap.containsKey(fullPath)){
+            //说明已存在，oldmediaenties 去除该mediaobj，newmediaenties 无需add
+            oldMediaEntriesList.remove(oldMediaEntriesMap.get(fullPath));
+        }else{
             Media m = new Media();
-            m.setFullPath(fullPath.substring(fullPath.indexOf(":")+1,fullPath.length()));
-            m.setDiskNo(fullPath.substring(0,fullPath.indexOf(":")));
+
+            FileTime fileTime= null;
+            Calendar cd = Calendar.getInstance();
+            try {
+                fileTime = Files.readAttributes(Paths.get(fullPath), BasicFileAttributes.class).creationTime();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            m.setFullPath(fullPath);
+            m.setDiskNo(diskNo);
             m.setName(fullPath.lastIndexOf("\\")>0?fullPath.substring(fullPath.lastIndexOf("\\")+1,fullPath.length()):fullPath);
             m.setDiskSize(calcFolderSize(f));
-
             m.setMediaSize(calc(calcFolderSize(f)));
             //f的最后修改时间
             cd.setTimeInMillis(f.lastModified());
@@ -160,20 +178,7 @@ public class ScanServiceImpl implements ScanService {
             m.setWhetherAlive(1);
             m.setWhetherTransfer(1);
             m.setDeleted(0);
-            mediaRepository.save(m);
-
-            newMediaEntries.add(m);
-
-            System.out.println("------insert----------"+m.getFullPath());
-
-        }else{
-
-            System.out.println("------update----------"+oldMedia.getFullPath());
-            oldMediaEntries.remove(oldMedia);
-
-            oldMedia.setDeleted(0);
-            oldMedia.setUpdateDate(new Date());
-            mediaRepository.save(oldMedia);
+            newMediaEntriesList.add(m);
         }
     }
 
@@ -210,26 +215,6 @@ public class ScanServiceImpl implements ScanService {
         }
         return flag;
     }
-
-
-    /**
-     * 判断数据库中是否已经存在相同全路径的条目
-     * @param fullPath
-     * @return
-     */
-    public Media whetherExist(String fullPath){
-
-
-        QMedia qMedia = QMedia.media;
-        Predicate predicate = qMedia.deleted.eq(1).and(qMedia.fullPath.eq(fullPath));
-        List<Media> list = (List<Media>) mediaRepository.findAll(predicate);
-        if(list!=null && list.size()>0){
-            return list.get(0);
-        }
-        return null;
-    }
-
-
 
     /**
      * 计算文件（夹）大小，以字节为单位
