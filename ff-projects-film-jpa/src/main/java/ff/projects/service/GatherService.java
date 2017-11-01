@@ -1,10 +1,7 @@
 package ff.projects.service;
 
 import ff.projects.entity.Film;
-import ff.projects.entity.Media;
-import ff.projects.entity.MediaVO;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -12,11 +9,7 @@ import java.util.List;
  */
 public interface GatherService {
 
-     List<Media> gatherMedia2DB(File fileDir);
-
-     List<MediaVO> Media2MediaVO();
-
-     void pickUp();
+     Object[] connectFilmForMedia();
 
      void relation();
 

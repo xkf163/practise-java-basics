@@ -19,4 +19,6 @@ public interface FilmService {
 
     //根据几个不为空字段来判断film是否需要保存，false直接跳过该电影后续抓取
     boolean needCrawler(Film film);
+
+    Object[] connectFilmForMedia();
 }

@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Author:xukangfeng
@@ -109,8 +111,8 @@ public class ScanServiceImpl implements ScanService {
             }
         }
 
-        Object[] ret = {oldMediaEntriesList,newMediaEntriesList};
-        return ret;
+
+        return new Object[]{oldMediaEntriesList,newMediaEntriesList};
     }
 
 
@@ -179,6 +181,29 @@ public class ScanServiceImpl implements ScanService {
             m.setWhetherAlive(1);
             m.setWhetherTransfer(1);
             m.setDeleted(0);
+
+
+//          mediaName="2001太空漫游.1968.A.Space.Odyssey.720p.MNHD-FRDS";
+            //正则表达式提取年代
+            Boolean finded  = false;
+            String year = "1900";
+            String mediaName = m.getName();
+            Pattern pattern = Pattern.compile("([1-2][9|0][0-9]{2})(\\.[B|H])");
+            Matcher matcher = pattern.matcher(mediaName);
+            if (matcher.find()){
+                year = matcher.group(1);
+                finded = true;
+            }else{
+                pattern = Pattern.compile("([1-2][9|0][0-9]{2})(\\.)");
+                matcher = pattern.matcher(mediaName);
+                if (matcher.find()){finded = true;year = matcher.group(1);}
+            }
+
+            m.setYear(Short.parseShort(year));
+            m.setNameChn(mediaName.substring(0,mediaName.indexOf(".")));
+            if(finded && mediaName.indexOf(year)-1>mediaName.indexOf(".")+1)
+                m.setNameEng(mediaName.substring(mediaName.indexOf(".")+1,mediaName.indexOf(year)-1).replaceAll("\\."," "));
+
             newMediaEntriesList.add(m);
         }
     }

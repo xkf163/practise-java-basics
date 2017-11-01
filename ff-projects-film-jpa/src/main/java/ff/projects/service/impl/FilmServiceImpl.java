@@ -1,9 +1,10 @@
 package ff.projects.service.impl;
 
 import com.querydsl.core.types.Predicate;
-import ff.projects.entity.Film;
-import ff.projects.entity.QFilm;
+import ff.projects.entity.*;
 import ff.projects.repository.FilmRepository;
+import ff.projects.repository.MediaRepository;
+import ff.projects.repository.MediaVOFilmVORepository;
 import ff.projects.service.FilmService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,11 @@ import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.selector.Selectable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xukangfeng on 2017/10/28 13:00
@@ -154,5 +160,87 @@ public class FilmServiceImpl implements FilmService {
         }
         return true;
     }
+
+
+
+
+    /**
+     * 提取并转换爬虫爬取的第一手数据
+     * 转换成FilmVOPersonVO
+     */
+    @Autowired
+    MediaRepository mediaRepository;
+
+    @Autowired
+    MediaVOFilmVORepository mediaVOFilmVORepository;
+
+    @Override
+    public Object[] connectFilmForMedia(){
+
+        List<Media> notFindMediaList = new ArrayList<>();
+        List<Media> needUpdateMediaList = new ArrayList<>();
+        List<Star> needUpdateStarList = new ArrayList<>();
+
+        Map<String,Star> starHashMap = new HashMap<>();
+//        List<Star> starsList = starRe..
+        //遍历库中stars，组成map，，后续根据doubanid来判断库中是否已存在
+
+
+        QMedia qMedia = QMedia.media;
+        List<Media> mediaList = (List<Media>) mediaRepository.findAll(qMedia.deleted.eq(0));
+        QFilm qFilm = QFilm.film;
+        Predicate[] predicateArray = new Predicate[6];
+        int i=0;
+        for(Media media : mediaList){
+            //mediaVO = mediaVORepository.findOne((long) 957);
+            i++;
+            //1: subject精确匹配
+            predicateArray[0]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
+            //2:
+            predicateArray[1]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+            //3:
+            predicateArray[2]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+
+            //predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameChn().trim())).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
+            //3: 0
+            predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+            //2: 2>1
+            predicateArray[4]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+
+            predicateArray[5]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().notEqualsIgnoreCase(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+
+            for (int j = 0; j<predicateArray.length; j++){
+                Film film = null;
+                if(j>1){
+                    System.out.println(j);
+                }
+                List<Film> filmList = (List<Film>) filmRepository.findAll(predicateArray[j]);
+                if(filmList.size() == 1){
+                    film = filmList.get(0);
+                    //1)update media obj
+                    media.setFilmId(film.getId());
+                    needUpdateMediaList.add(media);
+                    //2)保存或更新film的stars
+                    String director_douban_ids = film.getDirectors();
+                    String actors_douban_ids = film.getActors();
+                    //director doubanid array
+                    String[] ddids_array = director_douban_ids.split(",");
+                    String[] adids_array = actors_douban_ids.split(",");
+                    //as导演
+                    for(String ddid : ddids_array){
+                        //找star表，看是否存在，不存在则新建，存在即asdirect加上此filmid（先判断有无此filmid）
+                    }
+                    //as主演
+                    for(String adid : adids_array){
+
+                    }
+                    break;
+                }
+            }
+        }
+
+        return new Object[]{needUpdateMediaList,notFindMediaList,needUpdateStarList};
+    }
+
 
 }

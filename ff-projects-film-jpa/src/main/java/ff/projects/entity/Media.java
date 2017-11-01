@@ -39,7 +39,6 @@ public class Media implements Serializable {
 	@JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
 	private Date updateDate; //条目更新时间
 
-
 	private Integer whetherFolder;//是否文件夹
 
 	private Integer whetherTransfer; //是否需要转换成mediaVO
@@ -47,5 +46,14 @@ public class Media implements Serializable {
 	private Integer whetherAlive; //全路径是否存在文件(夹)
 
 	private Integer deleted = 0; //删除标记
+
+	private String nameChn;
+
+	private String nameEng;
+
+	private Short year;
+
+	//对应的filmID
+	private Long filmId;
 
 }

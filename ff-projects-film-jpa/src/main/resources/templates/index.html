@@ -112,25 +112,9 @@
         }
 
 
-        
-        function transfer() {
-            $.ajax({
-                url:"/transfer",
-                type:"get",
-                data:"",
-                dataType: "json",
-                success:function (data) {
 
-                    $('#resText').empty();   //清空resText里面的所有内容
-                    $.each(data, function(commentIndex, comment){
-                        html += '<div class="comment">' + comment['name_chn'] +':'+ comment['year'] +'</div>';
-                    });
-                    $('#resText').html(html);
-                }
-            });
-        }
 
-        function pickup() {
+        function connectFilmForMedia() {
             $.ajax({
                 url:"/pickup",
                 type:"get",
@@ -329,11 +313,7 @@
                     <div class="easyui-panel" title="日志" id="logText" style="height: 355px;padding: 5px">
                         <ul>
                             <li>
-                                <button onclick="transfer();">转换</button>
-                            </li>
-                            <br>
-                            <li>
-                                <button onclick="pickup();">关联Media&Film</button>
+                                <button onclick="connectFilmForMedia();">关联Media&Film</button>
                             </li>
                             <br>
                             <li>
