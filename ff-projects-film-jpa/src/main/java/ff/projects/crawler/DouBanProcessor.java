@@ -12,6 +12,9 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by F on 2017/7/1.
  * 豆瓣电影及人物信息爬虫工具类
@@ -34,6 +37,10 @@ public class DouBanProcessor implements PageProcessor {
     public static final String URL_PERSON_FULL= "https://movie\\.douban\\.com/celebrity/\\d+/";
 
     public static final String URL_HOMEPAGE= "https://movie\\.douban\\.com";
+
+    public static List<Film> newFilmList;
+    public static List<Person> newPersonList;
+
     @Autowired
     FilmService filmService;
 
@@ -41,7 +48,7 @@ public class DouBanProcessor implements PageProcessor {
     PersonService personService;
 
     //爬虫是否单个电影爬取，默认单个爬取完成后就结束；false即无限延伸爬取，时间比较长
-    private boolean singleCrawler = true;
+    public boolean singleCrawler = true;
 
     private Site site = Site
             .me()
@@ -81,6 +88,8 @@ public class DouBanProcessor implements PageProcessor {
     @Override
     public void process(Page page) {
 
+        System.out.println(singleCrawler);
+
         //电影页面
         if (page.getUrl().regex(URL_FILM).match() ) {
             //从网页中提取filmObject，只是部分字段，用于判断是否需要保存此object。
@@ -89,7 +98,7 @@ public class DouBanProcessor implements PageProcessor {
                 //完整提取film信息
                 f = filmService.extractFilmSecondFromCrawler(page,f);
                 filmService.save(f);
-
+                newFilmList.add(f);
                 //从页面发现后续的url地址来抓取
                 //1)当前电影所有人物的url
                 page.addTargetRequests(page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).all());
@@ -109,7 +118,7 @@ public class DouBanProcessor implements PageProcessor {
                 //完整提取person信息
                 p = personService.extractFilmSecondFromCrawler(page);
                 personService.save(p);
-
+                newPersonList.add(p);
                 if(!this.singleCrawler){
                     //最受欢迎5部
                     page.addTargetRequests(page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM).all());

@@ -11,5 +11,5 @@ import java.util.List;
  * @Date : Create in 15:57 2017/10/31
  */
 public interface ScanService {
-    List<Media> gatherMedia2DB(File fileDir);
+    Object[] gatherMedia2DB(File fileDir);
 }

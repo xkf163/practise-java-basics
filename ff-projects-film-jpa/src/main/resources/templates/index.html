@@ -11,32 +11,107 @@
     <script type="text/javascript" src="./js/jquery.cookie.js"></script>
 
     <script  type="text/javascript">
-        /*遍历多媒体文件夹，符合条件的电影条目写入数据库*/
-        function gather() {
-            $.ajax({
-                url:"/scanning",
-                type:"post",
-                data:"",
-                dataType: "json",
-                success:function (data) {
 
-                    $('#resText').empty();   //清空resText里面的所有内容
-                    var html = '没有新数据被添加！';
-                    $.each(data, function(commentIndex, comment){
-                        html += '<div class="comment">' + comment['fullPath'] +':'+ comment['mediaSize'] +'</div>';
-                    });
-                    $('#resText').html(html);
+        /*遍历多媒体文件夹，符合条件的电影条目写入数据库*/
+        function scanning() {
+            // call 'submit' method of form plugin to submit the form
+            $('#scan').form('submit', {
+                    url:"/scanning",
+                    onSubmit: function(){
+                        // do some check
+                        // return false to prevent submit;
+                    },
+                    success:function(data){
+                        //此处data={"Success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                        var obj = jQuery.parseJSON(data);
+                        if(!obj.code){
+                            var lenDel = obj.data[0].length;
+                            var lenNew = obj.data[1].length;
+                            if(lenDel== 0 && lenNew == 0){
+                                $('#resText').html("没有条目新增或被删除");
+                                return;
+                            }
+                            //遍历展示有变动的数据
+                            var tbl = $("#resText");
+                            tbl.empty();
+                            tbl.append("<tr><th colspan='3'>删除："+lenDel+"</th></tr>");
+                            //1)删除的条目s
+                            for(j = 0; j < lenDel; j++) {
+                                html='<tr><td>'+(j+1)+'</td><td>'+obj.data[0][j].fullPath+'</td><td>'+obj.data[0][j].diskSize+'</td></tr>';
+                                tbl.append(html);
+                            }
+                            //2）新增的条目s
+                            tbl.append("<tr><th colspan='3'>新增："+lenNew+"</th></tr>");
+                            for(j = 0; j < lenNew; j++) {
+                                html='<tr><td>'+(j+1)+'</td><td>'+obj.data[1][j].fullPath+'</td><td>'+obj.data[1][j].diskSize+'</td></tr>';
+                                tbl.append(html);
+                            }
+
+//                            $.each(obj.data, function(commentIndex, comment){
+//                               html += '<div class="comment">' + comment['fullPath'] +':'+ comment['mediaSize'] +'</div>';
+//                            });
+//                            $('#resText').html(html);
+
+                        }else {
+                            alert("obj.code=false");
+                        }
+                    }
+            });
+
+        }
+
+
+
+        function crawling(){
+
+            $('#crawler').form('submit', {
+                url:"/crawling",
+                onSubmit: function(){
+                    // do some check
+                    // return false to prevent submit;
+                },
+                success:function(data){
+                    //此处data={"Success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                    var obj = jQuery.parseJSON(data);
+                    if(!obj.code){
+                        var lenDel = obj.data[0].length;
+                        var lenNew = obj.data[1].length;
+                        if(lenDel== 0 && lenNew == 0){
+                            $('#resText').html("没有条目新增或被删除");
+                            return;
+                        }
+                        //遍历展示有变动的数据
+                        var tbl = $("#resText");
+                        tbl.empty();
+                        tbl.append("<tr><th colspan='3'>Film："+lenDel+"</th></tr>");
+                        //1)删除的条目s
+                        for(j = 0; j < lenDel; j++) {
+                            html='<tr><td>'+(j+1)+'</td><td>'+obj.data[0][j].subjectMain+'</td><td>'+obj.data[0][j].year+'</td></tr>';
+                            tbl.append(html);
+                        }
+                        //2）新增的条目s
+                        tbl.append("<tr><th colspan='3'>Person："+lenNew+"</th></tr>");
+                        for(j = 0; j < lenNew; j++) {
+                            html='<tr><td>'+(j+1)+'</td><td>'+obj.data[1][j].nameExtend+'</td><td>'+obj.data[1][j].job+'</td></tr>';
+                            tbl.append(html);
+                        }
+
+//                            $.each(obj.data, function(commentIndex, comment){
+//                               html += '<div class="comment">' + comment['fullPath'] +':'+ comment['mediaSize'] +'</div>';
+//                            });
+//                            $('#resText').html(html);
+
+                    }else {
+                        alert("obj.code=false");
+                    }
                 }
             });
+
+//            $('#ff').form('submit');
+//            $('#ff').form('clear');
         }
 
-        function gathering() {
-            $('#scan').form('submit');
-        }
-        
-        function foldering() {
-            alert("aaaaaa");
-        }
+
         
         function transfer() {
             $.ajax({
@@ -90,6 +165,7 @@
             });
         }
 
+
         //++++++++++++++++++++
         //Tab选项卡相关操作
         //+++++++++++++++++++
@@ -133,12 +209,7 @@
 
 
 
-        function submitForm(){
-            $('#ff').form('submit');
-        }
-        function clearForm(){
-            $('#ff').form('clear');
-        }
+
 
         function createFrame(url) {
             var s = '<iframe scrolling="auto" frameborder="0" src="'+url+'" style="width:100%; height:100%"></iframe>';
@@ -175,6 +246,7 @@
         #tabs .tabs-panels>.panel>.panel-body {
             overflow: hidden;
         }
+        
     </style>
 </head>
 
@@ -219,53 +291,65 @@
     <div id="mainPage" region="center" border="true">
         <div id="tabs" class="easyui-tabs" fit="true" border="false">
 
-            <div title="首页" fit="true" style="padding: 5px">
+            <div title="首页" fit="true" style="padding: 5px;width: 100%">
 
-                <div class="easyui-panel" title="遍历硬盘文件夹" style="width:700px;height:120px;padding: 15px">
-                    <span>文件夹入口：</span>
-                    <form id="scan" action="/scanning"  method="post" style="margin-top:5px">
-                        <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\电影\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 50%" />
-                        <a href="javascript:void(0);" onclick="gathering();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
+                <div style="float: left;display: inline;width:40%">
+                    <div class="easyui-panel" title="遍历硬盘文件夹" style="float:left;height:120px;padding: 15px;margin-bottom: 5px">
+                        <span>文件夹入口：</span>
+                        <form id="scan"  method="post" class="easyui-form" style="margin-top:5px">
+                            <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 70%" />
+                            <a href="javascript:void(0);" onclick="scanning();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
+                        </form>
+                    </div>
 
-                    </form>
+                    <div class="easyui-panel" title="豆瓣爬虫配置" style="float:left;height:230px;padding: 15px;margin-bottom: 5px">
+                        <form id="crawler" method="post" class="easyui-form">
+                            <div style="margin-bottom:5px">
+                                <div>起始页面地址：</div>
+                                <input class="easyui-textbox" style="width:70%" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="required:true" />
+                            </div>
+                            <div style="margin-bottom:5px">
+                                <div>线程数：</div>
+                                <input class="easyui-textbox" style="width:10%" name="thread" value="2" data-options="required:true"/>
+                            </div>
+                            <div style="margin-bottom:5px">
+                                延伸爬取：<input type="checkbox" name="mutil" value="1"/>
+                            </div>
+                            <div style="margin-bottom:5px">
+                                首页进入：<input type="checkbox" name="homepage" value="1"/>
+                            </div>
+                            <div>
+                                <a href="javascript:void(0);" onclick="crawling();" class="easyui-linkbutton" style="width: 80px">开 爬</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div style="margin:10px 0 10px 0;"></div>
 
-                <div class="easyui-panel" title="豆瓣爬虫配置" style="width:700px;height:230px;padding: 15px">
-                    <form id="ff" method="post" class="easyui-form" action="/crawling">
-                        <div style="margin-bottom:5px">
-                            <div>起始页面地址：</div>
-                            <input class="easyui-textbox" style="width:50%" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="required:true" />
-                        </div>
-                        <div style="margin-bottom:5px">
-                            <div>线程数：</div>
-                            <input class="easyui-textbox" style="width:10%" name="thread" value="2" data-options="required:true"/>
-                        </div>
-                        <div style="margin-bottom:5px">
-                            延伸爬取：<input type="checkbox" name="mutil" value="1"/>
-                        </div>
-                        <div style="margin-bottom:5px">
-                            首页进入：<input type="checkbox" name="homepage" value="1"/>
-                        </div>
-                        <div>
-                            <a href="javascript:void(0);" onclick="submitForm();" class="easyui-linkbutton" style="width: 80px">开 爬</a>
-                        </div>
+                <div style="width:55%;float: left;display: inline;margin-left: 0.5%">
+                    <div class="easyui-panel" title="日志" id="logText" style="height: 355px;padding: 5px">
+                        <ul>
+                            <li>
+                                <button onclick="transfer();">转换</button>
+                            </li>
+                            <br>
+                            <li>
+                                <button onclick="pickup();">关联Media&Film</button>
+                            </li>
+                            <br>
+                            <li>
+                                <button onclick="relation();">关联Person&Film</button>
+                            </li>
+                            <br>
+                        </ul>
+                    </div>
+                </div>
 
-                    </form>
-                    <div style="margin:5px 0 5px 0;"></div>
+                <div style="width:95.5%;float: left;display: inline">
+                    <div class="easyui-panel" title="日志" id="resText" style="height: 190px;padding: 5px">
+                    </div>
+                </div>
 
                 </div>
-                <div style="margin:10px 0 10px 0;"></div>
-
-                <ul>
-                    <li><button onclick="BrowseFolder();">收集</button></li><br>
-                    <li><button onclick="transfer();">转换</button></li><br>
-                    <li><button onclick="pickup();">关联Media&Film</button></li><br>
-                    <li><button onclick="relation();">关联Person&Film</button></li><br>
-                </ul>
-                <div id="resText" style="margin: 10px">
-                </div>
-            </div>
 
         </div>
     </div>

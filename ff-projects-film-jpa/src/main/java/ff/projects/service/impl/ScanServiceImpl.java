@@ -45,7 +45,7 @@ public class ScanServiceImpl implements ScanService {
     @Override
     @Transactional
     @Modifying
-    public List<Media> gatherMedia2DB(File fileDir) {
+    public Object[] gatherMedia2DB(File fileDir) {
 
         oldMediaEntriesList = new ArrayList<>();
         newMediaEntriesList = new ArrayList<>();
@@ -109,7 +109,8 @@ public class ScanServiceImpl implements ScanService {
             }
         }
 
-        return newMediaEntriesList;
+        Object[] ret = {oldMediaEntriesList,newMediaEntriesList};
+        return ret;
     }
 
 

@@ -3,11 +3,13 @@ package ff.projects.controller;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import ff.projects.common.ResultBean;
 import ff.projects.crawler.DouBanProcessor;
 import ff.projects.entity.Media;
 import ff.projects.entity.QFilm;
 import ff.projects.entity.QMediaVO;
 import ff.projects.entity.QMediaVOFilmVO;
+import ff.projects.service.CrawlerService;
 import ff.projects.service.GatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,16 +28,19 @@ import java.util.List;
  * @Description
  * @Date : Create in 11:12 2017/10/27
  */
-@Controller
+@RestController
 public class CrawlerController {
-
-
 
     @PersistenceContext
     EntityManager entityManager;
 
     @Autowired
     DouBanProcessor douBanProcessor;
+
+    @Autowired
+    CrawlerService crawlerService;
+
+
     /**
      * @Author: xukangfeng
      * @Description 通用爬取方法
@@ -44,16 +49,12 @@ public class CrawlerController {
      * @param : thread 线程数
      */
     @PostMapping(value = "/crawling")
-    public String crawler(@RequestParam (value = "url" ,required = true) String singleFilmUrl,
-                          @RequestParam (value = "mutil" ,defaultValue = "0") String mutil,
-                          @RequestParam (value = "homepage" ,defaultValue = "0") String homepage,
-                          @RequestParam (value = "thread" ,defaultValue = "1") String thread){
-        if ("1".equals(mutil))
-            douBanProcessor.setSingleCrawler(false);
-        if ("1".equals(homepage))
-            singleFilmUrl= "https://movie.douban.com/";
-        Spider.create(douBanProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread)).run();
-        return "redirect:/";
+    public ResultBean<Object[]> crawler(@RequestParam (value = "url" ,required = true) String singleFilmUrl,
+                              @RequestParam (value = "mutil" ,defaultValue = "0") String mutil,
+                              @RequestParam (value = "homepage" ,defaultValue = "0") String homepage,
+                              @RequestParam (value = "thread" ,defaultValue = "1") String thread){
+
+        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage));
     }
 
 
