@@ -26,7 +26,7 @@ public class ControllerAOP {
     /**
      * 定义拦截规则：拦截ff.projects.controller包下面的所有类中，有@PostMapping注解的方法。
      */
-    @Pointcut("execution(* ff.projects.controller..*(..)) && @annotation(org.springframework.web.bind.annotation.PostMapping)")
+    @Pointcut("execution(* ff.projects.restcontroller..*(..)) && @annotation(org.springframework.web.bind.annotation.PostMapping)")
     public void controllerMethodPointcut(){}
 
 

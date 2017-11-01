@@ -1,4 +1,4 @@
-package ff.projects.controller;
+package ff.projects.restcontroller;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.JPAExpressions;

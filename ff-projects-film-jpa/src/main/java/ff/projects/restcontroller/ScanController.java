@@ -1,4 +1,4 @@
-package ff.projects.controller;
+package ff.projects.restcontroller;
 
 import ff.projects.common.ResultBean;
 import ff.projects.entity.Media;

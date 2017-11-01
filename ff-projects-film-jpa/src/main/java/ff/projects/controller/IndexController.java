@@ -32,7 +32,7 @@ public class IndexController {
 
 
 
-    @RequestMapping(method = RequestMethod.GET,value = "/")
+    @GetMapping(value = "/")
     public String index(HttpServletRequest request){
         return "index";
     }
