@@ -167,23 +167,6 @@
         }
 
 
-        function relation() {
-            $.ajax({
-                url:"/relation",
-                type:"get",
-                data:"",
-                dataType: "json",
-                success:function (data) {
-
-                    $('#resText').empty();   //清空resText里面的所有内容
-                    $.each(data, function(commentIndex, comment){
-                        html += '<div class="comment">' + comment['name_chn'] +':'+ comment['year'] +'</div>';
-                    });
-                    $('#resText').html(html);
-                }
-            });
-        }
-
 
         //++++++++++++++++++++
         //Tab选项卡相关操作

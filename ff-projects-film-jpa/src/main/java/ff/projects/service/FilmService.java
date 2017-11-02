@@ -3,6 +3,8 @@ package ff.projects.service;
 import ff.projects.entity.Film;
 import us.codecraft.webmagic.Page;
 
+import java.util.List;
+
 /**
  * Created by xukangfeng on 2017/10/28 12:59
  */
@@ -21,4 +23,6 @@ public interface FilmService {
     boolean needCrawler(Film film);
 
     Object[] connectFilmForMedia();
+
+    List<Film> listFilmsByStarId(String starId, String type);
 }

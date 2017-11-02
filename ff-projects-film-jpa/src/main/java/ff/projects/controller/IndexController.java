@@ -1,7 +1,5 @@
 package ff.projects.controller;
 
-import ff.projects.repository.MediaVORepository;
-import ff.projects.service.GatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,8 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -19,17 +15,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Controller
 public class IndexController {
-
-    @Autowired
-    MediaVORepository mediaVORepository;
-
-    @Autowired
-    GatherService gatherService;
-
-    @PersistenceContext
-    EntityManager entityManager;
-
-
 
 
 
@@ -54,15 +39,6 @@ public class IndexController {
     }
 
 
-
-
-
-
-    @GetMapping(value = "/relation")
-    public String relation(){
-        gatherService.relation();
-        return "redirect:/";
-    }
 
 
 

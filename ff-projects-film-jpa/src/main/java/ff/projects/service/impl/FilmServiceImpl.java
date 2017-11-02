@@ -4,12 +4,13 @@ import com.querydsl.core.types.Predicate;
 import ff.projects.entity.*;
 import ff.projects.repository.FilmRepository;
 import ff.projects.repository.MediaRepository;
-import ff.projects.repository.MediaVOFilmVORepository;
+import ff.projects.repository.StarRepository;
 import ff.projects.service.FilmService;
 import ff.projects.service.PersonService;
 import ff.projects.service.StarService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import us.codecraft.webmagic.Page;
@@ -183,8 +184,6 @@ public class FilmServiceImpl implements FilmService {
     @Autowired
     MediaRepository mediaRepository;
 
-    @Autowired
-    MediaVOFilmVORepository mediaVOFilmVORepository;
 
     @Override
     @Transactional
@@ -225,8 +224,12 @@ public class FilmServiceImpl implements FilmService {
             String directorsDoubanNo = film.getDirectors();
             String actorsDoubanNo = film.getActors();
             //director doubanid array
-            String[] ddno_array = directorsDoubanNo.split(",");
-            String[] adno_array = actorsDoubanNo.split(",");
+            String[] ddno_array=null,adno_array=null;
+            if(directorsDoubanNo!=null)
+                ddno_array = directorsDoubanNo.split(",");
+            if(actorsDoubanNo!=null)
+                adno_array = actorsDoubanNo.split(",");
+
             //as导演
             for(String ddno : ddno_array){
                 //找star表，看是否存在，不存在则新建，存在即asdirect加上此filmid（先判断有无此filmid）
@@ -234,8 +237,10 @@ public class FilmServiceImpl implements FilmService {
                     Star star = starHashMapFinal.get(ddno);
                     //判断当前filmid是否已存在当前star的asdirect字段中
                     //不存在add进去，并更新number
-                    String[] asDArray = star.getAsDirector().split(",");
-                    if(!Arrays.asList(asDArray).contains(filmId)){
+                    String[] asDArray=null;
+                    if(star.getAsDirector()!=null)
+                        asDArray = star.getAsDirector().split(",");
+                    if(asDArray!=null && !Arrays.asList(asDArray).contains(filmId)){
                         String[] asDArrayNew = new String[asDArray.length+1];
                         System.arraycopy(asDArray, 0, asDArrayNew, 0, asDArray.length);//将a数组内容复制新数组b
                         asDArrayNew[asDArrayNew.length-1]=filmId;
@@ -267,8 +272,38 @@ public class FilmServiceImpl implements FilmService {
             for(String adno : adno_array){
                 if(starHashMapFinal.containsKey(adno)){
 
+                    Star star = starHashMapFinal.get(adno);
+                    //判断当前filmid是否已存在当前star的asdirect字段中
+                    //不存在add进去，并更新number
+                    String[] asAArray = null;
+                    if(star.getAsActor()!=null)
+                        star.getAsActor().split(",");
+                    if(asAArray!=null && !Arrays.asList(asAArray).contains(filmId)){
+                        String[] asAArrayNew = new String[asAArray.length+1];
+                        System.arraycopy(asAArray, 0, asAArrayNew, 0, asAArray.length);//将a数组内容复制新数组b
+                        asAArrayNew[asAArrayNew.length-1]=filmId;
+                        star.setAsActor(StringUtils.join(asAArrayNew,","));
+                        star.setAsActorNumber(asAArrayNew.length);
+                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
+                        if(starHashMapInit.containsKey(star.getDouBanNo())){
+                            needUpdateStarList.add(star);
+                        }
+
+                        thisMediaNeedUpdate=true;
+                    }
+
                 }else{
                     //new
+                    //new
+                    Star star = new Star();
+                    star.setDouBanNo(adno);
+                    star.setAsActorNumber(1);
+                    star.setAsActor(filmId);
+                    star.setPersonId(personService.findByDoubanNo(adno).getId());
+                    needSaveStarList.add(star);
+                    //加入到starlist，防止重复生成star数据
+                    starHashMapFinal.put(star.getDouBanNo(),star);
+                    thisMediaNeedUpdate=true;
                 }
             }
 
@@ -363,5 +398,26 @@ public class FilmServiceImpl implements FilmService {
         return null;
 
     }
+
+
+    @Autowired
+    StarRepository starRepository;
+
+    @Override
+    public  List<Film> listFilmsByStarId(String starId, String type){
+//        personId ="9112";
+
+        Star star = starRepository.findOne(Long.parseLong(starId));
+        String films = star.getAsDirector();
+        if("2".equals(type)){
+            films = star.getAsActor();
+        }
+        String[] filmArray = films.split(",");
+
+        QFilm qFilm = QFilm.film;
+        Predicate predicate1 = qFilm.id.stringValue().in(Arrays.asList(filmArray));
+        return (List<Film>) filmRepository.findAll(predicate1,new Sort("year"));
+    }
+
 
 }

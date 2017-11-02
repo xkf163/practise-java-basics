@@ -2,7 +2,7 @@ package ff.projects.service.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.common.TreeNode;
-import ff.projects.entity.QMediaVO;
+import ff.projects.entity.QMedia;
 import ff.projects.service.TreeService;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +23,12 @@ public class TreeServiceImpl implements TreeService {
         TreeNode pTreeNode,treeNode = null;
         Set<TreeNode> treeNodeSet =  new LinkedHashSet<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMM");
-        QMediaVO mediaVO = QMediaVO.mediaVO;
+        QMedia media = QMedia.media;
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
         List<Date> gatherDateList = queryFactory
-                .selectFrom(mediaVO)
-                .select(mediaVO.media.gatherDate)
+                .selectFrom(media)
+                .select(media.gatherDate)
                 .fetch();
         //去重
         List<Date> gatherDateListNew = new ArrayList<>(new HashSet<Date>(gatherDateList));
@@ -63,14 +63,14 @@ public class TreeServiceImpl implements TreeService {
     public TreeNode getTreeGroupByMovieReleaseYear() {
         TreeNode pTreeNode,treeNode = null;
         Set<TreeNode> treeNodeSet =  new LinkedHashSet<>();
-        QMediaVO mediaVO = QMediaVO.mediaVO;
+        QMedia media = QMedia.media;
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
         //树2：影片年代------------s------------------
         List<Short>  list = queryFactory
-                .selectFrom(mediaVO)
-                .select(mediaVO.year)
+                .selectFrom(media)
+                .select(media.year)
                 .distinct()
-                .orderBy(mediaVO.year.desc())
+                .orderBy(media.year.desc())
                 .fetch();
         treeNodeSet = new LinkedHashSet<>();
         for(Short year : list){

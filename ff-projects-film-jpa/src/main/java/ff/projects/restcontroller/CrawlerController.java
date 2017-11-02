@@ -1,26 +1,17 @@
 package ff.projects.restcontroller;
 
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.common.ResultBean;
 import ff.projects.crawler.DouBanProcessor;
-import ff.projects.entity.Media;
 import ff.projects.entity.QFilm;
-import ff.projects.entity.QMediaVO;
-import ff.projects.entity.QMediaVOFilmVO;
 import ff.projects.service.CrawlerService;
-import ff.projects.service.GatherService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import us.codecraft.webmagic.Spider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.swing.*;
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,6 +55,9 @@ public class CrawlerController {
       * @Description 找出没有Film关联的Media，然后以media。namechn即电影中文名为关键字去豆瓣网搜索电影，再爬取下来
       * @Date : 17:05 2017/10/27
       */
+    /*
+
+
     @GetMapping(value = "/crawler/patch")
     public String crawlerPatch(@RequestParam (value = "thread" ,defaultValue = "1") String thread){
 
@@ -89,7 +83,7 @@ public class CrawlerController {
     }
 
 
-
+  */
 
 
 
