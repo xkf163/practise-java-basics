@@ -255,6 +255,9 @@ public class FilmServiceImpl implements FilmService {
                     }
                 }else{
                     //new
+                    if(personService.findByDoubanNo(ddno)==null){
+                        continue;
+                    }
                     Star star = new Star();
                     star.setDouBanNo(ddno);
                     star.setAsDirectorNumber(1);
@@ -294,6 +297,9 @@ public class FilmServiceImpl implements FilmService {
 
                 }else{
                     //new
+                    if(personService.findByDoubanNo(adno)==null){
+                        continue;
+                    }
                     //new
                     Star star = new Star();
                     star.setDouBanNo(adno);
