@@ -53,7 +53,7 @@ public class Media implements Serializable {
 
 	private Short year;
 
-	//对应的filmID
-	private Long filmId;
+	@OneToOne
+	private Film film;
 
 }

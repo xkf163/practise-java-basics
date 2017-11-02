@@ -139,9 +139,9 @@ public class MediaController {
         String year = yearMonth.substring(0,4);
         String month = yearMonth.substring(4);
         yearMonth = year+"-"+month+"-";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDate = sdf.parse(yearMonth+"01");
-        Date endDate = sdf.parse(yearMonth+lastDate(year,month));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDate = sdf.parse(yearMonth+"01 00:00:00");
+        Date endDate = sdf.parse(yearMonth+lastDate(year,month)+" 23:59:59");
 
         //搜索区传入的参数值
         String name = request.getParameter("name");
@@ -150,10 +150,10 @@ public class MediaController {
         /*
          * queryDsl
          */
-        QMedia media = QMedia.media;
+        QMedia qMedia = QMedia.media;
         Pageable pageable = new PageRequest(Integer.parseInt(page)-1, Integer.parseInt(size), new Sort(Sort.Direction.DESC,"gatherDate"));
         //该Predicate为querydsl下的类,支持嵌套组装复杂查询条件
-        com.querydsl.core.types.Predicate predicate = media.gatherDate.before(endDate).and(media.gatherDate.after(startDate)).and(media.deleted.eq(0));
+        com.querydsl.core.types.Predicate predicate = qMedia.gatherDate.before(endDate).and(qMedia.gatherDate.after(startDate)).and(qMedia.deleted.eq(0));
 
         return mediaRepository.findAll(predicate,pageable);
     }
@@ -225,7 +225,7 @@ public class MediaController {
         Pageable pageable = new PageRequest(Integer.parseInt(page)-1, Integer.parseInt(size), ssort);
         //查询语句准备
         QMedia media = QMedia.media;
-        com.querydsl.core.types.Predicate predicate = media.filmId.isNull().and(media.deleted.eq(0));
+        com.querydsl.core.types.Predicate predicate = media.film.isNull().and(media.deleted.eq(0));
         return mediaRepository.findAll(predicate,pageable);
 
 

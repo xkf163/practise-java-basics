@@ -117,7 +117,7 @@ public class FilmController {
         //查询语句准备
         QFilm qFilm = QFilm.film;
         QMedia qMedia = QMedia.media;
-        com.querydsl.core.types.Predicate predicate = qFilm.id.in(JPAExpressions.select(qMedia.filmId).from(qMedia));
+        com.querydsl.core.types.Predicate predicate = qFilm.id.in(JPAExpressions.select(qMedia.film.id).from(qMedia));
         return filmRepository.findAll(predicate,pageable);
 
 
@@ -136,7 +136,7 @@ public class FilmController {
     public String listMediaPath(@PathVariable("id") String filmId) {
         //查询语句准备
         QMedia qMedia = QMedia.media;
-        com.querydsl.core.types.Predicate predicate = qMedia.filmId.stringValue().eq(filmId);
+        com.querydsl.core.types.Predicate predicate = qMedia.film.id.stringValue().eq(filmId);
         Media media = mediaRepository.findOne(predicate);
         if(media != null){
             return media.getDiskNo()+"："+media.getFullPath();

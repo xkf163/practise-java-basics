@@ -255,14 +255,17 @@ public class FilmServiceImpl implements FilmService {
                     }
                 }else{
                     //new
-                    if(personService.findByDoubanNo(ddno)==null){
+                    Person person =personService.findByDoubanNo(ddno);
+                    if(person==null){
                         continue;
                     }
                     Star star = new Star();
                     star.setDouBanNo(ddno);
                     star.setAsDirectorNumber(1);
                     star.setAsDirector(filmId);
-                    star.setPersonId(personService.findByDoubanNo(ddno).getId());
+                    star.setName(person.getName());
+                    star.setNameExtend(person.getNameExtend());
+                    star.setPerson(person);
                     needSaveStarList.add(star);
                     //加入到starlist，防止重复生成star数据
                     starHashMapFinal.put(star.getDouBanNo(),star);
@@ -297,7 +300,8 @@ public class FilmServiceImpl implements FilmService {
 
                 }else{
                     //new
-                    if(personService.findByDoubanNo(adno)==null){
+                    Person person = personService.findByDoubanNo(adno);
+                    if(person==null){
                         continue;
                     }
                     //new
@@ -305,7 +309,9 @@ public class FilmServiceImpl implements FilmService {
                     star.setDouBanNo(adno);
                     star.setAsActorNumber(1);
                     star.setAsActor(filmId);
-                    star.setPersonId(personService.findByDoubanNo(adno).getId());
+                    star.setName(person.getName());
+                    star.setNameExtend(person.getNameExtend());
+                    star.setPerson(person);
                     needSaveStarList.add(star);
                     //加入到starlist，防止重复生成star数据
                     starHashMapFinal.put(star.getDouBanNo(),star);
@@ -315,7 +321,7 @@ public class FilmServiceImpl implements FilmService {
 
             //step1)update media obj
             if(thisMediaNeedUpdate){
-                media.setFilmId(film.getId());
+                media.setFilm(film);
                 media.setUpdateDate(new Date());
                 needUpdateMediaList.add(media);
             }
@@ -374,8 +380,8 @@ public class FilmServiceImpl implements FilmService {
      * @return
      */
     Film findConnectedFilmForMedia(Media media){
-        if(media.getFilmId()!=null){
-            return filmRepository.findOne(media.getFilmId());
+        if(media.getFilm()!=null){
+            return media.getFilm();
         }
 
         QFilm qFilm = QFilm.film;

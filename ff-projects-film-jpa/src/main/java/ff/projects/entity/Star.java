@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 
 /**
@@ -19,9 +20,14 @@ public class Star implements Serializable{
     @GeneratedValue
     private Long id;
 
+    private String name;
+
+    private String nameExtend;
+
     private String douBanNo;
 
-    private Long personId;
+    @OneToOne
+    private Person person;
 
     private String asDirector;
 

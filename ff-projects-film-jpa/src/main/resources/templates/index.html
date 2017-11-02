@@ -295,7 +295,7 @@
 
             <div title="首页" fit="true" style="padding: 5px;width: 100%">
 
-                <div style="float: left;display: inline;width:40%">
+                <div style="float: left;display: inline;width:55%">
                     <div class="easyui-panel" title="遍历硬盘文件夹" style="float:left;height:120px;padding: 15px;margin-bottom: 5px">
                         <span>文件夹入口：</span>
                         <form id="scan"  method="post" class="easyui-form" style="margin-top:5px">
@@ -304,6 +304,14 @@
                         </form>
                     </div>
 
+                    <div class="easyui-panel" title="日志" id="logText" style="height: 105px;padding: 15px">
+                        <div>
+                            <a href="javascript:void(0);" onclick="connectFilmForMedia();" class="easyui-linkbutton" style="width: 110px">关联Media&Film</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div style="float: left;display: inline;width:40%;margin-left: 1%">
                     <div class="easyui-panel" title="豆瓣爬虫配置" style="float:left;height:230px;padding: 15px;margin-bottom: 5px">
                         <form id="crawler" method="post" class="easyui-form">
                             <div style="margin-bottom:5px">
@@ -327,19 +335,9 @@
                     </div>
                 </div>
 
-                <div style="width:55%;float: left;display: inline;margin-left: 0.5%">
-                    <div class="easyui-panel" title="日志" id="logText" style="height: 355px;padding: 5px">
-                        <ul>
-                            <li>
-                                <button onclick="connectFilmForMedia();">关联Media&Film</button>
-                            </li>
-                            <br>
-                        </ul>
-                    </div>
-                </div>
 
-                <div style="width:95.5%;float: left;display: inline">
-                    <div class="easyui-panel" title="日志" id="resText" style="height: 160px;padding: 5px">
+                <div style="width:95.5%;float: left;display: inline;margin-top: 5px">
+                    <div class="easyui-panel" title="日志" id="resText" style="height: 260px;padding: 5px">
                     </div>
                 </div>
 
