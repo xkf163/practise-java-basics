@@ -116,17 +116,52 @@
 
         function connectFilmForMedia() {
             $.ajax({
-                url:"/pickup",
+                url:"/connectFilmForMedia",
                 type:"get",
                 data:"",
                 dataType: "json",
-                success:function (data) {
+                success:function (obj) {
+                    //alert(data);
+                    //此处data={"Success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                    //var obj = jQuery.parseJSON(data);
+                    if(!obj.code){
+                        var needUpdateMediaLen = obj.data[0].length;
+                        var notFindMediaLen= obj.data[1].length;
+                        var needUpdateStarLen = obj.data[2].length;
+                        var needSaveStarLen = obj.data[3].length;
 
-                    $('#resText').empty();   //清空resText里面的所有内容
-                    $.each(data, function(commentIndex, comment){
-                        html += '<div class="comment">' + comment['name_chn'] +':'+ comment['year'] +'</div>';
-                    });
-                    $('#resText').html(html);
+
+                        //遍历展示有变动的数据
+                        var tbl = $("#resText");
+                        tbl.empty();
+                        tbl.append("<tr><th colspan='3'>needUpdateMediaLen："+needUpdateMediaLen+"</th></tr>");
+                        //1)删除的条目s
+                        for(j = 0; j < needUpdateMediaLen; j++) {
+                            html='<tr><td>'+(j+1)+'</td><td>'+obj.data[0][j].fullPath+'</td><td>'+obj.data[0][j].diskSize+'</td></tr>';
+                            tbl.append(html);
+                        }
+                        //2）新增的条目s
+                        tbl.append("<tr><th colspan='3'>notFindMediaLen："+notFindMediaLen+"</th></tr>");
+                        for(j = 0; j < notFindMediaLen; j++) {
+                            html='<tr><td>'+(j+1)+'</td><td>'+obj.data[1][j].fullPath+'</td><td>'+obj.data[1][j].diskSize+'</td></tr>';
+                            tbl.append(html);
+                        }
+
+                        tbl.append("<tr><th colspan='3'>needUpdateStarLen："+needUpdateStarLen+"</th></tr>");
+                        for(j = 0; j < needUpdateStarLen; j++) {
+                            html='<tr><td>'+(j+1)+'</td><td>'+obj.data[2][j].douBanNo+'</td><td>'+obj.data[2][j].asDirector+'</td><td>'+obj.data[2][j].asActor+'</td></tr>';
+                            tbl.append(html);
+                        }
+
+                        tbl.append("<tr><th colspan='3'>needSaveStarLen："+needSaveStarLen+"</th></tr>");
+                        for(j = 0; j < needSaveStarLen; j++) {
+                            html='<tr><td>'+(j+1)+'</td><td>'+obj.data[3][j].douBanNo+'</td><td>'+obj.data[3][j].asDirector+'</td><td>'+obj.data[3][j].asActor+'</td></tr>';
+                            tbl.append(html);
+                        }
+
+                    }else {
+                        alert("obj.code=false");
+                    }
                 }
             });
         }
@@ -316,16 +351,12 @@
                                 <button onclick="connectFilmForMedia();">关联Media&Film</button>
                             </li>
                             <br>
-                            <li>
-                                <button onclick="relation();">关联Person&Film</button>
-                            </li>
-                            <br>
                         </ul>
                     </div>
                 </div>
 
                 <div style="width:95.5%;float: left;display: inline">
-                    <div class="easyui-panel" title="日志" id="resText" style="height: 190px;padding: 5px">
+                    <div class="easyui-panel" title="日志" id="resText" style="height: 160px;padding: 5px">
                     </div>
                 </div>
 

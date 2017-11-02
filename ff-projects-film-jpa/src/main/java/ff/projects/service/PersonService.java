@@ -21,4 +21,6 @@ public interface PersonService {
 
     //根据不为空字段来判断是否需要保存到数据库
     boolean needCrawler(Person person);
+
+    Person findByDoubanNo(String doubanNo);
 }

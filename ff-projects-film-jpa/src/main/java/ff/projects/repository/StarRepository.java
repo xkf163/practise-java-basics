@@ -1,14 +1,16 @@
 package ff.projects.repository;
 
-import ff.projects.entity.Person;
+import ff.projects.entity.Star;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
- * Created by F on 2017/6/27.
+ * @Author:xukangfeng
+ * @Description
+ * @Date : Create in 8:48 2017/11/2
  */
+
 @Repository
-public interface PersonRepository extends JpaRepository<Person,Long>, QueryDslPredicateExecutor<Person> {
-    Person findByDoubanNo(String doubanNo);
+public interface StarRepository extends JpaRepository<Star,Long>,QueryDslPredicateExecutor<Star> {
 }

@@ -6,17 +6,19 @@ import ff.projects.repository.FilmRepository;
 import ff.projects.repository.MediaRepository;
 import ff.projects.repository.MediaVOFilmVORepository;
 import ff.projects.service.FilmService;
+import ff.projects.service.PersonService;
+import ff.projects.service.StarService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.selector.Selectable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.*;
 
 /**
  * Created by xukangfeng on 2017/10/28 13:00
@@ -25,7 +27,17 @@ import java.util.Map;
 public class FilmServiceImpl implements FilmService {
 
     @Autowired
+    StarService starService;
+
+    @Autowired
+    PersonService personService;
+
+    @Autowired
     FilmRepository filmRepository;
+
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Override
     public Film extractFilmFirstFromCrawler(Page page) {
@@ -175,72 +187,181 @@ public class FilmServiceImpl implements FilmService {
     MediaVOFilmVORepository mediaVOFilmVORepository;
 
     @Override
+    @Transactional
     public Object[] connectFilmForMedia(){
 
         List<Media> notFindMediaList = new ArrayList<>();
         List<Media> needUpdateMediaList = new ArrayList<>();
         List<Star> needUpdateStarList = new ArrayList<>();
+        List<Star> needSaveStarList = new ArrayList<>();
 
-        Map<String,Star> starHashMap = new HashMap<>();
-//        List<Star> starsList = starRe..
+        Map<String,Star> starHashMapInit = new HashMap<>();
+        Map<String,Star> starHashMapFinal = new HashMap<>();
+        List<Star> starsList = starService.findAll();
         //遍历库中stars，组成map，，后续根据doubanid来判断库中是否已存在
+        for (Star star : starsList){
+            starHashMapInit.put(star.getDouBanNo(),star);
+            starHashMapFinal=starHashMapInit;
+        }
+
 
 
         QMedia qMedia = QMedia.media;
         List<Media> mediaList = (List<Media>) mediaRepository.findAll(qMedia.deleted.eq(0));
-        QFilm qFilm = QFilm.film;
-        Predicate[] predicateArray = new Predicate[6];
-        int i=0;
+
         for(Media media : mediaList){
-            //mediaVO = mediaVORepository.findOne((long) 957);
-            i++;
-            //1: subject精确匹配
-            predicateArray[0]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
-            //2:
-            predicateArray[1]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
-            //3:
-            predicateArray[2]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+            boolean thisMediaNeedUpdate = false;
+            Film film = findConnectedFilmForMedia(media);
+            if(film==null){
+                notFindMediaList.add(media);
+                continue;
+            }
 
-            //predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameChn().trim())).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
-            //3: 0
-            predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
-            //2: 2>1
-            predicateArray[4]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+            //-----当前正在处理的filmId
+            String filmId = String.valueOf(film.getId());
 
-            predicateArray[5]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().notEqualsIgnoreCase(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
 
-            for (int j = 0; j<predicateArray.length; j++){
-                Film film = null;
-                if(j>1){
-                    System.out.println(j);
-                }
-                List<Film> filmList = (List<Film>) filmRepository.findAll(predicateArray[j]);
-                if(filmList.size() == 1){
-                    film = filmList.get(0);
-                    //1)update media obj
-                    media.setFilmId(film.getId());
-                    needUpdateMediaList.add(media);
-                    //2)保存或更新film的stars
-                    String director_douban_ids = film.getDirectors();
-                    String actors_douban_ids = film.getActors();
-                    //director doubanid array
-                    String[] ddids_array = director_douban_ids.split(",");
-                    String[] adids_array = actors_douban_ids.split(",");
-                    //as导演
-                    for(String ddid : ddids_array){
-                        //找star表，看是否存在，不存在则新建，存在即asdirect加上此filmid（先判断有无此filmid）
+            //step2)保存或更新当前film中的stars
+            String directorsDoubanNo = film.getDirectors();
+            String actorsDoubanNo = film.getActors();
+            //director doubanid array
+            String[] ddno_array = directorsDoubanNo.split(",");
+            String[] adno_array = actorsDoubanNo.split(",");
+            //as导演
+            for(String ddno : ddno_array){
+                //找star表，看是否存在，不存在则新建，存在即asdirect加上此filmid（先判断有无此filmid）
+                if(starHashMapFinal.containsKey(ddno)){
+                    Star star = starHashMapFinal.get(ddno);
+                    //判断当前filmid是否已存在当前star的asdirect字段中
+                    //不存在add进去，并更新number
+                    String[] asDArray = star.getAsDirector().split(",");
+                    if(!Arrays.asList(asDArray).contains(filmId)){
+                        String[] asDArrayNew = new String[asDArray.length+1];
+                        System.arraycopy(asDArray, 0, asDArrayNew, 0, asDArray.length);//将a数组内容复制新数组b
+                        asDArrayNew[asDArrayNew.length-1]=filmId;
+                        star.setAsDirector(StringUtils.join(asDArrayNew,","));
+                        star.setAsDirectorNumber(asDArrayNew.length);
+                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
+                        if(starHashMapInit.containsKey(star.getDouBanNo())){
+                            needUpdateStarList.add(star);
+                        }
+
+                        thisMediaNeedUpdate=true;
                     }
-                    //as主演
-                    for(String adid : adids_array){
-
-                    }
-                    break;
+                }else{
+                    //new
+                    Star star = new Star();
+                    star.setDouBanNo(ddno);
+                    star.setAsDirectorNumber(1);
+                    star.setAsDirector(filmId);
+                    star.setPersonId(personService.findByDoubanNo(ddno).getId());
+                    needSaveStarList.add(star);
+                    //加入到starlist，防止重复生成star数据
+                    starHashMapFinal.put(star.getDouBanNo(),star);
+                    thisMediaNeedUpdate=true;
                 }
+
+
+            }
+            //as主演
+            for(String adno : adno_array){
+                if(starHashMapFinal.containsKey(adno)){
+
+                }else{
+                    //new
+                }
+            }
+
+            //step1)update media obj
+            if(thisMediaNeedUpdate){
+                media.setFilmId(film.getId());
+                media.setUpdateDate(new Date());
+                needUpdateMediaList.add(media);
+            }
+
+
+        }
+
+
+        /*
+         批量保存
+        List<Media> needUpdateMediaList = new ArrayList<>();
+        List<Star> needUpdateStarList = new ArrayList<>();
+        List<Star> needSaveStarList = new ArrayList<>();
+         */
+        int size  = needUpdateMediaList.size();
+        System.out.println("needUpdateMediaList:::"+size);
+        for (int i=0; i<size; i++){
+            Media media = needUpdateMediaList.get(i);
+            entityManager.merge(media);
+            if(i % 50 == 0 || i==size-1){
+                    entityManager.flush();
+                    entityManager.clear();
+            }
+        }
+        size  = needUpdateStarList.size();
+        System.out.println("needUpdateStarList:::"+size);
+        for (int i=0; i<size; i++){
+            Star media = needUpdateStarList.get(i);
+            entityManager.merge(media);
+            if(i % 50 == 0 || i==size-1){
+                entityManager.flush();
+                entityManager.clear();
+            }
+        }
+        size  = needSaveStarList.size();
+        System.out.println("needSaveStarList:::"+size);
+        for (int i=0; i<size; i++){
+            Star media = needSaveStarList.get(i);
+            entityManager.persist(media);
+            if(i % 50 == 0 || i==size-1){
+                entityManager.flush();
+                entityManager.clear();
             }
         }
 
-        return new Object[]{needUpdateMediaList,notFindMediaList,needUpdateStarList};
+
+
+
+        return new Object[]{needUpdateMediaList,notFindMediaList,needUpdateStarList,needSaveStarList};
     }
 
+
+    /**
+     * 根据media条目信息去film表找一一对应的filmobj，找不到返回null
+     * @param media
+     * @return
+     */
+    Film findConnectedFilmForMedia(Media media){
+        if(media.getFilmId()!=null){
+            return filmRepository.findOne(media.getFilmId());
+        }
+
+        QFilm qFilm = QFilm.film;
+        Predicate[] predicateArray = new Predicate[6];
+        //1: subject精确匹配
+        predicateArray[0]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
+        //2:
+        predicateArray[1]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+        //3:
+        predicateArray[2]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+
+        //predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameChn().trim())).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
+        //3: 0
+        predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+        //2: 2>1
+        predicateArray[4]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+
+        predicateArray[5]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().notEqualsIgnoreCase(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+        for (int j = 0; j<predicateArray.length; j++){
+            List<Film> filmList = (List<Film>) filmRepository.findAll(predicateArray[j]);
+            if(filmList.size() == 1){
+                return filmList.get(0);
+            }
+        }
+
+        return null;
+
+    }
 
 }

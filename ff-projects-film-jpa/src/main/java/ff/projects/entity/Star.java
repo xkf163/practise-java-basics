@@ -19,7 +19,7 @@ public class Star implements Serializable{
     @GeneratedValue
     private Long id;
 
-    private String douBanId;
+    private String douBanNo;
 
     private Long personId;
 

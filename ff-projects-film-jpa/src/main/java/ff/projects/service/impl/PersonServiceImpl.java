@@ -35,8 +35,8 @@ public class PersonServiceImpl implements PersonService {
         //人物脚本信息
         page.putField("nameExtend", page.getHtml().xpath("//div[@id='content']/h1/text()"));
         page.putField("introduce", page.getHtml().xpath("//div[@id='intro']//div[@class='bd']//span[@class='all hidden']/text()"));
-        if(page.getResultItems().get("introduce") == null){
-            page.putField("introduce", page.getHtml().xpath("//*[@id=\"intro\"]/div[@class='bd']/text()").toString());
+        if(page.getResultItems().get("introduce").toString() == null){
+            page.putField("introduce", page.getHtml().xpath("//*[@id=\"intro\"]/div[@class='bd']/text()"));
         }
         //人物简介字符串集合
         Selectable selectableInfo =  page.getHtml().xpath("//div[@class='article']//div[@class='info']//li");
@@ -90,5 +90,10 @@ public class PersonServiceImpl implements PersonService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Person findByDoubanNo(String doubanNo) {
+        return personRepository.findByDoubanNo(doubanNo);
     }
 }
