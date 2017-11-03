@@ -42,6 +42,7 @@ public class ScanServiceImpl implements ScanService {
 
     private List<Media> oldMediaEntriesList ;
     private List<Media> newMediaEntriesList ;
+    private List<Media> addFailedMediaEntriesList ;
     private Map<String,Media> oldMediaEntriesMap ;
 
     @Override
@@ -51,6 +52,8 @@ public class ScanServiceImpl implements ScanService {
 
         oldMediaEntriesList = new ArrayList<>();
         newMediaEntriesList = new ArrayList<>();
+        addFailedMediaEntriesList = new ArrayList<>();
+
         oldMediaEntriesMap = new HashMap<>();
         /*
          * step1:获取选择的路径：如j:\201702\1.txt 或者 j:\;拆分出盘符及文件夹
@@ -112,7 +115,7 @@ public class ScanServiceImpl implements ScanService {
         }
 
 
-        return new Object[]{oldMediaEntriesList,newMediaEntriesList};
+        return new Object[]{oldMediaEntriesList,newMediaEntriesList,addFailedMediaEntriesList};
     }
 
 
@@ -188,13 +191,13 @@ public class ScanServiceImpl implements ScanService {
             Boolean finded  = false;
             String year = "1900";
             String mediaName = m.getName();
-            Pattern pattern = Pattern.compile("([1-2][9|0][0-9]{2})(\\.[B|H])");
+            Pattern pattern = Pattern.compile("\\.([1-2][9|0][0-9]{2})(\\.[B|H])");
             Matcher matcher = pattern.matcher(mediaName);
             if (matcher.find()){
                 year = matcher.group(1);
                 finded = true;
             }else{
-                pattern = Pattern.compile("([1-2][9|0][0-9]{2})(\\.)");
+                pattern = Pattern.compile("\\.([1-2][9|0][0-9]{2})(\\.)");
                 matcher = pattern.matcher(mediaName);
                 if (matcher.find()){finded = true;year = matcher.group(1);}
             }
@@ -203,6 +206,11 @@ public class ScanServiceImpl implements ScanService {
             m.setNameChn(mediaName.substring(0,mediaName.indexOf(".")));
             if(finded && mediaName.indexOf(year)-1>mediaName.indexOf(".")+1)
                 m.setNameEng(mediaName.substring(mediaName.indexOf(".")+1,mediaName.indexOf(year)-1).replaceAll("\\."," "));
+
+            if(m.getNameChn()==null || m.getNameEng()==null || m.getYear()==null){
+                addFailedMediaEntriesList.add(m);
+                return;
+            }
 
             newMediaEntriesList.add(m);
         }

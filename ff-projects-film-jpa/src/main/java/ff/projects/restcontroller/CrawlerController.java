@@ -43,9 +43,10 @@ public class CrawlerController {
     public ResultBean<Object[]> crawler(@RequestParam (value = "url" ,required = true) String singleFilmUrl,
                               @RequestParam (value = "mutil" ,defaultValue = "0") String mutil,
                               @RequestParam (value = "homepage" ,defaultValue = "0") String homepage,
-                              @RequestParam (value = "thread" ,defaultValue = "1") String thread){
+                              @RequestParam (value = "thread" ,defaultValue = "1") String thread,
+                              @RequestParam (value = "batchNumber" ,defaultValue = "10") String batchNumber){
 
-        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage));
+        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage,batchNumber));
     }
 
 

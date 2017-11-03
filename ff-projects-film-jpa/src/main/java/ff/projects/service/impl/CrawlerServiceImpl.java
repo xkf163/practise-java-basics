@@ -6,6 +6,7 @@ import ff.projects.entity.Person;
 import ff.projects.service.CrawlerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.codecraft.webmagic.Spider;
 
 import javax.persistence.EntityManager;
@@ -23,44 +24,46 @@ public class CrawlerServiceImpl implements CrawlerService {
     @Autowired
     DouBanProcessor douBanProcessor;
 
+
     @PersistenceContext
     EntityManager entityManager;
 
     @Override
-    public Object[] running(String mutil, String singleFilmUrl, String thread, String homepage) {
+    @Transactional
+    public Object[] running(String mutil, String singleFilmUrl, String thread, String homepage,String batchNumber) {
+
+        //初始化doubanprocess数据
         douBanProcessor.setSingleCrawler(true);
-        douBanProcessor.newFilmList = new ArrayList<>();
-        douBanProcessor.newPersonList = new ArrayList<>();
+
+        douBanProcessor.savedFilms=new ArrayList<>();
+        douBanProcessor.savedPersons=new ArrayList<>();
+
+        douBanProcessor.needSaveFilms=new ArrayList<>();
+        douBanProcessor.needSavePersons=new ArrayList<>();
+        //批量保存临界值
+        douBanProcessor.setBatchNumber(Integer.parseInt(batchNumber));
         if ("1".equals(mutil))
             douBanProcessor.setSingleCrawler(false);
         if ("1".equals(homepage))
-            singleFilmUrl= "https://movie.douban.com/";
+            singleFilmUrl = "https://movie.douban.com/";
         Spider.create(douBanProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread)).run();
 
-        //批量保存
-        int size = douBanProcessor.newPersonList.size();
-        for(int i = 0;i<size;i++){
-            Person person = douBanProcessor.newPersonList.get(i);
+        //保存剩余数据
+        for(int i = 0;i<douBanProcessor.needSavePersons.size();i++){
+            Person person = douBanProcessor.needSavePersons.get(i);
             entityManager.persist(person);
-            if(i % 50 == 0 || i==size-1){
-                entityManager.flush();
-                entityManager.clear();
-            }
-
         }
-        size = douBanProcessor.newFilmList.size();
-        for (int i = 0;i<size;i++){
-            Film film = douBanProcessor.newFilmList.get(i);
+        for (int i = 0;i<douBanProcessor.needSaveFilms.size();i++){
+            Film film = douBanProcessor.needSaveFilms.get(i);
             entityManager.persist(film);
-            if(i % 50 == 0 || i==size-1){
-                entityManager.flush();
-                entityManager.clear();
-            }
-
         }
+        entityManager.flush();
+        entityManager.clear();
+        douBanProcessor.savedPersons.addAll(douBanProcessor.needSavePersons);
+        douBanProcessor.savedFilms.addAll(douBanProcessor.needSaveFilms);
 
-
-
-        return new Object[]{douBanProcessor.newFilmList,douBanProcessor.newPersonList};
+        //返回前端数据
+        return new Object[]{douBanProcessor.savedFilms,douBanProcessor.savedPersons};
     }
+
 }

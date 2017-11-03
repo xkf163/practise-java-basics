@@ -211,7 +211,7 @@ public class FilmServiceImpl implements FilmService {
         for(Media media : mediaList){
             boolean thisMediaNeedUpdate = false;
             Film film = findConnectedFilmForMedia(media);
-            if(film==null){
+            if(film == null){
                 notFindMediaList.add(media);
                 continue;
             }
@@ -283,7 +283,7 @@ public class FilmServiceImpl implements FilmService {
                     //不存在add进去，并更新number
                     String[] asAArray = null;
                     if(star.getAsActor()!=null)
-                        star.getAsActor().split(",");
+                        asAArray= star.getAsActor().split(",");
                     if(asAArray!=null && !Arrays.asList(asAArray).contains(filmId)){
                         String[] asAArrayNew = new String[asAArray.length+1];
                         System.arraycopy(asAArray, 0, asAArrayNew, 0, asAArray.length);//将a数组内容复制新数组b

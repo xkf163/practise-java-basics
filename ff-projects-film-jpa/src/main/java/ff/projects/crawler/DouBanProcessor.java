@@ -7,10 +7,14 @@ import ff.projects.service.PersonService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,20 +28,18 @@ public class DouBanProcessor implements PageProcessor {
     public static final String URL_FILM = "/subject/\\d+/";
 //  https://movie.douban.com/subject/1291839/?from=subject-page
     public static final String URL_FILM_FROM_SUBJECT_PAGE=  "/subject/\\d+/\\?from=subject-page";
-
     //豆瓣首页抓取用
     public static final String URL_FILM_FROM_SHOWING=  "/subject/\\d+/\\?from=showing";
     //https://movie.douban.com/subject/24753477/?tag=%E7%83%AD%E9%97%A8&from=gaia
     public static final String URL_FILM_FROM_HOT=  "/subject/\\d+/\\?tag=.*&from=.*";
-
-    //celebrity/1022721/
     public static final String URL_PERSON= "/celebrity/\\d+/";
     public static final String URL_PERSON_FULL= "https://movie\\.douban\\.com/celebrity/\\d+/";
-
     public static final String URL_HOMEPAGE= "https://movie\\.douban\\.com";
 
-    public static List<Film> newFilmList;
-    public static List<Person> newPersonList;
+    public static List<Film> savedFilms; //此次任务最终完成的数据，返回给前端
+    public static List<Person> savedPersons;
+    public static List<Film> needSaveFilms;  //临时数据，每次批量保存后清空
+    public static List<Person> needSavePersons; //临时数据，每次批量保存后清空
 
     @Autowired
     FilmService filmService;
@@ -45,8 +47,13 @@ public class DouBanProcessor implements PageProcessor {
     @Autowired
     PersonService personService;
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     //爬虫是否单个电影爬取，默认单个爬取完成后就结束；false即无限延伸爬取，时间比较长
     public boolean singleCrawler = true;
+    //批量保存临界个数
+    public int batchNumber = 10 ;
 
     private Site site = Site
             .me()
@@ -75,7 +82,6 @@ public class DouBanProcessor implements PageProcessor {
             .addCookie("dbcl2","163054123:OPWsXSJ6OhU")
             .addCookie("ck","rlyv")
             .addCookie("as","https://movie.douban.com/")
-
             .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
             .addHeader("Accept-Encoding", "gzip, deflate, br")
             .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
@@ -89,10 +95,8 @@ public class DouBanProcessor implements PageProcessor {
 
 
     @Override
+    @Transactional
     public void process(Page page) {
-
-        System.out.println(singleCrawler);
-
         //电影页面
         if (page.getUrl().regex(URL_FILM).match() ) {
             //从网页中提取filmObject，只是部分字段，用于判断是否需要保存此object。
@@ -101,10 +105,7 @@ public class DouBanProcessor implements PageProcessor {
                 //完整提取film信息
                 f = filmService.extractFilmSecondFromCrawler(page,f);
                 //filmService.save(f);
-                newFilmList.add(f);
-                //从页面发现后续的url地址来抓取
-                //1)当前电影所有人物的url
-                page.addTargetRequests(page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).all());
+                needSaveFilms.add(f);
                 if(!this.singleCrawler){
                     //2）后续的电影url，有10个
                     page.addTargetRequests(page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE).all());
@@ -114,6 +115,10 @@ public class DouBanProcessor implements PageProcessor {
                 page.setSkip(true);
             }
 
+            //从页面发现后续的url地址来抓取:不管film存不存在，都把人物url加入到任务列表中，避免：某些情况film成功抓取后，人物抓取时由于超时或其他错误造成抓取失败，抓取失败后就永远不会再进行抓取了
+            //1)当前电影所有人物的url
+            page.addTargetRequests(page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).all());
+
         }else if(page.getUrl().regex(URL_PERSON).match()){
 
             Person p = personService.extractFilmFirstFromCrawler(page);
@@ -121,7 +126,7 @@ public class DouBanProcessor implements PageProcessor {
                 //完整提取person信息
                 p = personService.extractFilmSecondFromCrawler(page);
                 //personService.save(p);
-                newPersonList.add(p);
+                needSavePersons.add(p);
                 if(!this.singleCrawler){
                     //最受欢迎5部
                     page.addTargetRequests(page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM).all());
@@ -142,6 +147,37 @@ public class DouBanProcessor implements PageProcessor {
         } else {
 //            错误：URL不符合规则,直接退出
         }
+
+
+        /**
+         * 批量保存，而不是抓一个就保存一次
+         */
+        int size = needSavePersons.size()+needSaveFilms.size();
+        if(size == batchNumber){
+            System.out.println("needSavePersons::::"+needSavePersons.size());
+            System.out.println("needSaveFilms::::"+needSaveFilms.size());
+            for(int i = 0;i<needSavePersons.size();i++){
+                Person person = needSavePersons.get(i);
+                entityManager.persist(person);
+            }
+            for (int i = 0;i<needSaveFilms.size();i++){
+                Film film = needSaveFilms.get(i);
+                entityManager.persist(film);
+            }
+            entityManager.flush();
+            entityManager.clear();
+            //加入到savedPersons
+            savedPersons.addAll(needSavePersons);
+            needSavePersons.clear();
+            savedFilms.addAll(needSaveFilms);
+            needSaveFilms.clear();
+        }
+
+        System.out.println("page.getTargetRequests().size() 列表任务： "+page.getTargetRequests().size());
+
+
+
+
 
     }
 
