@@ -163,13 +163,13 @@ public class ScanServiceImpl implements ScanService {
             FileTime fileTime= null;
             Calendar cd = Calendar.getInstance();
             try {
-                fileTime = Files.readAttributes(Paths.get(fullPath), BasicFileAttributes.class).creationTime();
+                fileTime = Files.readAttributes(Paths.get(fullPathAll), BasicFileAttributes.class).creationTime();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             m.setFullPath(fullPath);
             m.setDiskNo(diskNo);
-            m.setName(fullPath.lastIndexOf("\\")>0?fullPath.substring(fullPath.lastIndexOf("\\")+1,fullPath.length()):fullPath);
+            m.setName(fullPath.lastIndexOf("\\")>0?fullPath.substring(fullPath.lastIndexOf("\\")+1,fullPath.length()):fullPath.substring(1,fullPath.length()));
             m.setDiskSize(calcFolderSize(f));
             m.setMediaSize(calc(calcFolderSize(f)));
             //f的最后修改时间
@@ -204,8 +204,8 @@ public class ScanServiceImpl implements ScanService {
 
             m.setYear(Short.parseShort(year));
             m.setNameChn(mediaName.substring(0,mediaName.indexOf(".")));
-            if(finded && mediaName.indexOf(year)-1>mediaName.indexOf(".")+1)
-                m.setNameEng(mediaName.substring(mediaName.indexOf(".")+1,mediaName.indexOf(year)-1).replaceAll("\\."," "));
+            if(finded && mediaName.lastIndexOf(year)-1>mediaName.indexOf(".")+1)
+                m.setNameEng(mediaName.substring(mediaName.indexOf(".")+1,mediaName.lastIndexOf(year)-1).replaceAll("\\."," "));
 
             if(m.getNameChn()==null || m.getNameEng()==null || m.getYear()==null){
                 addFailedMediaEntriesList.add(m);

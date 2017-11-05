@@ -66,6 +66,21 @@
 
         }
 
+        function crawlerStop(){
+            $.ajax({
+                url:"/crawler/stop",
+                type:"get",
+                data:"",
+                dataType: "json",
+                success:function (obj) {
+                    if(!obj.code) {
+                        var tbl = $("#resText");
+                        tbl.empty();
+                        tbl.html(obj.data);
+                    }
+                }
+            });
+        }
 
 
         function crawling(){
@@ -128,7 +143,6 @@
                 dataType: "json",
                 success:function (obj) {
                     //alert(data);
-                    //此处data={"Success":true}实际为字符串，而不是json对象，需要用如下代码处理
                     //var obj = jQuery.parseJSON(data);
                     if(!obj.code){
                         var needUpdateMediaLen = obj.data[0].length;
@@ -314,6 +328,9 @@
                         <div>
                             <a href="javascript:void(0);" onclick="connectFilmForMedia();" class="easyui-linkbutton" style="width: 110px">关联Media&Film</a>
                         </div>
+                        <div>
+                            从上到下：盘O系列-P盘合集-Q盘亚洲-R盘驿站
+                        </div>
                     </div>
 
                 </div>
@@ -324,24 +341,36 @@
                                 <div>起始页面地址：</div>
                                 <input class="easyui-textbox" style="width:70%" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="required:true" />
                             </div>
-                            <div style="margin-bottom:5px;display: inline-block;width: 100%">
+                            <div style="display: inline-block;width: 100%">
                                <div style="float: left;display: inline-block;">
                                    <div>线程数：</div>
                                    <input class="easyui-textbox" style="width:80%" name="thread" value="2" data-options="required:true"/>
                                </div>
                                 <div style="float: left;display: inline-block;margin-left: 10%">
                                     <div>批量保存临界值：</div>
-                                    <input class="easyui-textbox" style="width:50%" name="batchNumber" value="10" data-options="required:true"/>
+                                    <input class="easyui-textbox" style="width:50%" name="batchNumber" value="5" data-options="required:true"/>
                                 </div>
                             </div>
-                            <div style="margin-bottom:5px">
-                                延伸爬取：<input type="checkbox" name="mutil" value="1"/>
+                            <div style="display: inline-block;width: 100%;">
+                                <div style="margin-bottom:5px;float: left;display: inline-block;width: 30%">
+                                    <input type="checkbox" name="homepage" value="1"/>首页进入
+                                </div>
+                                <div style="margin-bottom:5px;float: left;display: inline-block">
+                                    <input type="checkbox" name="mutil" value="1"/>延伸爬取
+                                </div>
+
                             </div>
-                            <div style="margin-bottom:5px">
-                                首页进入：<input type="checkbox" name="homepage" value="1"/>
+                            <div style="display: inline-block;width: 100%;">
+                                <div style="margin-bottom:5px;float: left;display: inline-block;width: 30%">
+                                    <input type="checkbox" name="keySearch" value="1"/>未关联片名搜索
+                                </div>
+                                <div style="margin-left: 5px;margin-bottom:5px;float: left;display: inline-block;">
+                                    <input type="checkbox" name="onePage" value="1" checked/>只爬第一页结果
+                                </div>
                             </div>
-                            <div>
+                            <div style="display: inline-block">
                                 <a href="javascript:void(0);" onclick="crawling();" class="easyui-linkbutton" style="width: 80px">开 爬</a>
+                                <a href="javascript:void(0);" onclick="crawlerStop();" class="easyui-linkbutton" style="width: 80px">终止</a>
                             </div>
                         </form>
                     </div>

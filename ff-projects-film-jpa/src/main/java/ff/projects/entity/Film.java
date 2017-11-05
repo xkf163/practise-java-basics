@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Created by F on 2017/6/27.
  */
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(name = "cons_film",columnNames = {"doubanNo","imdbNo","subject"})},indexes ={@Index(name = "index_film",columnList = "subject,doubanNo")})
+@Table(name = "fm_film",uniqueConstraints = {@UniqueConstraint(name = "cons_film",columnNames = {"doubanNo","imdbNo","subject"})},indexes ={@Index(name = "index_film",columnList = "subject,doubanNo")})
 @Data
 public class Film implements Serializable{
 

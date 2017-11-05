@@ -3,6 +3,8 @@ package ff.projects.service;
 import ff.projects.entity.Person;
 import us.codecraft.webmagic.Page;
 
+import java.util.List;
+
 /**
  * @Author:xukangfeng
  * @Description
@@ -23,4 +25,6 @@ public interface PersonService {
     boolean needCrawler(Person person);
 
     Person findByDoubanNo(String doubanNo);
+
+    List<String> listPersonsDouBanNo();
 }

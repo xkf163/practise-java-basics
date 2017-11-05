@@ -1,6 +1,7 @@
 package ff.projects.service.impl;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.entity.*;
 import ff.projects.repository.FilmRepository;
 import ff.projects.repository.MediaRepository;
@@ -9,6 +10,7 @@ import ff.projects.service.FilmService;
 import ff.projects.service.PersonService;
 import ff.projects.service.StarService;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.select.Collector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import us.codecraft.webmagic.selector.Selectable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by xukangfeng on 2017/10/28 13:00
@@ -200,9 +203,8 @@ public class FilmServiceImpl implements FilmService {
         //遍历库中stars，组成map，，后续根据doubanid来判断库中是否已存在
         for (Star star : starsList){
             starHashMapInit.put(star.getDouBanNo(),star);
-            starHashMapFinal=starHashMapInit;
         }
-
+        starHashMapFinal=new HashMap<>(starHashMapInit);
 
 
         QMedia qMedia = QMedia.media;
@@ -431,5 +433,32 @@ public class FilmServiceImpl implements FilmService {
         return (List<Film>) filmRepository.findAll(predicate1,new Sort("year"));
     }
 
+    /**
+     * 返回所有数据库中已存在的film 的 doubanNo
+     */
 
+    @Override
+    public List<String> listFilmsDouBanNo() {
+
+        QFilm qFilm = QFilm.film;
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
+
+        List<String> listDouBanNo = jpaQueryFactory.select(qFilm.doubanNo)
+                .from(qFilm)
+                .fetch();
+        return listDouBanNo;
+
+    }
+
+    @Override
+    public List<String> listFilmsNameUnconnect() {
+        final QMedia qMedia = QMedia.media;
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
+
+        List<String> listFilmsName = jpaQueryFactory.selectFrom(qMedia)
+                .select(qMedia.nameChn)
+                .where(qMedia.film.id.isNull())
+                .fetch();
+        return listFilmsName;
+    }
 }

@@ -23,6 +23,17 @@ spring:
       additional-paths: src/main/java
   profiles:
     active: dev
+#  redis:
+#    database: 0
+#    host: 127.0.0.1
+#    port: 6379
+#    password:
+#    pool:
+#      max-active: 8
+#      max-wait: 1
+#      max-idle: 8
+#      min-idle: 0
+#    timeout: 0
 server:
   session:
     timeout: 1000
@@ -34,5 +45,6 @@ system:
   mainPage: redirect:/
   loginPage: pages/login
   registerPage: register
+
 
 

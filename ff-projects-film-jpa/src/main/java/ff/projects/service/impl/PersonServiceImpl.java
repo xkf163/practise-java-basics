@@ -1,6 +1,7 @@
 package ff.projects.service.impl;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import ff.projects.entity.Person;
 import ff.projects.entity.QPerson;
 import ff.projects.repository.PersonRepository;
@@ -10,6 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.selector.Selectable;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.List;
 
 /**
  * @Author:xukangfeng
@@ -21,6 +26,10 @@ public class PersonServiceImpl implements PersonService {
 
     @Autowired
     PersonRepository personRepository;
+
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Override
     public Person extractFilmSecondFromCrawler(Page page) {
@@ -95,5 +104,17 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public Person findByDoubanNo(String doubanNo) {
         return personRepository.findByDoubanNo(doubanNo);
+    }
+
+
+    @Override
+    public List<String> listPersonsDouBanNo() {
+        QPerson qPerson = QPerson.person;
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
+
+        List<String> listDouBanNo = jpaQueryFactory.select(qPerson.doubanNo)
+                .from(qPerson)
+                .fetch();
+        return listDouBanNo;
     }
 }

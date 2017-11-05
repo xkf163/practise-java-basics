@@ -2,10 +2,7 @@ package ff.projects.entity;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -14,6 +11,7 @@ import java.io.Serializable;
  */
 @Entity
 @Data
+@Table(name = "fm_star")
 public class Star implements Serializable{
 
     @Id

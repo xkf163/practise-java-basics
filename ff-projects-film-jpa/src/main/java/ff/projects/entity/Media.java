@@ -9,7 +9,7 @@ import java.util.Date;
 
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(name = "cons_media",columnNames = {"name","fullPath","deleted"})},indexes ={@Index(name = "index_media",columnList = "id,name")})
+@Table(name = "fm_media",uniqueConstraints = {@UniqueConstraint(name = "cons_media",columnNames = {"name","fullPath","deleted"})},indexes ={@Index(name = "index_media",columnList = "id,name")})
 @Data
 public class Media implements Serializable {
 

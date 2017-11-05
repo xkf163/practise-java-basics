@@ -77,16 +77,16 @@ public class MediaController {
                 }
                 List<Predicate> predicates = new ArrayList<>();
                 if(null!=startDate){
-                    predicates.add(criteriaBuilder.greaterThan(root.get("media").get("gatherDate"),startDate));
+                    predicates.add(criteriaBuilder.greaterThan(root.get("gatherDate"),startDate));
                 }
                 if(null!=endDate){
-                    predicates.add(criteriaBuilder.lessThan(root.get("media").get("gatherDate"),endDate));
+                    predicates.add(criteriaBuilder.lessThan(root.get("gatherDate"),endDate));
                 }
                 if(null!=name && !"".equals(name)){
-                    predicates.add(criteriaBuilder.like(root.get("media").get("name"),"%"+name+"%"));
+                    predicates.add(criteriaBuilder.like(root.get("name"),"%"+name+"%"));
                 }
                 if(null!=diskNo && !"".equals(diskNo)){
-                    predicates.add(criteriaBuilder.equal(root.get("media").get("diskNo"),diskNo.toUpperCase()));
+                    predicates.add(criteriaBuilder.equal(root.get("diskNo"),diskNo.toUpperCase()));
                 }
                 if(null!=year && !"".equals(year)){
                     predicates.add(criteriaBuilder.equal(root.get("year"),Short.parseShort(year)));

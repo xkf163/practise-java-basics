@@ -25,4 +25,9 @@ public interface FilmService {
     Object[] connectFilmForMedia();
 
     List<Film> listFilmsByStarId(String starId, String type);
+
+    List<String> listFilmsDouBanNo();
+
+    //所有数据库中未关联film的media。name
+    List<String> listFilmsNameUnconnect();
 }

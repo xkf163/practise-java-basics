@@ -2,6 +2,7 @@ package ff.projects.restcontroller;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import ff.projects.common.CrawlerCMD;
 import ff.projects.common.ResultBean;
 import ff.projects.crawler.DouBanProcessor;
 import ff.projects.entity.QFilm;
@@ -44,9 +45,19 @@ public class CrawlerController {
                               @RequestParam (value = "mutil" ,defaultValue = "0") String mutil,
                               @RequestParam (value = "homepage" ,defaultValue = "0") String homepage,
                               @RequestParam (value = "thread" ,defaultValue = "1") String thread,
+                              @RequestParam (value = "keySearch" ,defaultValue = "0") String keySearch,
+                              @RequestParam (value = "onePage" ,defaultValue = "1") String onePage,
                               @RequestParam (value = "batchNumber" ,defaultValue = "10") String batchNumber){
 
-        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage,batchNumber));
+        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage,batchNumber,keySearch,onePage));
+    }
+
+
+    @GetMapping(value = "/crawler/stop")
+    public ResultBean<String> crawlerStop(){
+        CrawlerCMD.globalSpider.stop();
+        System.out.println("*************爬虫收到退出指令");
+        return new ResultBean<>("消息指令发送成功!");
     }
 
 
