@@ -114,6 +114,8 @@ public class DouBanProcessor implements PageProcessor {
 
         //电影页面
         if (page.getUrl().regex(URL_FILM).match() ) {
+
+
             //从网页中提取filmObject，只是部分字段，用于判断是否需要保存此object。
             Film f = filmService.extractFilmFirstFromCrawler(page);
             if (filmService.needCrawler(f)) {
@@ -121,26 +123,7 @@ public class DouBanProcessor implements PageProcessor {
                 f = filmService.extractFilmSecondFromCrawler(page,f);
                 //filmService.save(f);
                 needSaveFilms.add(f);
-                if(!this.singleCrawler){
-                    //2）后续的电影url，有10个
 
-                    //2.1)取出后续电影doubannNo LIST，判断dbFilmsDouBanNoList是否已存在，已存在就不add了
-//                    List<String> urlList = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE).all();
-//                    List<String> urlsDoubanNoList = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE).regex("/subject/(\\d+)/").all();
-//                    List<String> urlListFinally = new ArrayList<>(urlList);
-//                    int i;
-//                    for (i=0;i <urlsDoubanNoList.size(); i++){
-//                        if(dbFilmsDouBanNo.contains(urlsDoubanNoList.get(i))){
-//                            //数据库已存在，不加入抓取队列
-//                            urlListFinally.remove(urlList.get(i));
-//                        }
-//                    }
-
-                    Selectable selectable = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE);
-                    List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
-                    page.addTargetRequests(filmListFinally);
-
-                }
             }else{
                 //skip this page
                 page.setSkip(true);
@@ -150,20 +133,19 @@ public class DouBanProcessor implements PageProcessor {
             //从页面发现后续的url地址来抓取:不管film存不存在，都把人物url加入到任务列表中，避免：某些情况film成功抓取后，人物抓取时由于超时或其他错误造成抓取失败，抓取失败后就永远不会再进行抓取了
             //1)当前电影所有人物的url
             if(true){
-
-//                List<String> personList =page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).all();
-//                List<String> personDouBanNoList =page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON).regex("/celebrity/(\\d+)/").all();
-//                List<String> personListFinally = new ArrayList<>(personList);
-//                int i;
-//                for (i=0;i <personDouBanNoList.size(); i++){
-//                    if(dbPersonsDouBanNo.contains(personDouBanNoList.get(i))){
-//                        //数据库已存在，不加入抓取队列
-//                        personListFinally.remove(personList.get(i));
-//                    }
-//                }
                 Selectable selectable = page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON);
                 List<String> personListFinally = filterUrl(selectable,"/celebrity/(\\d+)/",dbPersonsDouBanNo);
                 page.addTargetRequests(personListFinally);
+
+            }
+
+            //不管当前film是否已存在，还是把关联film是加入到任务队列，尽可能扩大范围
+            if(!this.singleCrawler){
+                //2）后续的电影url，有10个
+                //2.1)取出后续电影doubannNo LIST，判断dbFilmsDouBanNoList是否已存在，已存在就不add了
+                Selectable selectable = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE);
+                List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
+                page.addTargetRequests(filmListFinally);
 
             }
 
@@ -178,22 +160,21 @@ public class DouBanProcessor implements PageProcessor {
                 p = personService.extractFilmSecondFromCrawler(page);
                 //personService.save(p);
                 needSavePersons.add(p);
-                if(!this.singleCrawler){
-                    //最受欢迎5部
-                    //page.addTargetRequests(page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM).all());
 
-                    Selectable selectable = page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM);
-                    List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
-                    page.addTargetRequests(filmListFinally);
-
-
-                    //合作2次以上的影人
-                    //page.addTargetRequests(page.getHtml().xpath("//div[@id='partners']").css("div.pic").links().regex(URL_PERSON).all());
-                }
             }else {
                 page.setSkip(true);
             }
 
+            //扩大爬虫范围，不管当前person是否已经存在
+            if(!this.singleCrawler){
+                //最受欢迎5部
+                //page.addTargetRequests(page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM).all());
+                Selectable selectable = page.getHtml().xpath("//div[@id='best_movies']").css("div.info").links().regex(URL_FILM);
+                List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
+                page.addTargetRequests(filmListFinally);
+                //合作2次以上的影人
+                //page.addTargetRequests(page.getHtml().xpath("//div[@id='partners']").css("div.pic").links().regex(URL_PERSON).all());
+            }
 
 
         } else if(page.getUrl().regex(URL_SEARCH).match()){
@@ -226,8 +207,8 @@ public class DouBanProcessor implements PageProcessor {
         /**
          * 批量保存，而不是抓一个就保存一次
          */
-        System.out.println("needSavePersons::::"+needSavePersons.size());
-        System.out.println("needSaveFilms::::"+needSaveFilms.size());
+        System.out.println("-->NeedSavePersons::::"+needSavePersons.size());
+        System.out.println("-->NeedSaveFilms::::::"+needSaveFilms.size());
         int size = needSavePersons.size()+needSaveFilms.size();
         if(size >= batchNumber){
             try {

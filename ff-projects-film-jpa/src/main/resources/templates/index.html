@@ -315,40 +315,19 @@
 
             <div title="首页" fit="true" style="padding: 5px;width: 100%">
 
-                <div style="float: left;display: inline;width:55%">
-                    <div class="easyui-panel" title="遍历硬盘文件夹" style="float:left;height:120px;padding: 15px;margin-bottom: 5px">
-                        <span>文件夹入口：</span>
-                        <form id="scan"  method="post" class="easyui-form" style="margin-top:5px">
-                            <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 70%" />
-                            <a href="javascript:void(0);" onclick="scanning();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
-                        </form>
-                    </div>
-
-                    <div class="easyui-panel" title="日志" id="logText" style="height: 105px;padding: 15px">
-                        <div>
-                            <a href="javascript:void(0);" onclick="connectFilmForMedia();" class="easyui-linkbutton" style="width: 110px">关联Media&Film</a>
-                        </div>
-                        <div>
-                            从上到下：盘O系列-P盘合集-Q盘亚洲-R盘驿站
-                        </div>
-                    </div>
-
-                </div>
-                <div style="float: left;display: inline;width:40%;margin-left: 1%">
-                    <div class="easyui-panel" title="豆瓣爬虫配置" style="float:left;height:230px;padding: 15px;margin-bottom: 5px">
+                <div style="float: left;display: inline;width:35%">
+                    <div class="easyui-panel" title="豆瓣爬虫配置" style="float:left;height:270px;padding: 15px;margin-bottom: 5px">
                         <form id="crawler" method="post" class="easyui-form">
                             <div style="margin-bottom:5px">
-                                <div>起始页面地址：</div>
-                                <input class="easyui-textbox" style="width:70%" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="required:true" />
+                                <div>起始页面地址：(回车换行)</div>
+                                <input class="easyui-textbox" style="width:90%;height: 80px" name="url"  value="https://movie.douban.com/subject/10512661/" data-options="multiline:true" />
                             </div>
                             <div style="display: inline-block;width: 100%">
-                               <div style="float: left;display: inline-block;">
-                                   <div>线程数：</div>
-                                   <input class="easyui-textbox" style="width:80%" name="thread" value="2" data-options="required:true"/>
-                               </div>
-                                <div style="float: left;display: inline-block;margin-left: 10%">
-                                    <div>批量保存临界值：</div>
-                                    <input class="easyui-textbox" style="width:50%" name="batchNumber" value="5" data-options="required:true"/>
+                                <div style="float: left;display: inline-block;width: 30%">
+                                    线程数：<input class="easyui-textbox" name="thread" style="width: 30%" value="2" data-options="required:true"/>
+                                </div>
+                                <div style="float: left;display: inline-block;width: 55%">
+                                    批量保存临界值：<input class="easyui-textbox" name="batchNumber" style="width: 20%" value="5" data-options="required:true"/>
                                 </div>
                             </div>
                             <div style="display: inline-block;width: 100%;">
@@ -370,17 +349,34 @@
                             </div>
                             <div style="display: inline-block">
                                 <a href="javascript:void(0);" onclick="crawling();" class="easyui-linkbutton" style="width: 80px">开 爬</a>
-                                <a href="javascript:void(0);" onclick="crawlerStop();" class="easyui-linkbutton" style="width: 80px">终止</a>
+                                <a href="javascript:void(0);" onclick="crawlerStop();" class="easyui-linkbutton" style="margin-left:10px;width: 80px">终止</a>
                             </div>
                         </form>
                     </div>
+
+                    <div class="easyui-panel" title="遍历硬盘文件夹" style="float:left;height:120px;padding: 10px;margin-bottom: 5px">
+                        <span>文件夹入口：</span>
+                        <form id="scan"  method="post" class="easyui-form" style="margin-top:5px">
+                            <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 70%" />
+                            <a href="javascript:void(0);" onclick="scanning();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
+                        </form>
+                    </div>
+
+                    <div class="easyui-panel" title="日志" id="logText" style="height: 105px;padding: 10px">
+                        <div>
+                            <a href="javascript:void(0);" onclick="connectFilmForMedia();" class="easyui-linkbutton" style="width: 110px">关联Media&Film</a>
+                        </div>
+                        <div>
+                            从上到下：盘O系列-P盘合集-Q盘亚洲-R盘驿站
+                        </div>
+                    </div>
+
                 </div>
-
-
-                <div style="width:95.5%;float: left;display: inline;margin-top: 5px">
-                    <div class="easyui-panel" title="日志" id="resText" style="height: 260px;padding: 5px">
+                <div style="float: left;display: inline;width:60%;margin-left: 1%">
+                    <div class="easyui-panel" title="日志" id="resText" style="height:500px;padding: 5px">
                     </div>
                 </div>
+
 
                 </div>
 

@@ -73,9 +73,11 @@ public class CrawlerServiceImpl implements CrawlerService {
             }
             Spider.create(douBanProcessor).addUrl(listSearchUrl.toArray(new String[listSearchUrl.size()])).thread(Integer.parseInt(thread)).run();
         }else{
+            //转换成数组
+            String[] targetUrls= singleFilmUrl.split("\r\n");
 
             //默认spider
-            Spider spider = Spider.create(douBanProcessor).addUrl(singleFilmUrl).thread(Integer.parseInt(thread));
+            Spider spider = Spider.create(douBanProcessor).addUrl(targetUrls).thread(Integer.parseInt(thread));
             CrawlerCMD.globalSpider = spider;
             spider.run();
         }
