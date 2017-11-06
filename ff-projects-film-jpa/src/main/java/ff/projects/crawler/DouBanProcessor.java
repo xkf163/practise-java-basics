@@ -123,7 +123,15 @@ public class DouBanProcessor implements PageProcessor {
                 f = filmService.extractFilmSecondFromCrawler(page,f);
                 //filmService.save(f);
                 needSaveFilms.add(f);
+                //不管当前film是否已存在，还是把关联film是加入到任务队列，尽可能扩大范围
+                if(!this.singleCrawler){
+                    //2）后续的电影url，有10个
+                    //2.1)取出后续电影doubannNo LIST，判断dbFilmsDouBanNoList是否已存在，已存在就不add了
+                    Selectable selectable = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE);
+                    List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
+                    page.addTargetRequests(filmListFinally);
 
+                }
             }else{
                 //skip this page
                 page.setSkip(true);
@@ -139,15 +147,7 @@ public class DouBanProcessor implements PageProcessor {
 
             }
 
-            //不管当前film是否已存在，还是把关联film是加入到任务队列，尽可能扩大范围
-            if(!this.singleCrawler){
-                //2）后续的电影url，有10个
-                //2.1)取出后续电影doubannNo LIST，判断dbFilmsDouBanNoList是否已存在，已存在就不add了
-                Selectable selectable = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE);
-                List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
-                page.addTargetRequests(filmListFinally);
 
-            }
 
 
 
