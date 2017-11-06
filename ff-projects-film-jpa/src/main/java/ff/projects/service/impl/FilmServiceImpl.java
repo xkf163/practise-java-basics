@@ -10,7 +10,6 @@ import ff.projects.service.FilmService;
 import ff.projects.service.PersonService;
 import ff.projects.service.StarService;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.select.Collector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import us.codecraft.webmagic.selector.Selectable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by xukangfeng on 2017/10/28 13:00
@@ -165,7 +163,8 @@ public class FilmServiceImpl implements FilmService {
         //1）导演和主演列表为空就skip,不保存
         //2）发现集数不为空，判断是电视剧，
         //3）暂无评分 也不保存
-        if (StringUtils.isBlank(f.getActors()) || StringUtils.isBlank(f.getDirectors()) || f.getEpisodeNumber()!=null || f.getDoubanRating()==null){
+        //|| StringUtils.isBlank(f.getDirectors()) 去掉了，有些情况导演不知名，可能为空
+        if (StringUtils.isBlank(f.getActors())  || f.getEpisodeNumber()!=null || f.getDoubanRating()==null){
             //skip this page
             return false;
         }
@@ -208,7 +207,14 @@ public class FilmServiceImpl implements FilmService {
 
 
         QMedia qMedia = QMedia.media;
-        List<Media> mediaList = (List<Media>) mediaRepository.findAll(qMedia.deleted.eq(0));
+
+        List<Media> mediaList;
+        if(true){
+            //只处理没有关联film的Medias
+            mediaList = (List<Media>) mediaRepository.findAll(qMedia.deleted.eq(0).and(qMedia.film.isNull()));
+        }else{
+            mediaList = (List<Media>) mediaRepository.findAll(qMedia.deleted.eq(0));
+        }
 
         for(Media media : mediaList){
             boolean thisMediaNeedUpdate = false;
@@ -385,29 +391,56 @@ public class FilmServiceImpl implements FilmService {
         if(media.getFilm()!=null){
             return media.getFilm();
         }
-
+        /**1）namechn和year完全匹配
+         * 1.1）size=1 over
+         * 1.2）size>1 nameEng contain subjectMain or subjectOther over
+         * 1.3）none nameEng contain subjectMain and nameCHN contain subjectOther
+         * 1.3.1）size=1 over
+         * 1.3.2) over
+         *
+         */
         QFilm qFilm = QFilm.film;
         Predicate[] predicateArray = new Predicate[6];
-        //1: subject精确匹配
-        predicateArray[0]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
-        //2:
-        predicateArray[1]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
-        //3:
-        predicateArray[2]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
-
-        //predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameChn().trim())).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
-        //3: 0
-        predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
-        //2: 2>1
-        predicateArray[4]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
-
-        predicateArray[5]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().notEqualsIgnoreCase(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
-        for (int j = 0; j<predicateArray.length; j++){
-            List<Film> filmList = (List<Film>) filmRepository.findAll(predicateArray[j]);
-            if(filmList.size() == 1){
-                return filmList.get(0);
+        predicateArray[0] = qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
+        predicateArray[1] = qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim())).and(qFilm.year.eq(media.getYear()));
+        List<Film> films = (List<Film>) filmRepository.findAll(predicateArray[0]);
+        if(films.size()== 1){
+            return films.get(0);
+        }else if(films.size()>1){
+            for(Film film : films){
+                String nameEng = media.getNameEng();
+                if(nameEng!=null & (film.getSubjectMain().indexOf(nameEng)>0 | film.getSubjectOther().indexOf(nameEng)>0)){
+                    return film;
+                }
+            }
+        }else {
+            films = (List<Film>) filmRepository.findAll(predicateArray[1]);
+            if(films.size()==1){
+                return films.get(0);
             }
         }
+
+
+        //        //1: subject精确匹配
+//        predicateArray[0]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
+//        //2:
+//        predicateArray[1]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+//        //3:
+//        predicateArray[2]=qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim())).and(qFilm.year.eq(media.getYear()));
+//        //predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(mediaVO.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(mediaVO.getNameChn().trim())).and(qFilm.subjectMain.trim().contains(mediaVO.getNameEng().trim())).and(qFilm.year.eq(mediaVO.getYear()));
+//        //3: 0
+//        predicateArray[3]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+//        //2: 2>1
+//        predicateArray[4]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+//
+//        predicateArray[5]=qFilm.subject.trim().notEqualsIgnoreCase(media.getNameChn().trim()).and(qFilm.subjectOther.trim().notEqualsIgnoreCase(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
+//
+//        for (int j = 0; j<predicateArray.length; j++){
+//            List<Film> filmList = (List<Film>) filmRepository.findAll(predicateArray[j]);
+//            if(filmList.size() == 1){
+//                return filmList.get(0);
+//            }
+//        }
 
         return null;
 
