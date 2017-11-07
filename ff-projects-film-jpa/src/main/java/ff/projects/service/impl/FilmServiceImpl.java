@@ -47,7 +47,7 @@ public class FilmServiceImpl implements FilmService {
         //影片页
         //1）片名
         page.putField("subject", page.getHtml().xpath("//title/text()").regex("(.*)\\s*\\(豆瓣\\)"));
-        f.setSubject(page.getResultItems().get("subject").toString());
+        f.setSubject(page.getResultItems().get("subject").toString().trim());
 
 
         Selectable selectableInfo = page.getHtml().xpath("//div[@id='info']");
@@ -71,6 +71,10 @@ public class FilmServiceImpl implements FilmService {
         if (null != episodeNumber && !"".equals(episodeNumber)) {
             f.setEpisodeNumber(episodeNumber);
         }
+        //8）年代
+        page.putField("year", page.getHtml().xpath("//div[@id='content']/h1//span[@class='year']/text()").regex("\\((.*)\\)"));
+        if(page.getResultItems().get("year").toString()!=null)
+            f.setYear(Short.parseShort(page.getResultItems().get("year").toString()));
 
         return f;
     }
@@ -95,10 +99,10 @@ public class FilmServiceImpl implements FilmService {
         f.setImdbNo(imdbNo);
         //
         page.putField("subjectMain", page.getHtml().xpath("//div[@id='content']/h1//span[@property='v:itemreviewed']/text()"));
-        f.setSubjectMain(page.getResultItems().get("subjectMain").toString());
-        //年代
-        page.putField("year", page.getHtml().xpath("//div[@id='content']/h1//span[@class='year']/text()").regex("\\((.*)\\)"));
-        f.setYear(Short.parseShort(page.getResultItems().get("year").toString()));
+        f.setSubjectMain(page.getResultItems().get("subjectMain").toString().trim());
+//        //年代
+//        page.putField("year", page.getHtml().xpath("//div[@id='content']/h1//span[@class='year']/text()").regex("\\((.*)\\)"));
+//        f.setYear(Short.parseShort(page.getResultItems().get("year").toString()));
 //      page.putField("imdb", page.getHtml().xpath("//div[@id='info']").regex("<a href=\"http://www.imdb.com/title/tt\\d+\" target=\"_blank\" rel=\"nofollow\">(tt\\d+)</a>"));
         page.putField("introduce", page.getHtml().xpath("//div[@class='related-info']//div[@class='indent']//span[@property='v:summary']/text()"));
         f.setIntroduce(page.getResultItems().get("introduce").toString());
@@ -158,22 +162,37 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public boolean needCrawler(Film f) {
+    public String[] needCrawler(Film f) {
+
+        String[] retString = {"true","false"}; //第一个参数表示是否需要抓取，第二个表示是否是电视剧
+
         //几种不需要保存的条件：
         //1）导演和主演列表为空就skip,不保存
         //2）发现集数不为空，判断是电视剧，
         //3）暂无评分 也不保存
         //|| StringUtils.isBlank(f.getDirectors()) 去掉了，有些情况导演不知名，可能为空
-        if (StringUtils.isBlank(f.getActors())  || f.getEpisodeNumber()!=null || f.getDoubanRating()==null){
+        if (f.getEpisodeNumber()!=null || f.getDoubanRating()==null || f.getYear()==null){
             //skip this page
-            return false;
+            System.out.println("--->!!!film "+f.getSubject()+" 豆瓣编号为空、年代为空或者可能是电视剧");
+            retString[0] = "false";
+        }
+
+        if(StringUtils.isBlank(f.getActors()) && StringUtils.isBlank(f.getDirectors()) ){
+            System.out.println("--->!!!film "+f.getSubject()+" 导演和演员都为空");
+            retString[0] = "false";
+        }
+
+        if(f.getEpisodeNumber()!=null){
+            retString[1] = "true";
         }
         //4)判断数据库里是否存在
         Film film = findBySubjectAndDoubanNo(f);
         if (null != film){
-            return false;
+            System.out.println("--->!!!film "+f.getSubject()+" 已经存在于数据库中");
+            retString[0] = "false";
         }
-        return true;
+
+        return retString;
     }
 
 
@@ -189,7 +208,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     @Transactional
-    public Object[] connectFilmForMedia(){
+    public Object[] connectFilmForMedia(String onlyNone){
 
         List<Media> notFindMediaList = new ArrayList<>();
         List<Media> needUpdateMediaList = new ArrayList<>();
@@ -209,7 +228,7 @@ public class FilmServiceImpl implements FilmService {
         QMedia qMedia = QMedia.media;
 
         List<Media> mediaList;
-        if(true){
+        if(Boolean.valueOf(onlyNone)){
             //只处理没有关联film的Medias
             mediaList = (List<Media>) mediaRepository.findAll(qMedia.deleted.eq(0).and(qMedia.film.isNull()));
         }else{
@@ -217,12 +236,20 @@ public class FilmServiceImpl implements FilmService {
         }
 
         for(Media media : mediaList){
-            boolean thisMediaNeedUpdate = false;
+
+
+
             Film film = findConnectedFilmForMedia(media);
             if(film == null){
                 notFindMediaList.add(media);
                 continue;
             }
+
+
+            if(media.getId()==1270){
+                System.out.println("aaa");
+            }
+
 
             //-----当前正在处理的filmId
             String filmId = String.valueOf(film.getId());
@@ -254,13 +281,19 @@ public class FilmServiceImpl implements FilmService {
                         asDArrayNew[asDArrayNew.length-1]=filmId;
                         star.setAsDirector(StringUtils.join(asDArrayNew,","));
                         star.setAsDirectorNumber(asDArrayNew.length);
-                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
-                        if(starHashMapInit.containsKey(star.getDouBanNo())){
+
+                        //star是地址引用，故若已添加，不需再次添加
+                        if(!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)){
                             needUpdateStarList.add(star);
                         }
 
-                        thisMediaNeedUpdate=true;
+
+                    }else {
+                        //asdirector空的情况
+                        star.setAsDirector(filmId);
+                        star.setAsDirectorNumber(1);
                     }
+
                 }else{
                     //new
                     Person person =personService.findByDoubanNo(ddno);
@@ -275,9 +308,10 @@ public class FilmServiceImpl implements FilmService {
                     star.setNameExtend(person.getNameExtend());
                     star.setPerson(person);
                     needSaveStarList.add(star);
+
                     //加入到starlist，防止重复生成star数据
                     starHashMapFinal.put(star.getDouBanNo(),star);
-                    thisMediaNeedUpdate=true;
+
                 }
 
 
@@ -298,13 +332,22 @@ public class FilmServiceImpl implements FilmService {
                         asAArrayNew[asAArrayNew.length-1]=filmId;
                         star.setAsActor(StringUtils.join(asAArrayNew,","));
                         star.setAsActorNumber(asAArrayNew.length);
-                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
-                        if(starHashMapInit.containsKey(star.getDouBanNo())){
+
+                        //star是地址引用，故若已添加，不需再次添加
+                        if(!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)){
                             needUpdateStarList.add(star);
                         }
+//                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
+//                        if(starHashMapInit.containsKey(star.getDouBanNo())){
+//                            needUpdateStarList.add(star);
+//                        }
 
-                        thisMediaNeedUpdate=true;
-                    }
+
+                    }  else {
+                        //asactor空的情况
+                        star.setAsActor(filmId);
+                        star.setAsActorNumber(1);
+                }
 
                 }else{
                     //new
@@ -320,19 +363,19 @@ public class FilmServiceImpl implements FilmService {
                     star.setName(person.getName());
                     star.setNameExtend(person.getNameExtend());
                     star.setPerson(person);
+
                     needSaveStarList.add(star);
                     //加入到starlist，防止重复生成star数据
                     starHashMapFinal.put(star.getDouBanNo(),star);
-                    thisMediaNeedUpdate=true;
+
                 }
             }
 
             //step1)update media obj
-            if(thisMediaNeedUpdate){
                 media.setFilm(film);
                 media.setUpdateDate(new Date());
                 needUpdateMediaList.add(media);
-            }
+
 
 
         }
@@ -388,6 +431,9 @@ public class FilmServiceImpl implements FilmService {
      * @return
      */
     Film findConnectedFilmForMedia(Media media){
+        if(media.getId()==1270){
+            System.out.println("aaa");
+        }
         if(media.getFilm()!=null){
             return media.getFilm();
         }
@@ -402,7 +448,7 @@ public class FilmServiceImpl implements FilmService {
         QFilm qFilm = QFilm.film;
         Predicate[] predicateArray = new Predicate[6];
         predicateArray[0] = qFilm.subject.trim().eq(media.getNameChn().trim()).and(qFilm.year.eq(media.getYear()));
-        predicateArray[1] = qFilm.subjectMain.trim().contains(media.getNameEng().trim()).and(qFilm.subjectOther.contains(media.getNameChn().trim())).and(qFilm.year.eq(media.getYear()));
+        predicateArray[1] = (qFilm.subjectMain.trim().contains(media.getNameEng().trim()).or(qFilm.subjectOther.contains(media.getNameChn().trim()))).and(qFilm.year.eq(media.getYear()));
         List<Film> films = (List<Film>) filmRepository.findAll(predicateArray[0]);
         if(films.size()== 1){
             return films.get(0);

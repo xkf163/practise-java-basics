@@ -42,8 +42,8 @@ public class FilmController {
 
     @GetMapping(value = "/connectFilmForMedia")
     @ResponseBody
-    public ResultBean<Object[]> connectFilmForMedia(){
-        return new ResultBean<Object[]>(filmService.connectFilmForMedia());
+    public ResultBean<Object[]> connectFilmForMedia(@RequestParam(required = true,name = "onlyNone") String onlyNone){
+        return new ResultBean<Object[]>(filmService.connectFilmForMedia(onlyNone));
     }
 
 

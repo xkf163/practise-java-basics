@@ -34,6 +34,19 @@ public class TreeNodeController {
 
         //树3：操作平台------------s------------------
         treeNodeSet = new LinkedHashSet<>();
+
+        treeNode = new TreeNode();
+        treeNode.setText("已有关联");
+        treeNode.setDataUrl("/filmvo/years/");
+        treeNode.setHtmlUrl("/pages/table_filmVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
+
+        treeNode = new TreeNode();
+        treeNode.setText("未有关联");
+        treeNode.setDataUrl("/mediavo/unrelation/");
+        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
+        treeNodeSet.add(treeNode);
+
         treeNode = new TreeNode();
         treeNode.setText("重复下载");
         treeNode.setDataUrl("/mediavo/repetitive/");
@@ -52,6 +65,8 @@ public class TreeNodeController {
         treeNode.setHtmlUrl("/pages/table_mediaVO?toolbarType=toolbar_recycle&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
+
+
         pTreeNode = new TreeNode();
         pTreeNode.setText("操作平台");
         pTreeNode.setDataUrl("");
@@ -65,17 +80,7 @@ public class TreeNodeController {
 
         //数据整理
         treeNodeSet = new LinkedHashSet<>();
-        treeNode = new TreeNode();
-        treeNode.setText("已关联");
-        treeNode.setDataUrl("/filmvo/years/");
-        treeNode.setHtmlUrl("/pages/table_filmVO?dataUrl="+treeNode.getDataUrl());
-        treeNodeSet.add(treeNode);
 
-        treeNode = new TreeNode();
-        treeNode.setText("未关联");
-        treeNode.setDataUrl("/mediavo/unrelation/");
-        treeNode.setHtmlUrl("/pages/table_mediaVO?dataUrl="+treeNode.getDataUrl());
-        treeNodeSet.add(treeNode);
 
         treeNode = new TreeNode();
         treeNode.setText("导演列表");
@@ -90,7 +95,7 @@ public class TreeNodeController {
         treeNodeSet.add(treeNode);
 
         pTreeNode = new TreeNode();
-        pTreeNode.setText("电影资料详情");
+        pTreeNode.setText("影人作品");
         pTreeNode.setDataUrl("");
         pTreeNode.setHtmlUrl("");
         pTreeNode.setChildren(treeNodeSet);

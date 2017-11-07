@@ -118,32 +118,35 @@ public class DouBanProcessor implements PageProcessor {
 
             //从网页中提取filmObject，只是部分字段，用于判断是否需要保存此object。
             Film f = filmService.extractFilmFirstFromCrawler(page);
-            if (filmService.needCrawler(f)) {
+            String[] result = filmService.needCrawler(f);
+            if (Boolean.valueOf(result[0])) {
                 //完整提取film信息
                 f = filmService.extractFilmSecondFromCrawler(page,f);
                 //filmService.save(f);
                 needSaveFilms.add(f);
-                //不管当前film是否已存在，还是把关联film是加入到任务队列，尽可能扩大范围
-                if(!this.singleCrawler){
-                    //2）后续的电影url，有10个
-                    //2.1)取出后续电影doubannNo LIST，判断dbFilmsDouBanNoList是否已存在，已存在就不add了
-                    Selectable selectable = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE);
-                    List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
-                    page.addTargetRequests(filmListFinally);
 
-                }
             }else{
                 //skip this page
                 page.setSkip(true);
             }
 
             //判断是否是电影，电视剧跳过执行
-            //从页面发现后续的url地址来抓取:不管film存不存在，都把人物url加入到任务列表中，避免：某些情况film成功抓取后，人物抓取时由于超时或其他错误造成抓取失败，抓取失败后就永远不会再进行抓取了
-            //1)当前电影所有人物的url
-            if(true){
+            if(!Boolean.valueOf(result[1])){
+                //从页面发现后续的url地址来抓取:不管film存不存在，都把人物url加入到任务列表中，避免：某些情况film成功抓取后，人物抓取时由于超时或其他错误造成抓取失败，抓取失败后就永远不会再进行抓取了
+                //1)当前电影所有人物的url
                 Selectable selectable = page.getHtml().css("div.subject.clearfix").links().regex(URL_PERSON);
                 List<String> personListFinally = filterUrl(selectable,"/celebrity/(\\d+)/",dbPersonsDouBanNo);
                 page.addTargetRequests(personListFinally);
+
+                //不管当前film是否已存在，还是把关联film是加入到任务队列，尽可能扩大范围
+                if(!this.singleCrawler){
+                    //2）后续的电影url，有10个
+                    //2.1)取出后续电影doubannNo LIST，判断dbFilmsDouBanNoList是否已存在，已存在就不add了
+                    selectable = page.getHtml().xpath("//div[@class='recommendations-bd']/dl/dt").links().regex(URL_FILM_FROM_SUBJECT_PAGE);
+                    List<String> filmListFinally = filterUrl(selectable,"/subject/(\\d+)/",dbFilmsDouBanNo);
+                    page.addTargetRequests(filmListFinally);
+
+                }
 
             }
 
