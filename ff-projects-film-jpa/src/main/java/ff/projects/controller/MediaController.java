@@ -98,8 +98,15 @@ public class MediaController {
     }
 
 
-
-
+    /**
+     * 按下载日期排序的medias
+     * @param request
+     * @param page
+     * @param size
+     * @param sort
+     * @param order
+     * @return
+     */
     @PostMapping(value = "/mediavo/years")
     public Page<Media> listAll(HttpServletRequest request, @RequestParam(value = "page",defaultValue = "1",required = false) String page,
                                  @RequestParam(value = "rows",defaultValue = "10",required = false) String size,
@@ -211,12 +218,19 @@ public class MediaController {
     }
 
 
-
-
+    /**
+     * 未关联Medias
+     * @param request
+     * @param page
+     * @param size
+     * @param sort
+     * @param order
+     * @return
+     */
     @PostMapping(value = "/mediavo/unrelation/")
     public Page<Media> listAllUnRelation(HttpServletRequest request, @RequestParam(value = "page",defaultValue = "1",required = false) String page,
                                            @RequestParam(value = "rows",defaultValue = "10",required = false) String size,
-                                           @RequestParam(value = "sort",defaultValue = "nameChn",required = false) String sort,
+                                           @RequestParam(value = "sort",defaultValue = "gatherDate",required = false) String sort,
                                            @RequestParam(value = "order",defaultValue = "DESC",required = false) String order) {
         //排序及分页
         Sort ssort = new Sort(Sort.Direction.ASC,sort);

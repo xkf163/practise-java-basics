@@ -107,7 +107,7 @@ public class FilmController {
     @ResponseBody
     public Page<Film> listAll(HttpServletRequest request, @RequestParam(value = "page",defaultValue = "1",required = false) String page,
                               @RequestParam(value = "rows",defaultValue = "10",required = false) String size,
-                              @RequestParam(value = "sort",defaultValue = "subject",required = false) String sort,
+                              @RequestParam(value = "sort",defaultValue = "year",required = false) String sort,
                               @RequestParam(value = "order",defaultValue = "DESC",required = false) String order) {
         //排序及分页
         Sort ssort = new Sort(Sort.Direction.ASC,sort);

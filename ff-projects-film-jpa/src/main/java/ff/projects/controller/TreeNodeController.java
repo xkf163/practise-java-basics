@@ -55,7 +55,7 @@ public class TreeNodeController {
 
         treeNode = new TreeNode();
         treeNode.setText("增删改查");
-        treeNode.setDataUrl("/mediavo/years");
+        treeNode.setDataUrl("/mediavo/gatherdates");
         treeNode.setHtmlUrl("/pages/table_mediaVO?toolbarType=toolbar_add&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
