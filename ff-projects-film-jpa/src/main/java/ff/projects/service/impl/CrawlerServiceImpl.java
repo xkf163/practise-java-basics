@@ -39,7 +39,7 @@ public class CrawlerServiceImpl implements CrawlerService {
 
     @Override
     @Transactional
-    public Object[] running(String mutil, String singleFilmUrl, String thread, String homepage,String batchNumber,String keySearch,String onePage) {
+    public Object[] running(String mutil, String singleFilmUrl, String thread, String homepage,String batchNumber,String keySearch,String onePage,String directorEmpty,String actorEmpty) {
 
 
         //初始化doubanprocess数据
@@ -53,6 +53,9 @@ public class CrawlerServiceImpl implements CrawlerService {
 
         douBanProcessor.dbFilmsDouBanNo  = filmService.listFilmsDouBanNo();
         douBanProcessor.dbPersonsDouBanNo = personService.listPersonsDouBanNo();
+
+        douBanProcessor.directorAllowEmpty = directorEmpty;
+        douBanProcessor.actorAllowEmpty = actorEmpty;
 
         //批量保存临界值
         douBanProcessor.setBatchNumber(Integer.parseInt(batchNumber));

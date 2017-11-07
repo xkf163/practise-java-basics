@@ -47,9 +47,11 @@ public class CrawlerController {
                               @RequestParam (value = "thread" ,defaultValue = "1") String thread,
                               @RequestParam (value = "keySearch" ,defaultValue = "0") String keySearch,
                               @RequestParam (value = "onePage" ,defaultValue = "1") String onePage,
+                              @RequestParam (value = "director" ,defaultValue = "1") String directorEmpty,
+                              @RequestParam (value = "actor" ,defaultValue = "1") String actorEmpty,
                               @RequestParam (value = "batchNumber" ,defaultValue = "10") String batchNumber){
 
-        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage,batchNumber,keySearch,onePage));
+        return new ResultBean<Object[]>(crawlerService.running(mutil,singleFilmUrl,thread,homepage,batchNumber,keySearch,onePage,directorEmpty,actorEmpty));
     }
 
 

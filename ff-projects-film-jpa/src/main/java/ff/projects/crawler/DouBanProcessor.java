@@ -46,6 +46,8 @@ public class DouBanProcessor implements PageProcessor {
     public static List<String> dbPersonsDouBanNo; //数据库已存persons的doubanno
     public static List<String> dbFilmsDouBanNo; //数据库已存persons的doubanno
 
+    public static String actorAllowEmpty;
+    public static String directorAllowEmpty;
 
     @Autowired
     FilmService filmService;
@@ -118,7 +120,7 @@ public class DouBanProcessor implements PageProcessor {
 
             //从网页中提取filmObject，只是部分字段，用于判断是否需要保存此object。
             Film f = filmService.extractFilmFirstFromCrawler(page);
-            String[] result = filmService.needCrawler(f);
+            String[] result = filmService.needCrawler(f,directorAllowEmpty,actorAllowEmpty);
             if (Boolean.valueOf(result[0])) {
                 //完整提取film信息
                 f = filmService.extractFilmSecondFromCrawler(page,f);

@@ -338,9 +338,15 @@
                                 <div style="margin-bottom:5px;float: left;display: inline-block">
                                     <input type="checkbox" name="mutil" value="1"/>延伸爬取
                                 </div>
-
                             </div>
-                            <div style="display: inline-block;width: 100%;">
+                            <div style="display: inline-block;width: 100%">
+                                <div style="margin-bottom:5px;float: left;display: inline-block;">
+                                    可以为空字段：
+                                    <input type="checkbox" name="director" value="1"/>导演
+                                    <input type="checkbox" name="actor" value="1"/>演员
+                                </div>
+                            </div>
+                            <div style="display: inline-block;width: 100%;display: none">
                                 <div style="margin-bottom:5px;float: left;display: inline-block;width: 30%">
                                     <input type="checkbox" name="keySearch" value="1"/>未关联片名搜索
                                 </div>
@@ -355,13 +361,7 @@
                         </form>
                     </div>
 
-                    <div class="easyui-panel" title="遍历硬盘文件夹" style="float:left;height:120px;padding: 10px;margin-bottom: 5px">
-                        <span>文件夹入口：</span>
-                        <form id="scan"  method="post" class="easyui-form" style="margin-top:5px">
-                            <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 70%" />
-                            <a href="javascript:void(0);" onclick="scanning();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
-                        </form>
-                    </div>
+
 
                     <div class="easyui-panel" title="关联Media&Film" id="logText" style="height: 105px;padding: 10px">
                         <div style="float: left;display: inline-block;width: 30%">
@@ -375,7 +375,13 @@
                             从上到下：盘O系列-P盘合集-Q盘亚洲-R盘驿站
                         </p>
                     </div>
-
+                    <div class="easyui-panel" title="遍历硬盘文件夹" style="float:left;height:120px;padding: 10px;margin-bottom: 5px">
+                        <span>文件夹入口：</span>
+                        <form id="scan"  method="post" class="easyui-form" style="margin-top:5px">
+                            <input class="easyui-textbox"  name="parentFolder" type="text"  value="D:\201710" data-options="prompt:'请输入文件夹路径...'" style="width: 70%" />
+                            <a href="javascript:void(0);" onclick="scanning();" class="easyui-linkbutton" style="width: 80px"> 开 始 </a>
+                        </form>
+                    </div>
                 </div>
                 <div style="float: left;display: inline;width:60%;margin-left: 1%">
                     <div class="easyui-panel" title="日志" id="resText" style="height:500px;padding: 5px">
