@@ -45,6 +45,7 @@ public class CrawlerServiceImpl implements CrawlerService {
         //初始化doubanprocess数据
         douBanProcessor.setSingleCrawler(true);
 
+
         douBanProcessor.savedFilms=new ArrayList<>();
         douBanProcessor.savedPersons=new ArrayList<>();
 

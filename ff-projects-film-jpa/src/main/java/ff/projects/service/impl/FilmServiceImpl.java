@@ -65,8 +65,9 @@ public class FilmServiceImpl implements FilmService {
             f.setDoubanRating(Float.parseFloat(selectableRating.xpath("//strong/text()").toString()));
             f.setDoubanSum(Long.parseLong(selectableRating.xpath("//span[@property='v:votes']/text()").toString()));
         }
-        //7)集数
-        String episodeNumber = selectableInfo.regex("<span class=\"pl\">集数:</span>(.*)\n<br>\n<span class=\"pl\">").toString();
+        //7)集数<span class="pl">集数:</span><br>
+        String episodeNumber = selectableInfo.regex("<span class=\"pl\">集数:</span> (\\d+)\n"+
+                " <br>").toString();
         if (null != episodeNumber && !"".equals(episodeNumber)) {
             f.setEpisodeNumber(episodeNumber);
         }
@@ -175,34 +176,35 @@ public class FilmServiceImpl implements FilmService {
             System.out.println("--->!!!film "+f.getSubject()+" 豆瓣编号为空、年代为空");
             retString[0] = "false";
         }
-
-        if("0".equals(directrAllowEmpty) && "0".equals(actorAllowEmpty)){
-            if(StringUtils.isBlank(f.getActors()) && StringUtils.isBlank(f.getDirectors()) ){
-                System.out.println("--->!!!film "+f.getSubject()+" 导演和演员都为空");
-                retString[0] = "false";
-            }
-        }else if("1".equals(directrAllowEmpty) && "1".equals(actorAllowEmpty)){
-            //都可以为空，什么都不做
-
-        }else if("1".equals(directrAllowEmpty) || "1".equals(actorAllowEmpty)){
-            if(StringUtils.isBlank(f.getActors()) || StringUtils.isBlank(f.getDirectors()) ){
-                System.out.println("--->!!!film "+f.getSubject()+" 导演或演员为空");
-                retString[0] = "false";
+        if("true".equals(retString[0])) {
+            if ("0".equals(directrAllowEmpty) && "0".equals(actorAllowEmpty)) {
+                if (StringUtils.isBlank(f.getActors()) && StringUtils.isBlank(f.getDirectors())) {
+                    System.out.println("--->!!!film " + f.getSubject() + " 导演和演员都为空");
+                    retString[0] = "false";
+                }
+            } else if ("1".equals(directrAllowEmpty) && "1".equals(actorAllowEmpty)) {
+                //都可以为空，什么都不做
+            } else if ("1".equals(directrAllowEmpty) || "1".equals(actorAllowEmpty)) {
+                if (StringUtils.isBlank(f.getActors()) || StringUtils.isBlank(f.getDirectors())) {
+                    System.out.println("--->!!!film " + f.getSubject() + " 导演或演员为空");
+                    retString[0] = "false";
+                }
             }
         }
-
         //集数为1如圣斗士剧场版 ，故
         if(f.getEpisodeNumber()!=null && !"1".equals(f.getEpisodeNumber().trim())){
             retString[0] = "false";
             retString[1] = "true";
+            System.out.println("--->!!!film "+f.getSubject()+" 是电视剧（集数"+f.getEpisodeNumber()+"）");
         }
         //4)判断数据库里是否存在
-        Film film = findBySubjectAndDoubanNo(f);
-        if (null != film){
-            System.out.println("--->!!!film "+f.getSubject()+" 已经存在于数据库中");
-            retString[0] = "false";
+        if("true".equals(retString[0])) {
+            Film film = findBySubjectAndDoubanNo(f);
+            if (null != film) {
+                System.out.println("--->!!!film " + f.getSubject() + " 已经存在于数据库中");
+                retString[0] = "false";
+            }
         }
-
         return retString;
     }
 
