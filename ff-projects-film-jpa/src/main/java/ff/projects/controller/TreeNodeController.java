@@ -85,13 +85,13 @@ public class TreeNodeController {
         treeNode = new TreeNode();
         treeNode.setText("导演列表");
         treeNode.setDataUrl("/person/directors");
-        treeNode.setHtmlUrl("/pages/table_personVO?dataUrl="+treeNode.getDataUrl());
+        treeNode.setHtmlUrl("/pages/table_personVO?toolbarType=toolbar_person&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
         treeNode = new TreeNode();
         treeNode.setText("演员列表");
         treeNode.setDataUrl("/person/actors");
-        treeNode.setHtmlUrl("/pages/table_personVO?dataUrl="+treeNode.getDataUrl());
+        treeNode.setHtmlUrl("/pages/table_personVO?toolbarType=toolbar_person&dataUrl="+treeNode.getDataUrl());
         treeNodeSet.add(treeNode);
 
         pTreeNode = new TreeNode();
