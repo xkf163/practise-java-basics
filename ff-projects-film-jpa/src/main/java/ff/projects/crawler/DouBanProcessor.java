@@ -256,7 +256,7 @@ public class DouBanProcessor implements PageProcessor {
         int i;
         for (i=0;i <oriDouBanNoList.size(); i++){
             if(dbList.contains(oriDouBanNoList.get(i))){
-                //数据库已存在，不加入抓取队列
+                System.out.println("--->!!!film豆瓣编号"+oriDouBanNoList.get(i)+"在数据库已存在，不加入抓取队列");
                 finallyList.remove(oriList.get(i));
             }
         }

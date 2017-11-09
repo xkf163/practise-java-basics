@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 @Service
 public class ScanServiceImpl implements ScanService {
 
-    private static final String[] folderKeys  = new String[] {"720P","1080P","DTS","CMCT","TLF","CHD","HDS","HDSKY","FRDS","EPIC","HDAREA","ATOMS","TRUEHD","X264","X265","DVDRIP"};
+    private static final String[] folderKeys  = new String[] {"720P","1080P","1080I","DTS","CMCT","TLF","CHD","HDS","HDSKY","FRDS","EPIC","HDAREA","ATOMS","TRUEHD","X264","X265","DVDRIP"};
     private static final String[] filePostfix = new String[]{"MKV","TS","AVI"};
 
     @Autowired
