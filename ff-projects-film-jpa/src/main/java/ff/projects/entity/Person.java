@@ -1,5 +1,6 @@
 package ff.projects.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class Person implements Serializable {
 
     private String nameExtend;
 
+    @JsonIgnore
     @Column(columnDefinition = "TEXT")
     private String info;
 

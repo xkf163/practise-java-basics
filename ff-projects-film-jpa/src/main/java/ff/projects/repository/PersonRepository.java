@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PersonRepository extends JpaRepository<Person,Long>, QueryDslPredicateExecutor<Person> {
     Person findByDoubanNo(String doubanNo);
+
+
 }

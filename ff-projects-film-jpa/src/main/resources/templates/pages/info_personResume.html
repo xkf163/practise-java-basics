@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>table</title>
+    <title>人物简历</title>
     <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-themes/ui-cupertino/easyui.css">
     <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-1.5.1/themes/icon.css">
     <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.min.js"></script>
@@ -53,7 +53,8 @@
     </tr>
     </thead>
     <tbody>
-    <#list filmList as f>
+    <tr>参演作品</tr>
+    <#list filmsAct as f>
         <tr>
             <td>${f_index+1}</td>
             <td><span class="easyui-tooltip" id="${f.id?c}">${f.subject}</span></td>
@@ -73,6 +74,29 @@
             <td><a style="text-decoration: none" href="https://movie.douban.com/subject/${f.doubanNo}/" target="_blank">${f.doubanNo}</a></td>
         </tr>
     </#list>
+
+    <tr>参导作品</tr>
+    <#list filmsDirect as f>
+        <tr>
+            <td>${f_index+1}</td>
+            <td><span class="easyui-tooltip" id="${f.id?c}">${f.subject}</span></td>
+            <td>${f.year}</td>
+            <td>${f.country}</td>
+
+            <#if (f.doubanRating)??>
+                <td>${f.doubanRating?string('0.0')}</td>
+                <#else>
+                    <td>null</td>
+            </#if>
+            <#if (f.doubanSum)??>
+                <td>${f.doubanSum}</td>
+                <#else>
+                    <td>null</td>
+            </#if>
+            <td><a style="text-decoration: none" href="https://movie.douban.com/subject/${f.doubanNo}/" target="_blank">${f.doubanNo}</a></td>
+        </tr>
+    </#list>
+
     </tbody>
 </table>
 

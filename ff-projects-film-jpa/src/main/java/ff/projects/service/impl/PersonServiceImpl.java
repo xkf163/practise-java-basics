@@ -117,4 +117,10 @@ public class PersonServiceImpl implements PersonService {
                 .fetch();
         return listDouBanNo;
     }
+
+
+    @Override
+    public Person findById(Long id) {
+        return personRepository.findOne(id);
+    }
 }

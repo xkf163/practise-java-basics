@@ -509,6 +509,12 @@ public class FilmServiceImpl implements FilmService {
     @Autowired
     StarRepository starRepository;
 
+    /**
+     * 查找影人的作品清单
+     * @param starId
+     * @param type 2:参演作品，1就是参导作品
+     * @return
+     */
     @Override
     public  List<Film> listFilmsByStarId(String starId, String type){
 //        personId ="9112";
@@ -518,6 +524,10 @@ public class FilmServiceImpl implements FilmService {
         if("2".equals(type)){
             films = star.getAsActor();
         }
+        if(films==null){
+            return new ArrayList<Film>();
+        }
+
         String[] filmArray = films.split(",");
 
         QFilm qFilm = QFilm.film;

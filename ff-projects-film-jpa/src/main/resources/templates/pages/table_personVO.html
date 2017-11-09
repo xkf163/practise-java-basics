@@ -13,15 +13,17 @@
 
 
     <script type="text/javascript">
+        //查询按钮
         function doSearch() {
             $("#dg").datagrid('reload',{
                 name:$("#name").val()
             });
         }
 
-        function showFilmList(rowIndex, personId, produceype) {
+        //双击当前行打开当前人物简介
+        var openResume = function (personId,produceype) {
             $('#films').dialog({
-                title: '影片列表',
+                title: '影人资料',
                 width: 730,
                 height: 500,
 //                top: ($(window).height() - 730) * 0.5,
@@ -36,15 +38,37 @@
                 top: 5,
                 modal: true,
 //                onResize:function(){$(this).dialog('center');},
+                content: '<iframe frameborder="0"  src="/persons/' + personId + '"  style="height: 98%; width: 100%;" ></iframe>'
+            });
+        };
+
+        //对话框弹出所有作品
+        function openWorks(rowIndex, personId, produceype) {
+            $('#films').dialog({
+                title: '人物作品',
+                width: 730,
+                height: 500,
+//              top: ($(window).height() - 730) * 0.5,
+//              left: ($(window).width() - 500) * 0.5,
+                closed: false,
+                cache: false,
+//              collapsible: true,
+//              maximizable: true,
+                resizable: true,
+                shadow: true,
+                left: 100,
+                top: 5,
+                modal: true,
+//              onResize:function(){$(this).dialog('center');},
                 content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 98%; width: 100%;" ></iframe>'
             });
         }
 
         function formatAsDirector(index, row ) {
-            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:showFilmList("+ index + ","+ row['id'] + ",1)'>"+ row['asDirectorNumber'] + "</a>";
+            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:openWorks("+ index + ","+ row['id'] + ",1)'>"+ row['asDirectorNumber'] + "</a>";
         }
         function formatAsActor(index, row ) {
-            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:showFilmList("+ index + ","+ row['id'] + ",2)'>"+ row['asActorNumber'] + "</a>";
+            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:openWorks("+ index + ","+ row['id'] + ",2)'>"+ row['asActorNumber'] + "</a>";
         }
         
         function show() {
@@ -78,6 +102,7 @@
                 rownumbers:true,
                 striped:true,
                 border:false,
+                singleSelect:true,
                 fit:true,//自动补全
                 fitColumns:true,
                 multiSort:true,
@@ -142,19 +167,19 @@
                             }
                         }
                     },
-//                    {field:'nameExtend',title:'片名',width:50},
-//                    {field:'gender',title:'片名',width:50},
-//                    {field:'birthDay',title:'片名',width:50},
-//                    {field:'birthPlace',title:'片名',width:50},
-//                    {field:'job',title:'片名',width:50},
-//                    {field:'imdbNo',title:'片名',width:50},
-//                    {field:'doubanNo',title:'片名',width:50}
                 ]],
                 loadFilter: function(data){
                     var ret={};
                     ret.rows=data.content;
                     ret.total=data.totalElements;
                     return ret;
+                },
+                onDblClickCell: function(index,field,value){
+                    //选中
+                    $(this).datagrid('selectRow', index);
+                    var row = $(this).datagrid("getSelected");
+                    openResume(row['id'],"1");
+
                 }
 
             });
@@ -172,14 +197,6 @@
 <table id="dg" class="easyui-datagrid"></table>
 <div id="films"></div>
 
-<div id="win" class="easyui-window" title="My Window" style="width:600px;height:400px"
-     data-options="iconCls:'icon-save',modal:true,closed:true">
-    <div class="easyui-layout" data-options="fit:true">
-        <div data-options="region:'north',split:true" style="height:100px"></div>
-        <div data-options="region:'center'">
-            The Content.
-        </div>
-    </div>
 </div>
 </body>
 </html>

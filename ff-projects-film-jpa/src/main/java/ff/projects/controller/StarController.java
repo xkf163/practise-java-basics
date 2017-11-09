@@ -1,20 +1,19 @@
 package ff.projects.controller;
 
 import com.querydsl.core.types.Predicate;
-import ff.projects.entity.Media;
-import ff.projects.entity.QPerson;
-import ff.projects.entity.QStar;
-import ff.projects.entity.Star;
+import ff.projects.entity.*;
 import ff.projects.repository.StarRepository;
+import ff.projects.service.FilmService;
+import ff.projects.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,7 +31,7 @@ import java.util.stream.Collectors;
  * @Description
  * @Date : Create in 13:15 2017/11/2
  */
-@RestController
+@Controller
 public class StarController {
 
     @PersistenceContext
@@ -41,6 +40,8 @@ public class StarController {
     @Autowired
     StarRepository starRepository;
 
+    @Autowired
+    FilmService filmService;
 
     Specification<Media> getWhereClause(final HttpServletRequest request){
         //动态查询条件准备
@@ -64,6 +65,7 @@ public class StarController {
 
 
     @PostMapping(value = "/persons")
+    @ResponseBody
     public Page<Star> listAll(HttpServletRequest request, @RequestParam(value = "page",defaultValue = "1",required = false) String page,
                                 @RequestParam(value = "rows",defaultValue = "10",required = false) String size,
                                 @RequestParam(value = "sort",defaultValue = "name",required = false) String sort,
@@ -87,6 +89,7 @@ public class StarController {
      * @return
      */
     @PostMapping(value = "/person/directors")
+    @ResponseBody
     public Page<Star> listAllDirector(@RequestParam(value = "page",defaultValue = "1",required = false) String page,
                                        @RequestParam(value = "rows",defaultValue = "10",required = false) String size,
                                        @RequestParam(value = "sort",defaultValue = "asDirectorNumber",required = false) String sort,
@@ -121,6 +124,7 @@ public class StarController {
      * @return
      */
     @PostMapping(value = "/person/actors")
+    @ResponseBody
     public Page<Star> listAllActor( @RequestParam(value = "page",defaultValue = "1",required = false) String page,
                                              @RequestParam(value = "rows",defaultValue = "10",required = false) String size,
                                              @RequestParam(value = "sort",defaultValue = "asActorNumber",required = false) String sort,
@@ -144,5 +148,26 @@ public class StarController {
 
 
 
+    /**
+     * 人物作品列表
+     * @param model
+     * @param id
+     * @return
+     */
+    @GetMapping(value = "/persons/{id}")
+    public String openPersonResume(Model model, @PathVariable("id") String id){
+
+        Star star = starRepository.findOne(Long.parseLong(id));
+        Person person = star.getPerson();
+        //参导作品和参演作品s
+        List<Film> filmsDirect = filmService.listFilmsByStarId(id,"1");
+        List<Film> filmsAct = filmService.listFilmsByStarId(id,"2");
+        model.addAttribute("filmsDirect",filmsDirect);
+        model.addAttribute("filmsAct",filmsAct);
+        model.addAttribute("star",star);
+        model.addAttribute("person",person);
+        return "pages/info_personResume";
+
+    }
 
 }

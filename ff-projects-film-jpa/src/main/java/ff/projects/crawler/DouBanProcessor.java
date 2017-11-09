@@ -65,6 +65,9 @@ public class DouBanProcessor implements PageProcessor {
 
     private Site site = Site
             .me()
+            .setSleepTime(10000)
+            .setRetryTimes(3)
+            .setCharset("utf-8")
             .setDomain("movie.douban.com")
             //%7B%22distinct_id%22%3A%20%2215cf2586637111-09cc812eb1fc81-701238-2a3000-15cf258663828b%22%2C%22%24id%22%3A%20%22163054123%22%2C%22initial_view_time%22%3A%20%221498714502%22%2C%22initial_referrer%22%3A%20%22https%3A%2F%2Fmovie.douban.com%2Fsubject_search%3Fsearch_text%3D%25E7%2581%25AB%25E9%2594%2585%25E8%258B%25B1%25E9%259B%2584%26cat%3D1002%22%2C%22initial_referrer_domain%22%3A%20%22movie.douban.com%22%2C%22%24_sessionid%22%3A%200%2C%22%24_sessionTime%22%3A%201498717202%2C%22%24dp%22%3A%200%2C%22%24_sessionPVTime%22%3A%201498717202%7D;
             // UM_distinctid=15cf2586637111-09cc812eb1fc81-701238-2a3000-15cf258663828b; ap=1; ue="xkf99@qq.com"; dbcl2="163054123:chmaQ1NsVJU"; ck=t0ID; _pk_id.100001.4cf6=a90e45eb3a458ed3.1498541166.30.1498897875.1498881693.; _pk_ses.100001.4cf6=*; __utma=30149280.561785331.1498541167.1498880150.1498896335.30;
@@ -96,6 +99,7 @@ public class DouBanProcessor implements PageProcessor {
             .addCookie("push_noty_num","0")
             .addCookie("push_doumail_num","0")
             .addCookie("_vwo_uuid_v2","D8570F0119A0D26A171627FC7CD214FE|f9fd83098aac087eb826bd151219de18")
+            .addCookie("Referer","movie.douban.com")
 
 //            .addCookie("viewed","3135476")
 //            .addCookie("gr_user_id","922cd5e7-60dc-4640-92ac-f15bf31d7a41")
@@ -105,8 +109,6 @@ public class DouBanProcessor implements PageProcessor {
             .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
             .addHeader("Connection", "keep-alive")
             .addHeader("Cache-Control", "max-age=0")
-            .setSleepTime(10000).setRetryTimes(3)
-            .setCharset("utf-8")
             .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.79 Safari/537.36");
            // .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0");
 

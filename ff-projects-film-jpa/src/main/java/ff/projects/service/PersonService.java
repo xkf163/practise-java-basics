@@ -27,4 +27,6 @@ public interface PersonService {
     Person findByDoubanNo(String doubanNo);
 
     List<String> listPersonsDouBanNo();
+
+    Person findById(Long id);
 }

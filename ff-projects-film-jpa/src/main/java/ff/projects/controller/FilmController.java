@@ -145,12 +145,22 @@ public class FilmController {
     }
 
 
+    /**
+     * 人物作品列表
+     * @param model
+     * @param id
+     * @param type 参导或是参演
+     * @return
+     */
     @GetMapping(value = "/persons/{id}/films/type/{type}")
     public String listFilmByPerson(Model model, @PathVariable("id") String id, @PathVariable("type") String type){
         List<Film> filmList = filmService.listFilmsByStarId(id,type);
         model.addAttribute("filmList",filmList);
-        return "pages/filmList";
+        return "pages/table_films_personWorks";
 
     }
+
+
+
 
 }
