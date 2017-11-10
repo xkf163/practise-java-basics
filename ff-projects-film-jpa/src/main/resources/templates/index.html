@@ -66,6 +66,7 @@
 
         }
 
+        //发送终止爬虫指令
         function crawlerStop(){
             $.ajax({
                 url:"/crawler/stop",
@@ -83,6 +84,7 @@
         }
 
 
+        /*爬虫启动*/
         function crawling(){
 
             $('#crawler').form('submit', {
@@ -127,14 +129,11 @@
                     }
                 }
             });
-
-//            $('#ff').form('submit');
-//            $('#ff').form('clear');
         }
 
 
 
-
+        /*关联media和film对象*/
         function connectFilmForMedia() {
             var onlyNone = $("#onlyNone").prop("checked");
             $.ajax({
@@ -230,16 +229,13 @@
             tabClose();
         }
 
-
-
-
-
         function createFrame(url) {
             var s = '<iframe scrolling="auto" frameborder="0" src="'+url+'" style="width:100%; height:100%"></iframe>';
             return s;
         }
 
         $(document).ready(function(){
+            /*导航树*/
             $('#userMenu').tree({
                 url: '/tree',
                 //method: 'post',
@@ -254,7 +250,11 @@
                     if(node.id != '' & node.htmlUrl!=''){
                         addTab(node.text, node.htmlUrl);
                     }
-                }
+                },
+                onSelect:function(node){
+                    //点击树节点展开
+                    $(this).tree('expand',node.target);
+                },
             });
         });
     </script>
@@ -293,8 +293,6 @@
             <div>退出</div>
         </div>
     </div>
-
-
     <!--<div data-options="region:'east',split:true,hideCollapsedContent:false" title="East" style="width:150px;"></div>-->
     <div title="收藏馆" iconCls="icon-twotone-home" region="west" split="true" style="width:170px;" >
         <div class="easyui-accordion" fit="true" border="false" >
@@ -308,9 +306,6 @@
             </div>
         </div>
     </div>
-
-
-
     <div id="mainPage" region="center" border="true">
         <div id="tabs" class="easyui-tabs" fit="true" border="false">
 
@@ -394,7 +389,7 @@
         </div>
     </div>
 
-    <div region="south" border="false" style="height: 20px;line-height:20px;background-color: #E0ECFF;padding-left: 20px;">欢迎进入...</div>
+    <div region="south" border="false" style="height: 20px;line-height:20px;background-color: #E0ECFF;padding-left: 20px;">欢迎进入电影档案馆</div>
 
 </body>
 </html>
