@@ -99,6 +99,7 @@
             });
         }
 
+
         $(document).ready(function () {
 
             //实现按回车键进行搜索功能
@@ -181,7 +182,17 @@
                     ret.rows=data.content;
                     ret.total=data.totalElements;
                     return ret;
+                },
+                //单击事件
+                onClickRow:function(rowIndex,rowData){
+                    //alert("单击");
+                },
+                //双击事件
+                onDblClickRow :function(rowIndex,rowData){
+                    //alert("/films/"+rowData.id);
+                    parent.addTab(rowData.film.subject, "/media/"+rowData.id);
                 }
+
             });
         });
 

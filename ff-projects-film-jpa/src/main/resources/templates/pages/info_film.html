@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>${media.film.subject}</title>
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-1.5.1/themes/icon.css">
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/components/jquery-easyui-1.5.1/locale/easyui-lang-zh_CN.js"></script>
+    <style>
+        body{
+            margin: 0px;
+            padding: 5px;
+        }
+        table tbody  tr td {height:24px;}
+        .border-table {
+            border-collapse: collapse;
+            border: none;
+            width: 100%;
+        }
+        .border-table td {
+            padding: 5px;
+            border: solid #000 1px;
+            border-color: #ddd;
+        }
+
+        .border-table .td_title {
+            background-color: #efefef;
+            color: #1f637b;
+            font-weight: bolder;
+            width: 15%;
+        }
+        .border-table .td_body {
+            background-color: white;
+            width: 35%;
+        }
+    </style>
+
+    <script>
+    $(function(){
+        $('#ff').form({
+            onSubmit: function(){
+            // do some check
+            // return false to prevent submit;
+            },
+            success:function(data){
+                alert(data)
+            }
+        });
+    });
+    </script>
+</head>
+<body>
+
+<table class="border-table">
+    <tbody>
+        <tr>
+            <td class="td_title">片名：</td><td class="td_body">${media.film.subject}</td>
+            <td class="td_title"></td><td class="td_body"></td>
+        </tr>
+        <tr>
+            <td class="td_title">编号：</td><td class="td_body">${media.film.doubanNo}</td>
+            <td class="td_title">编号：</td><td class="td_body">${media.film.imdbNo}</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
