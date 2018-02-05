@@ -13,4 +13,6 @@ public interface StarService {
     List<Star> findAll();
 
     Star findByDouBanNo(String douBanNo);
+
+    Star findById(Long id);
 }

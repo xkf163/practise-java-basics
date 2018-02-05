@@ -38,11 +38,19 @@ public class MediaController {
         //提取media.film.directors ，放入有序数组
         Map maps = new LinkedHashMap();
         String directorsString = media.getFilm().getDirectors();
-        String[] dirrctorsArray = directorsString.split(",");
-        for (String directorId : dirrctorsArray) {
-            maps.put(directorId,starRepository.findByDouBanNo(directorId));
+        String[] directorsArray = directorsString.split(",");
+        for (String directorDouBanNo : directorsArray) {
+            maps.put(directorDouBanNo,starRepository.findByDouBanNo(directorDouBanNo));
         }
         model.addAttribute("directors",maps);
+
+        maps = new LinkedHashMap();
+        String actorsString = media.getFilm().getActors();
+        String[] actorsArray = actorsString.split(",");
+        for (String actorDouBanNo : actorsArray) {
+            maps.put(actorDouBanNo,starRepository.findByDouBanNo(actorDouBanNo));
+        }
+        model.addAttribute("actors",maps);
 
         return "pages/info_film";
     }

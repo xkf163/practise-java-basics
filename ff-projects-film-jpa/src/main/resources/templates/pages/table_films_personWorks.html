@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>作品清单</title>
+    <title>${star.name}</title>
     <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-themes/ui-cupertino/easyui.css">
     <link rel="stylesheet" type="text/css" href="/components/jquery-easyui-1.5.1/themes/icon.css">
     <script type="text/javascript" src="/components/jquery-easyui-1.5.1/jquery.min.js"></script>
@@ -10,7 +10,18 @@
     <script type="text/javascript" src="/components/jquery-easyui-1.5.1/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript">
         $(function () {
-
+        var actFilmListSize = ${actFilmList?size};
+        if(actFilmListSize==0){
+//            $('#ptab').tabs('getTab',"参演作品").panel('options').tab.colse();//显示tab表头
+           // $("#act").hide();//显示tab内容
+            $('#ptab').tabs('close',"参演作品");
+        }
+            var directFilmListSize = ${directFilmList?size};
+            if(directFilmListSize==0){
+                //$('#ptab').tabs('getTab',"参导作品").panel('options').tab.colse();//显示tab表头
+               // $("#direct").hide();//显示tab内容
+                $('#ptab').tabs('close',"参导作品");
+            }
 
             $('.easyui-tooltip').tooltip({
                 content: $('<div></div>'),
@@ -29,6 +40,12 @@
             });
         });
     </script>
+    <!--<script>-->
+        <!--var getH =   function () {-->
+            <!--var h = $("body").height();-->
+            <!--alert(h);-->
+        <!--}-->
+    <!--</script>-->
 </head>
 <style>
     body{
@@ -38,43 +55,84 @@
 </style>
 
 <body>
+<!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-library_occupied',plain:true" onclick="getH();"></a>-->
+<div id="ptab" class="easyui-tabs" data-options="tools:'#tab-tools',border:false" style="width:100%;">
+    <div id="act" title="参演作品" data-options="closable:false" style="padding:10px;">
+        <table  class="easyui-datagrid"
+               data-options="singleSelect:true,collapsible:true,border:true,">
+            <thead>
+            <tr>
+                <th data-options="field:'productid',width:30">序号</th>
+                <th data-options="field:'listprice',width:210,align:'right'">片名</th>
+                <th data-options="field:'unitcost',width:60,align:'right'">年代</th>
+                <th data-options="field:'attr1',width:200,align:'right'">国家/地区</th>
+                <th data-options="field:'status',width:60,align:'center'">豆瓣评分</th>
+                <th data-options="field:'comments',width:60,align:'center'">评价人数</th>
+                <th data-options="field:'url',width:80,align:'center'">豆瓣号</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list actFilmList as f>
+                <tr>
+                    <td>${f_index+1}</td>
+                    <td><span class="easyui-tooltip" id="${f.id?c}">${f.subject}</span></td>
+                    <td>${f.year}</td>
+                    <td>${f.country}</td>
+                    <#if (f.doubanRating)??>
+                        <td>${f.doubanRating?string('0.0')}</td>
+                        <#else>
+                            <td>null</td>
+                    </#if>
+                    <#if (f.doubanSum)??>
+                        <td>${f.doubanSum}</td>
+                        <#else>
+                            <td>null</td>
+                    </#if>
+                    <td><a style="text-decoration: none" href="https://movie.douban.com/subject/${f.doubanNo}/" target="_blank">${f.doubanNo}</a></td>
+                </tr>
+            </#list>
+            </tbody>
+        </table>
+    </div>
+    <div id="direct" title="参导作品" data-options="closable:true" style="padding:10px;display: none">
+        <table  class="easyui-datagrid"
+               data-options="singleSelect:true,collapsible:true,border:true,">
+            <thead>
+            <tr>
+                <th data-options="field:'productid',width:30">序号</th>
+                <th data-options="field:'listprice',width:210,align:'right'">片名</th>
+                <th data-options="field:'unitcost',width:60,align:'right'">年代</th>
+                <th data-options="field:'attr1',width:200,align:'right'">国家/地区</th>
+                <th data-options="field:'status',width:60,align:'center'">豆瓣评分</th>
+                <th data-options="field:'comments',width:60,align:'center'">评价人数</th>
+                <th data-options="field:'url',width:80,align:'center'">豆瓣号</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list directFilmList as f>
+                <tr>
+                    <td>${f_index+1}</td>
+                    <td><span class="easyui-tooltip" id="${f.id?c}">${f.subject}</span></td>
+                    <td>${f.year}</td>
+                    <td>${f.country}</td>
 
-<table id="dg" class="easyui-datagrid"
-       data-options="singleSelect:true,collapsible:true,border:false,">
-    <thead>
-    <tr>
-        <th data-options="field:'productid',width:30">序号</th>
-        <th data-options="field:'listprice',width:200,align:'right'">片名</th>
-        <th data-options="field:'unitcost',width:60,align:'right'">年代</th>
-        <th data-options="field:'attr1',width:200,align:'right'">国家/地区</th>
-        <th data-options="field:'status',width:60,align:'center'">豆瓣评分</th>
-        <th data-options="field:'comments',width:60,align:'center'">评价人数</th>
-        <th data-options="field:'url',width:80,align:'center'">豆瓣号</th>
-    </tr>
-    </thead>
-    <tbody>
-    <#list filmList as f>
-        <tr>
-            <td>${f_index+1}</td>
-            <td><span class="easyui-tooltip" id="${f.id?c}">${f.subject}</span></td>
-            <td>${f.year}</td>
-            <td>${f.country}</td>
-
-            <#if (f.doubanRating)??>
-                <td>${f.doubanRating?string('0.0')}</td>
-            <#else>
-                <td>null</td>
-            </#if>
-            <#if (f.doubanSum)??>
-                <td>${f.doubanSum}</td>
-                <#else>
-                    <td>null</td>
-            </#if>
-            <td><a style="text-decoration: none" href="https://movie.douban.com/subject/${f.doubanNo}/" target="_blank">${f.doubanNo}</a></td>
-        </tr>
-    </#list>
-    </tbody>
-</table>
+                    <#if (f.doubanRating)??>
+                        <td>${f.doubanRating?string('0.0')}</td>
+                        <#else>
+                            <td>null</td>
+                    </#if>
+                    <#if (f.doubanSum)??>
+                        <td>${f.doubanSum}</td>
+                        <#else>
+                            <td>null</td>
+                    </#if>
+                    <td><a style="text-decoration: none" href="https://movie.douban.com/subject/${f.doubanNo}/" target="_blank">${f.doubanNo}</a></td>
+                </tr>
+            </#list>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 </body>
 </html>

@@ -17,55 +17,54 @@
         .border-table {
             border-collapse: collapse;
             border: none;
-            width: 100%;
+            width: 98%;
+            margin: 0 auto;
         }
         .border-table td {
             padding: 5px;
             border: solid #000 1px;
             border-color: #ddd;
-            font-size: 14px;
+            font-size: 13px;
         }
         .border-table .td_header {
             background-color: #9cc8f7;
             /*color: white;*/
             font-weight: bolder;
         }
-
         .border-table .td_title {
             background-color: #efefef;
             color: #1f637b;
             font-weight: bolder;
-            width: 15%;
+            width: 12%;
         }
        .border-table .td_body {
             background-color: white;
-            width: 35%;
-           max-width: 800px;
+            width: 38%;
+            max-width: 800px;
         }
-    </style>
+        .border-table_inner {
+            border-collapse: collapse;
+            border: none;
+            width: 99%;
+            margin: 0 auto;
+        }
+        .border-table_inner td {
+            padding: 5px;
+            border: solid #000 1px;
+            border-color: #ddd;
+            font-size: 12px;
+        }
 
-    <script>
-    $(function(){
-        $('#ff').form({
-            onSubmit: function(){
-            // do some check
-            // return false to prevent submit;
-            },
-            success:function(data){
-                alert(data)
-            }
-        });
-    });
-    </script>
+    </style>
 </head>
 <body>
-<div style="font-weight: bolder;font-size: 20px;margin: 8px;">
-    ${media.film.subjectMain}<span style="font-size: 18px;color: #00458a">&nbsp;${media.film.year}</span>
-</div>
-<!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-clapperboard-open',plain:true"></a>-->
-<!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-library_occupied',plain:true"></a>-->
 <table class="border-table">
     <tbody>
+        <tr>
+            <td style="font-weight: bolder;font-size: 20px;" colspan="4">
+                ${media.film.subjectMain}<span style="font-size: 18px;color: #00458a">&nbsp;${media.film.year}</span>
+            </td>
+        </tr>
         <tr>
             <td colspan="4" class="td_header">
                 <img src="/components/jquery-easyui-1.5.1/themes/icons/clapperboard.png" style="vertical-align: middle;margin-right: 2px">影片资料
@@ -85,23 +84,65 @@
         </tr>
 
         <tr>
-            <td class="td_title">又名：</td><td class="td_body" colspan="3">${media.film.subjectOther}</td>
+            <td class="td_title">又名：</td><td class="td_body" colspan="3">${media.film.subjectOther!''}</td>
         </tr>
         <tr>
             <td class="td_title">类型：</td><td class="td_body">${media.film.genre}</td>
             <td class="td_title">时长：</td><td class="td_body">${media.film.runtime}</td>
         </tr>
         <tr>
-            <td class="td_title">导演：</td><td class="td_body"  colspan="3">${media.film.directors}</td>
+            <td class="td_title">导演：</td>
+            <td class="td_body"  colspan="3">
+                <table class="border-table_inner">
+                    <thead style="background-color: #efefef">
+                    <tr>
+                        <td width="25px">序号</td>
+                        <td>姓名</td>
+                        <td>姓名</td>
+                        <td>性别</td>
+                        <td>生日</td>
+                        <td>出生地</td>
+                        <td>IMDB编号</td>
+                    </tr>
+                    </thead>
+                    <#list directors?keys as key>
+                        <tr>
+                            <td >${key_index+1}</td>
+                            <td><a style='text-decoration: none;cursor:pointer;' href='javascript:parent.openWorks("${directors[key].nameExtend}",${directors[key].id?c},"1")' >${(directors[key].name)!''}</a></td>
+                            <td>${(directors[key].nameExtend)!''}</td>
+                            <td>${(directors[key].person.gender)!''}</td>
+                            <td>${(directors[key].person.birthDay)!''}</td>
+                            <td>${(directors[key].person.birthPlace)!''}</td>
+                            <td>${(directors[key].person.imdbNo)!''}</td>
+                        </tr>
+                    </#list>
+                </table>
+            </td>
         </tr>
         <tr>
             <td class="td_title">主演：</td>
             <td class="td_body"  colspan="3">
-                <table  class="border-table">
-                    <#list directors?keys as key>
+                <table class="border-table_inner">
+                    <thead style="background-color: #efefef">
+                        <tr>
+                            <td width="25px">序号</td>
+                            <td>姓名</td>
+                            <td>姓名</td>
+                            <td>性别</td>
+                            <td>生日</td>
+                            <td>出生地</td>
+                            <td>IMDB编号</td>
+                        </tr>
+                    </thead>
+                    <#list actors?keys as key>
                     <tr>
-                        <td class="td_title">类型：</td><td class="td_body">${key}</td>
-                        <td class="td_title">时长：</td><td class="td_body">${(directors[key].name)!''}</td>
+                        <td >${key_index+1}</td>
+                        <td><a style='text-decoration: none;cursor:pointer;' href='javascript:parent.openWorks("${(actors[key].nameExtend)!""}",${(actors[key].id?c)!""},"1")' >${(actors[key].name)!''}</a></td>
+                        <td>${(actors[key].nameExtend)!''}</td>
+                        <td>${(actors[key].person.gender)!''}</td>
+                        <td>${(actors[key].person.birthDay)!''}</td>
+                        <td>${(actors[key].person.birthPlace)!''}</td>
+                        <td>${(actors[key].person.imdbNo)!''}</td>
                     </tr>
                     </#list>
                 </table>
@@ -128,6 +169,5 @@
         </tr>
     </tbody>
 </table>
-
 </body>
 </html>

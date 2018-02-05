@@ -28,4 +28,9 @@ public class StarServiceImpl implements StarService {
     public Star findByDouBanNo(String douBanNo){
         return starRepository.findByDouBanNo(douBanNo);
     }
+
+    @Override
+    public Star findById(Long id){
+        return starRepository.findById(id);
+    }
 }

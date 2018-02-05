@@ -6,6 +6,7 @@ import ff.projects.entity.*;
 import ff.projects.repository.FilmRepository;
 import ff.projects.repository.MediaRepository;
 import ff.projects.service.FilmService;
+import ff.projects.service.StarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +40,9 @@ public class FilmController {
 
     @Autowired
     FilmService filmService;
+
+    @Autowired
+    StarService starService;
 
     @GetMapping(value = "/connectFilmForMedia")
     @ResponseBody
@@ -154,8 +158,12 @@ public class FilmController {
      */
     @GetMapping(value = "/persons/{id}/films/type/{type}")
     public String listFilmByPerson(Model model, @PathVariable("id") String id, @PathVariable("type") String type){
-        List<Film> filmList = filmService.listFilmsByStarId(id,type);
-        model.addAttribute("filmList",filmList);
+
+        List<Film> directFilmList = filmService.listFilmsByStarId(id,"1");
+        model.addAttribute("directFilmList",directFilmList);
+        List<Film> actFilmList = filmService.listFilmsByStarId(id,"2");
+        model.addAttribute("actFilmList",actFilmList);
+        model.addAttribute("star",starService.findById(Long.parseLong(id)));
         return "pages/table_films_personWorks";
 
     }

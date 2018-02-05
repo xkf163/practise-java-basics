@@ -46,7 +46,7 @@
         function openWorks(rowIndex, personId, produceype) {
             $('#films').dialog({
                 title: '人物作品',
-                width: 730,
+                width: 760,
                 height: 500,
 //              top: ($(window).height() - 730) * 0.5,
 //              left: ($(window).width() - 500) * 0.5,
@@ -60,7 +60,7 @@
                 top: 5,
                 modal: true,
 //              onResize:function(){$(this).dialog('center');},
-                content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 98%; width: 100%;" ></iframe>'
+                content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 100%; width: 100%;" ></iframe>'
             });
         }
 

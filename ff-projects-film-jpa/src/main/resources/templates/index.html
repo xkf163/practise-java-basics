@@ -12,6 +12,27 @@
 
     <script  type="text/javascript">
 
+        //对话框弹出所有作品
+        function openWorks(starName, personId, produceype) {
+
+            $('#films').dialog({
+                title: starName,
+                width: 744,
+                height: 500,
+                closed: false,
+                cache: false,
+//              collapsible: true,
+//              maximizable: true,
+                resizable: true,
+                shadow: true,
+//              left: ($(document).width()-760)/2,
+                top: 10,
+                modal: true,
+                onResize:function(){$(this).dialog('center');},
+                content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 95%; width: 100%;" ></iframe>'
+            });
+        }
+
         /*遍历多媒体文件夹，符合条件的电影条目写入数据库*/
         function scanning() {
             // call 'submit' method of form plugin to submit the form
@@ -390,6 +411,7 @@
     </div>
 
     <div region="south" border="false" style="height: 20px;line-height:20px;background-color: #E0ECFF;padding-left: 20px;">欢迎进入电影档案馆</div>
-
+    <div id="films"></div>
+    </div>
 </body>
 </html>
