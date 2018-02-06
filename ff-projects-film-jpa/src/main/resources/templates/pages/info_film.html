@@ -55,7 +55,7 @@
             padding: 5px;
             border: solid #ddd 1px;
             /*border-color: #ddd;*/
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .border-table_inner td a {
@@ -85,6 +85,22 @@
                 <!--<img src="/components/jquery-easyui-1.5.1/themes/icons/pencil.png" style="margin-right: 2px">${media.film.subjectMain}<span style="font-size: 14px;color: white">&nbsp;${media.film.year?c}</span>-->
             <!--</td>-->
         <!--</tr>-->
+
+        <tr>
+            <td colspan="6" class="td_header">
+                <img src="/components/jquery-easyui-1.5.1/themes/icons/green/green_pixel_77.gif" style="width:12px;height:12px;margin-right: 2px">媒介信息
+            </td>
+        </tr>
+        <tr>
+            <td class="td_title">下载日期：</td><td class="td_body">${media.gatherDate}</td>
+            <td class="td_title">收库日期：</td><td class="td_body">${media.createDate}</td>
+            <td class="td_title">更新日期：</td><td class="td_body">${media.updateDate}</td>
+
+        </tr>
+        <tr>
+            <td class="td_title">媒体大小：</td><td class="td_body">${media.mediaSize}</td>
+            <td class="td_title">存放路径：</td><td class="td_body"  colspan="3">${media.diskNo}:${media.fullPath}</td>
+        </tr>
         <tr>
             <td colspan="6" class="td_header">
                 <img src="/components/jquery-easyui-1.5.1/themes/icons/green/green_pixel_119.gif" style="width: 12px;height:12px;margin-right: 2px">影片资料
@@ -129,7 +145,7 @@
                     <#list directors?keys as key>
                         <tr>
                             <td style="text-align: center">${key_index+1}</td>
-                            <td><a style='text-decoration: none;cursor:pointer;' href='javascript:parent.openWorks("${directors[key].nameExtend}",${directors[key].id?c},"1")' >${(directors[key].name)!''}</a></td>
+                            <td><a style='text-decoration: none;cursor:pointer;' href='javascript:parent.openWorks("${(directors[key].nameExtend)!''}",${(directors[key].id?c)!''},"1")' >${(directors[key].name)!''}</a></td>
                             <td>${(directors[key].nameExtend)!''}</td>
                             <td>${(directors[key].person.gender)!''}</td>
                             <td>${(directors[key].person.birthDay)!''}</td>
@@ -174,21 +190,6 @@
         </tr>
         <tr>
             <td class="td_title">简&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;介：</td><td class="td_body" colspan="5">${media.film.introduce}</td>
-        </tr>
-        <tr>
-            <td colspan="6" class="td_header">
-                <img src="/components/jquery-easyui-1.5.1/themes/icons/green/green_pixel_77.gif" style="width:12px;height:12px;margin-right: 2px">媒介信息
-            </td>
-        </tr>
-        <tr>
-            <td class="td_title">下载日期：</td><td class="td_body">${media.gatherDate}</td>
-            <td class="td_title">收库日期：</td><td class="td_body">${media.createDate}</td>
-            <td class="td_title">更新日期：</td><td class="td_body">${media.updateDate}</td>
-
-        </tr>
-        <tr>
-            <td class="td_title">媒体大小：</td><td class="td_body">${media.mediaSize}</td>
-            <td class="td_title">存放路径：</td><td class="td_body"  colspan="3">${media.diskNo}:${media.fullPath}</td>
         </tr>
     </tbody>
 </table>

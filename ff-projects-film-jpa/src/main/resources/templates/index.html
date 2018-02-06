@@ -18,17 +18,17 @@
             $('#films').dialog({
                 title: starName,
                 width: 744,
-                height: 400,
+                height: 500,
                 closed: false,
                 cache: false,
 //              collapsible: true,
 //              maximizable: true,
                 resizable: true,
                 shadow: true,
-//              left: ($(document).width()-760)/2,
-                top: 10,
+                left: ($(document).width()-744)/2,
+                top: 100,
                 modal: true,
-                onResize:function(){$(this).dialog('center');},
+                //onResize:function(){$(this).dialog('center');},
                 content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 98%; width: 100%;" ></iframe>'
             });
         }
