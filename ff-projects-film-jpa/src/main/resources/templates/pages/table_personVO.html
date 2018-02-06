@@ -25,7 +25,7 @@
             $('#films').dialog({
                 title: '影人资料',
                 width: 730,
-                height: 500,
+                height: 400,
 //                top: ($(window).height() - 730) * 0.5,
 //                left: ($(window).width() - 500) * 0.5,
                 closed: false,
@@ -43,9 +43,9 @@
         };
 
         //对话框弹出所有作品
-        function openWorks(rowIndex, personId, produceype) {
+        function openWorks(nameExtend, personId, produceype) {
             $('#films').dialog({
-                title: '人物作品',
+                title: nameExtend,
                 width: 760,
                 height: 500,
 //              top: ($(window).height() - 730) * 0.5,
@@ -65,10 +65,10 @@
         }
 
         function formatAsDirector(index, row ) {
-            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:openWorks("+ index + ","+ row['id'] + ",1)'>"+ row['asDirectorNumber'] + "</a>";
+            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:openWorks(&quot;"+ row['nameExtend']+"&quot;,"+ row['id'] + ",1)'>"+ row['asDirectorNumber'] + "</a>";
         }
         function formatAsActor(index, row ) {
-            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:openWorks("+ index + ","+ row['id'] + ",2)'>"+ row['asActorNumber'] + "</a>";
+            return "<a style='text-decoration: none;cursor:pointer;' href='javascript:openWorks(&quot;"+ row['nameExtend']+"&quot;,"+ row['id'] + ",2)'>"+ row['asActorNumber'] + "</a>";
         }
         
         function show() {

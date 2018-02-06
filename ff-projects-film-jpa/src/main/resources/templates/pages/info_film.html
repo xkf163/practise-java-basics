@@ -17,97 +17,118 @@
         .border-table {
             border-collapse: collapse;
             border: none;
-            width: 98%;
+            width: 100%;
             margin: 0 auto;
         }
         .border-table td {
             padding: 5px;
             border: solid #000 1px;
             border-color: #ddd;
-            font-size: 13px;
+            font-size: 12px;
         }
         .border-table .td_header {
-            background-color: #9cc8f7;
-            /*color: white;*/
+            background-color: rgb(224, 236, 255);
+            color: #2779AA;
             font-weight: bolder;
+            vertical-align: middle;
         }
         .border-table .td_title {
-            background-color: #efefef;
-            color: #1f637b;
+            background-color: #f2f5f7;
+            color: #2779AA;
             font-weight: bolder;
-            width: 12%;
+            width: 10%;
+            padding-left: 16px;
+            vertical-align: top;
         }
        .border-table .td_body {
             background-color: white;
-            width: 38%;
+            width: 20%;
             max-width: 800px;
         }
         .border-table_inner {
             border-collapse: collapse;
-            border: none;
-            width: 99%;
-            margin: 0 auto;
+            border: 0px;
+            width: 100%;
+            /*margin: 0 auto;*/
         }
-        .border-table_inner td {
+        .border-table_inner tbody td {
             padding: 5px;
-            border: solid #000 1px;
-            border-color: #ddd;
-            font-size: 12px;
+            border: solid #ddd 1px;
+            /*border-color: #ddd;*/
+            font-size: 11px;
         }
 
+        .border-table_inner td a {
+            color: #3baae3;
+        }
     </style>
+    <script>
+        $(function () {
+            var oTbl = $("#tb");
+            hideBoder(oTbl);
+            oTbl = $("#ta");
+            hideBoder(oTbl);
+        });
+        var hideBoder = function (oTbl) {
+            oTbl.find("tr:first >td").css("border-top","none");//去掉上边框
+            oTbl.find("tr:last >td").css("border-bottom","none");//去掉下边框
+            oTbl.find("tr >td:first-child").css("border-left","none");//去掉左边框
+            oTbl.find("tr >td:last-child").css("border-right","none");//去掉右边框
+        }
+    </script>
 </head>
 <body>
 <table class="border-table">
     <tbody>
+        <!--<tr>-->
+            <!--<td style="font-weight: bolder;font-size: 14px;color:white;background-color: #3baae3" colspan="6">-->
+                <!--<img src="/components/jquery-easyui-1.5.1/themes/icons/pencil.png" style="margin-right: 2px">${media.film.subjectMain}<span style="font-size: 14px;color: white">&nbsp;${media.film.year?c}</span>-->
+            <!--</td>-->
+        <!--</tr>-->
         <tr>
-            <td style="font-weight: bolder;font-size: 20px;" colspan="4">
-                ${media.film.subjectMain}<span style="font-size: 18px;color: #00458a">&nbsp;${media.film.year}</span>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4" class="td_header">
-                <img src="/components/jquery-easyui-1.5.1/themes/icons/clapperboard.png" style="vertical-align: middle;margin-right: 2px">影片资料
+            <td colspan="6" class="td_header">
+                <img src="/components/jquery-easyui-1.5.1/themes/icons/green/green_pixel_119.gif" style="width: 12px;height:12px;margin-right: 2px">影片资料
             </td>
         </tr>
         <tr>
             <td class="td_title">IMDB编号：</td><td class="td_body">${media.film.imdbNo!''}</td>
             <td class="td_title">IMDB评分：</td><td class="td_body">${media.film.imdbRating!''}</td>
+            <td class="td_title">类&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;型：</td><td class="td_body">${media.film.genre}</td>
         </tr>
         <tr>
             <td class="td_title">豆瓣编号：</td><td class="td_body">${media.film.doubanNo!''}</td>
             <td class="td_title">豆瓣评分：</td><td class="td_body">${media.film.doubanRating!''}</td>
+            <td class="td_title">时&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;长：</td><td class="td_body">${media.film.runtime}</td>
         </tr>
         <tr>
-            <td class="td_title">片名：</td><td class="td_body">${media.film.subject}</td>
-            <td class="td_title">片名：</td><td class="td_body">${media.film.subjectMain}</td>
-        </tr>
-
-        <tr>
-            <td class="td_title">又名：</td><td class="td_body" colspan="3">${media.film.subjectOther!''}</td>
+            <td class="td_title">片&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</td><td class="td_body" colspan="3">${media.film.subject}</td>
+            <td class="td_title">年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;代：</td><td class="td_body">${media.film.year?c}</td>
         </tr>
         <tr>
-            <td class="td_title">类型：</td><td class="td_body">${media.film.genre}</td>
-            <td class="td_title">时长：</td><td class="td_body">${media.film.runtime}</td>
+            <td class="td_title">片&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</td><td class="td_body" colspan="5">${media.film.subjectMain!''}</td>
         </tr>
         <tr>
-            <td class="td_title">导演：</td>
-            <td class="td_body"  colspan="3">
-                <table class="border-table_inner">
-                    <thead style="background-color: #efefef">
+            <td class="td_title">又&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</td><td class="td_body" colspan="5">${media.film.subjectOther!''}</td>
+        </tr>
+        <tr>
+            <td class="td_title">导&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;演：</td>
+            <td class="td_body"  colspan="5" style="padding: 0px;">
+                <table id="ta" class="border-table_inner">
+                    <thead style="background-color: #f2f5f7;color: grey">
                     <tr>
-                        <td width="25px">序号</td>
+                        <td width="25px" style="text-align: center">序号</td>
+                        <td width="15%">姓名</td>
                         <td>姓名</td>
-                        <td>姓名</td>
-                        <td>性别</td>
-                        <td>生日</td>
-                        <td>出生地</td>
-                        <td>IMDB编号</td>
+                        <td width="5%">性别</td>
+                        <td width="12%">生日</td>
+                        <td width="25%">出生地</td>
+                        <td width="5%">IMDB编号</td>
                     </tr>
                     </thead>
+                    <tbody>
                     <#list directors?keys as key>
                         <tr>
-                            <td >${key_index+1}</td>
+                            <td style="text-align: center">${key_index+1}</td>
                             <td><a style='text-decoration: none;cursor:pointer;' href='javascript:parent.openWorks("${directors[key].nameExtend}",${directors[key].id?c},"1")' >${(directors[key].name)!''}</a></td>
                             <td>${(directors[key].nameExtend)!''}</td>
                             <td>${(directors[key].person.gender)!''}</td>
@@ -116,27 +137,29 @@
                             <td>${(directors[key].person.imdbNo)!''}</td>
                         </tr>
                     </#list>
+                    </tbody>
                 </table>
             </td>
         </tr>
         <tr>
-            <td class="td_title">主演：</td>
-            <td class="td_body"  colspan="3">
-                <table class="border-table_inner">
-                    <thead style="background-color: #efefef">
+            <td class="td_title">主&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;演：</td>
+            <td class="td_body"  colspan="5" style="padding: 0px">
+                <table id="tb" class="border-table_inner">
+                    <thead style="background-color: #f2f5f7;color: grey">
                         <tr>
                             <td width="25px">序号</td>
+                            <td width="15%">姓名</td>
                             <td>姓名</td>
-                            <td>姓名</td>
-                            <td>性别</td>
-                            <td>生日</td>
-                            <td>出生地</td>
-                            <td>IMDB编号</td>
+                            <td width="5%">性别</td>
+                            <td width="12%">生日</td>
+                            <td width="25%">出生地</td>
+                            <td width="5%">IMDB编号</td>
                         </tr>
                     </thead>
+                    <tbody>
                     <#list actors?keys as key>
                     <tr>
-                        <td >${key_index+1}</td>
+                        <td style="text-align: center">${key_index+1}</td>
                         <td><a style='text-decoration: none;cursor:pointer;' href='javascript:parent.openWorks("${(actors[key].nameExtend)!""}",${(actors[key].id?c)!""},"1")' >${(actors[key].name)!''}</a></td>
                         <td>${(actors[key].nameExtend)!''}</td>
                         <td>${(actors[key].person.gender)!''}</td>
@@ -145,26 +168,26 @@
                         <td>${(actors[key].person.imdbNo)!''}</td>
                     </tr>
                     </#list>
+                    </tbody>
                 </table>
             </td>
         </tr>
         <tr>
-            <td class="td_title">简介：</td><td class="td_body" colspan="3">${media.film.introduce}</td>
+            <td class="td_title">简&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;介：</td><td class="td_body" colspan="5">${media.film.introduce}</td>
         </tr>
         <tr>
-            <td colspan="4" class="td_header">
-                <img src="/components/jquery-easyui-1.5.1/themes/icons/library_occupied.png" style="vertical-align: middle;margin-right: 2px">媒介信息
+            <td colspan="6" class="td_header">
+                <img src="/components/jquery-easyui-1.5.1/themes/icons/green/green_pixel_77.gif" style="width:12px;height:12px;margin-right: 2px">媒介信息
             </td>
         </tr>
         <tr>
             <td class="td_title">下载日期：</td><td class="td_body">${media.gatherDate}</td>
-            <td class="td_title">媒体大小：</td><td class="td_body">${media.mediaSize}</td>
-        </tr>
-        <tr>
             <td class="td_title">收库日期：</td><td class="td_body">${media.createDate}</td>
             <td class="td_title">更新日期：</td><td class="td_body">${media.updateDate}</td>
+
         </tr>
         <tr>
+            <td class="td_title">媒体大小：</td><td class="td_body">${media.mediaSize}</td>
             <td class="td_title">存放路径：</td><td class="td_body"  colspan="3">${media.diskNo}:${media.fullPath}</td>
         </tr>
     </tbody>

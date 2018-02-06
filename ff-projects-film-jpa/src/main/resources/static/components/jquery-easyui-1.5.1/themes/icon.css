@@ -121,9 +121,13 @@
 
 
 .icon-twotone-grow{
-	background:url('icons/twotone/grow.gif') no-repeat center center;
+	background:url('icons/green/green_pixel_127.gif') no-repeat center center;
 }
 
 .icon-twotone-home{
-	background:url('icons/twotone/home.gif') no-repeat center center;
+	 background:url('icons/green/green_pixel_92.gif') no-repeat center center;
+ }
+
+.icon-twotone-config{
+	background:url('icons/green/green_pixel_64.gif') no-repeat center center;
 }

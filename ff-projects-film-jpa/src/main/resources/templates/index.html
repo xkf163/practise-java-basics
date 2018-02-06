@@ -18,7 +18,7 @@
             $('#films').dialog({
                 title: starName,
                 width: 744,
-                height: 500,
+                height: 400,
                 closed: false,
                 cache: false,
 //              collapsible: true,
@@ -29,7 +29,7 @@
                 top: 10,
                 modal: true,
                 onResize:function(){$(this).dialog('center');},
-                content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 95%; width: 100%;" ></iframe>'
+                content: '<iframe frameborder="0"  src="/persons/' + personId + '/films/type/'+produceype+'"  style="height: 98%; width: 100%;" ></iframe>'
             });
         }
 
@@ -321,7 +321,7 @@
                 <ul id="userMenu" style="padding: 15px">
                 </ul>
             </div>
-            <div title="系统配置" iconCls="icon-note" >
+            <div title="系统配置" iconCls="icon-twotone-config" >
                 <ul id="systemMenu">
                 </ul>
             </div>
