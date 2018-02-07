@@ -56,6 +56,7 @@ public class TreeServiceImpl implements TreeService {
             treeNodeSet.add(treeNode);
         }
         pTreeNode = new TreeNode("收集年月", "closed", "/pages/table_mediaVO?dataUrl=/mediavo/gatherdates", "/mediavo/gatherdates" , treeNodeSet);
+        //pTreeNode.setIconCls("icon-wenjianjia-colse");
         return pTreeNode;
     }
 

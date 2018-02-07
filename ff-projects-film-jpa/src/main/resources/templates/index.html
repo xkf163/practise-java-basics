@@ -262,6 +262,7 @@
                 //method: 'post',
                 //queryParams: {"id" : 0},
                 //url: '/tree.json',
+                lines:true,
                 method: 'get',
                 animate: true,
                 checkbox: false,
@@ -274,7 +275,11 @@
                 },
                 onSelect:function(node){
                     //点击树节点展开
-                    $(this).tree('expand',node.target);
+                    if (node.state == "closed")
+                        $(this).tree('expand', node.target);
+                    else
+                        $(this).tree('collapse', node.target);
+
                 },
             });
         });

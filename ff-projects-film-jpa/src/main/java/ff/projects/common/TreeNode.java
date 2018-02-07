@@ -21,6 +21,8 @@ public class TreeNode implements Serializable {
 
     private String dataUrl; //目标数据
 
+    //private String iconCls;
+
     private Set<TreeNode>  children;
 
     public TreeNode() {
