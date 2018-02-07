@@ -229,17 +229,16 @@ public class FilmServiceImpl implements FilmService {
         List<Star> needSaveStarList = new ArrayList<>();
 
         Map<String,Star> starHashMapInit = new HashMap<>();
-        Map<String,Star> starHashMapFinal = new HashMap<>();
+        Map<String,Star> starHashMapFinal;
         List<Star> starsList = starService.findAll();
         //遍历库中stars，组成map，，后续根据doubanid来判断库中是否已存在
         for (Star star : starsList){
-            starHashMapInit.put(star.getDouBanNo(),star);
+            starHashMapInit.put(star.getDouBanNo().trim(),star);
         }
         starHashMapFinal=new HashMap<>(starHashMapInit);
 
-
+        //提取所有符合条件的media条目
         QMedia qMedia = QMedia.media;
-
         List<Media> mediaList;
         if(Boolean.valueOf(onlyNone)){
             //只处理没有关联film的Medias
@@ -249,28 +248,16 @@ public class FilmServiceImpl implements FilmService {
         }
 
         for(Media media : mediaList){
-
-
-
             Film film = findConnectedFilmForMedia(media);
             if(film == null){
                 notFindMediaList.add(media);
                 continue;
             }
-
-
-            if(media.getId()==1270){
-                System.out.println("aaa");
-            }
-
-
             //-----当前正在处理的filmId
             String filmId = String.valueOf(film.getId());
-
-
             //step2)保存或更新当前film中的stars
-            String directorsDoubanNo = film.getDirectors();
-            String actorsDoubanNo = film.getActors();
+            String directorsDoubanNo = film.getDirectors().trim();
+            String actorsDoubanNo = film.getActors().trim();
             //director doubanid array
             String[] ddno_array=null,adno_array=null;
             if(directorsDoubanNo!=null)
@@ -285,30 +272,34 @@ public class FilmServiceImpl implements FilmService {
                     Star star = starHashMapFinal.get(ddno);
                     //判断当前filmid是否已存在当前star的asdirect字段中
                     //不存在add进去，并更新number
-                    String[] asDArray=null;
-                    if(star.getAsDirector()!=null)
+                    String[] asDArray;
+                    if(star.getAsDirector()!=null){
                         asDArray = star.getAsDirector().split(",");
-                    if(asDArray!=null && !Arrays.asList(asDArray).contains(filmId)){
-                        String[] asDArrayNew = new String[asDArray.length+1];
-                        System.arraycopy(asDArray, 0, asDArrayNew, 0, asDArray.length);//将a数组内容复制新数组b
-                        asDArrayNew[asDArrayNew.length-1]=filmId;
-                        star.setAsDirector(StringUtils.join(asDArrayNew,","));
-                        star.setAsDirectorNumber(asDArrayNew.length);
+                        if(asDArray!=null && !Arrays.asList(asDArray).contains(filmId)) {
+                            String[] asDArrayNew = new String[asDArray.length + 1];
+                            System.arraycopy(asDArray, 0, asDArrayNew, 0, asDArray.length);//将a数组内容复制新数组b
+                            asDArrayNew[asDArrayNew.length - 1] = filmId;
+                            star.setAsDirector(StringUtils.join(asDArrayNew, ","));
+                            star.setAsDirectorNumber(asDArrayNew.length);
 
-                        //star是地址引用，故若已添加，不需再次添加
-                        if(!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)){
-                            needUpdateStarList.add(star);
+                            //star是地址引用，故若已添加，不需再次添加
+                            if (!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)) {
+                                needUpdateStarList.add(star);
+                            }
                         }
-
-
                     }else {
                         //asdirector空的情况
                         star.setAsDirector(filmId);
                         star.setAsDirectorNumber(1);
+
+                        //star是地址引用，故若已添加，不需再次添加
+                        if (!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)) {
+                            needUpdateStarList.add(star);
+                        }
                     }
 
                 }else{
-                    //new
+                    //new star
                     Person person =personService.findByDoubanNo(ddno);
                     if(person==null){
                         continue;
@@ -320,47 +311,51 @@ public class FilmServiceImpl implements FilmService {
                     star.setName(person.getName());
                     star.setNameExtend(person.getNameExtend());
                     star.setPerson(person);
+
+                    //新建保存
                     needSaveStarList.add(star);
 
                     //加入到starlist，防止重复生成star数据
-                    starHashMapFinal.put(star.getDouBanNo(),star);
-
+                    starHashMapFinal.put(ddno,star);
                 }
-
 
             }
             //as主演
             for(String adno : adno_array){
+                if (adno.equals("1031931"))
+                    System.out.println("amierhan");
                 if(starHashMapFinal.containsKey(adno)){
-
                     Star star = starHashMapFinal.get(adno);
                     //判断当前filmid是否已存在当前star的asdirect字段中
                     //不存在add进去，并更新number
                     String[] asAArray = null;
-                    if(star.getAsActor()!=null)
+                    if(star.getAsActor()!=null){
                         asAArray= star.getAsActor().split(",");
-                    if(asAArray!=null && !Arrays.asList(asAArray).contains(filmId)){
-                        String[] asAArrayNew = new String[asAArray.length+1];
-                        System.arraycopy(asAArray, 0, asAArrayNew, 0, asAArray.length);//将a数组内容复制新数组b
-                        asAArrayNew[asAArrayNew.length-1]=filmId;
-                        star.setAsActor(StringUtils.join(asAArrayNew,","));
-                        star.setAsActorNumber(asAArrayNew.length);
+                        if(asAArray!=null && !Arrays.asList(asAArray).contains(filmId)) {
+                            String[] asAArrayNew = new String[asAArray.length + 1];
+                            System.arraycopy(asAArray, 0, asAArrayNew, 0, asAArray.length);//将a数组内容复制新数组b
+                            asAArrayNew[asAArrayNew.length - 1] = filmId;
+                            star.setAsActor(StringUtils.join(asAArrayNew, ","));
+                            star.setAsActorNumber(asAArrayNew.length);
 
-                        //star是地址引用，故若已添加，不需再次添加
-                        if(!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)){
-                            needUpdateStarList.add(star);
+                            //star是地址引用，故若已添加，不需再次添加
+                            if (!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)) {
+                                needUpdateStarList.add(star);
+                            }
+    //                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
+    //                        if(starHashMapInit.containsKey(star.getDouBanNo())){
+    //                            needUpdateStarList.add(star);
+    //                        }
                         }
-//                        //此star一开始就没有，已经在needsaveStarlist中，否则会重复添加重复生成
-//                        if(starHashMapInit.containsKey(star.getDouBanNo())){
-//                            needUpdateStarList.add(star);
-//                        }
-
-
                     }  else {
                         //asactor空的情况
                         star.setAsActor(filmId);
                         star.setAsActorNumber(1);
-                }
+                        //star是地址引用，故若已添加，不需再次添加
+                        if (!needUpdateStarList.contains(star) && !needSaveStarList.contains(star)) {
+                            needUpdateStarList.add(star);
+                        }
+                    }
 
                 }else{
                     //new
@@ -377,9 +372,10 @@ public class FilmServiceImpl implements FilmService {
                     star.setNameExtend(person.getNameExtend());
                     star.setPerson(person);
 
+                    //new star
                     needSaveStarList.add(star);
                     //加入到starlist，防止重复生成star数据
-                    starHashMapFinal.put(star.getDouBanNo(),star);
+                    starHashMapFinal.put(adno,star);
 
                 }
             }
@@ -388,9 +384,6 @@ public class FilmServiceImpl implements FilmService {
                 media.setFilm(film);
                 media.setUpdateDate(new Date());
                 needUpdateMediaList.add(media);
-
-
-
         }
 
 
@@ -413,8 +406,8 @@ public class FilmServiceImpl implements FilmService {
         size  = needUpdateStarList.size();
         System.out.println("needUpdateStarList:::"+size);
         for (int i=0; i<size; i++){
-            Star media = needUpdateStarList.get(i);
-            entityManager.merge(media);
+            Star star = needUpdateStarList.get(i);
+            entityManager.merge(star);
             if(i % 50 == 0 || i==size-1){
                 entityManager.flush();
                 entityManager.clear();
@@ -423,16 +416,13 @@ public class FilmServiceImpl implements FilmService {
         size  = needSaveStarList.size();
         System.out.println("needSaveStarList:::"+size);
         for (int i=0; i<size; i++){
-            Star media = needSaveStarList.get(i);
-            entityManager.persist(media);
+            Star star = needSaveStarList.get(i);
+            entityManager.persist(star);
             if(i % 50 == 0 || i==size-1){
                 entityManager.flush();
                 entityManager.clear();
             }
         }
-
-
-
 
         return new Object[]{needUpdateMediaList,notFindMediaList,needUpdateStarList,needSaveStarList};
     }
@@ -444,7 +434,7 @@ public class FilmServiceImpl implements FilmService {
      * @return
      */
     Film findConnectedFilmForMedia(Media media){
-        if(media.getId()==1270){
+        if(media.getId()==644){
             System.out.println("aaa");
         }
         if(media.getFilm()!=null){
