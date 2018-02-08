@@ -46,6 +46,34 @@
             <!--alert(h);-->
         <!--}-->
     <!--</script>-->
+    <style>
+        table tbody tr {height:20px;}
+        .border-table {
+            border-collapse: collapse;
+            border: none;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .border-table td {
+            padding: 5px;
+            border: solid #000 1px;
+            border-color: #ddd;
+            font-size: 12px;
+        }
+        .border-table .td_title {
+            background-color: #f2f5f7;
+            color: #2779AA;
+            font-weight: bolder;
+            width: 75px;
+            padding-left: 5px;
+            vertical-align: top;
+        }
+        .border-table .td_body {
+            background-color: white;
+            /*width: 22%;*/
+            /*max-width: 640px;*/
+        }
+    </style>
 </head>
 <style>
     body{
@@ -58,6 +86,30 @@
 <body>
 <!--<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-library_occupied',plain:true" onclick="getH();"></a>-->
 <div id="ptab" class="easyui-tabs" data-options="tools:'#tab-tools',border:false" style="width:100%;">
+    <div id="resume" title="人物资料" data-options="closable:false" style="padding:10px;padding-right: 20px">
+        <table class="border-table">
+            <tbody>
+
+                <tr>
+                    <td class="td_title">性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别：</td><td class="td_body">${(star.person.gender)!''}</td>
+                    <td class="td_title">出生日期：</td><td class="td_body">${(star.person.birthDay)!''}</td>
+                    <td class="td_title">出生地：</td><td class="td_body">${(star.person.birthPlace)!''}</td>
+                </tr>
+                <tr>
+                    <td class="td_title">工&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作：</td><td class="td_body" colspan="5">${(star.person.job)!''}</td>
+                </tr>
+                <tr>
+                    <td class="td_title">IMDB编号：</td><td class="td_body">${(star.person.imdbNo)!''}</td>
+                    <td class="td_title">豆瓣编号：</td><td class="td_body">${(star.person.doubanNo)!''}</td>
+                </tr>
+                <tr>
+                    <td class="td_title">简&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;介：</td><td class="td_body" colspan="5">${(star.person.introduce)!''}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
     <div id="act" title="参演作品" data-options="closable:false" style="padding:10px;">
         <table  class="easyui-datagrid"
                data-options="singleSelect:true,collapsible:true,border:true,">
