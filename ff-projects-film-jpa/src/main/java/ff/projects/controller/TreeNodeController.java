@@ -3,7 +3,10 @@ package ff.projects.controller;
 import ff.projects.common.TreeNode;
 import ff.projects.service.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -21,6 +24,46 @@ public class TreeNodeController {
     @Autowired
     TreeService treeService;
 
+    @GetMapping(value = "/initTree")
+    public List<TreeNode> initTree(@RequestParam(required = false,name = "id") String nodeId){
+
+        List<TreeNode> treeNodeList = new ArrayList<>();
+        //表示打开首页动作，初始化1级节点
+        if (nodeId == null) {
+            //1级父节点
+            TreeNode pTreeNode;
+            pTreeNode = new TreeNode("010000","收集年月", "closed", "/pages/table_mediaVO?dataUrl=/mediavo/gatherdates", "/mediavo/gatherdates" );
+            treeNodeList.add(pTreeNode);
+
+            pTreeNode = new TreeNode("020000","影片年代", "closed", "/pages/table_mediaVO?dataUrl=/mediavo/years", "/mediavo/years");
+            treeNodeList.add(pTreeNode);
+
+            pTreeNode = new TreeNode("030000","影人作品", "closed", "", "" );
+            treeNodeList.add(pTreeNode);
+
+            pTreeNode = new TreeNode("040000","操作平台", "closed", "", "" );
+            treeNodeList.add(pTreeNode);
+        }
+
+        if("010000".equals(nodeId)){
+            treeNodeList = new ArrayList<>(treeService.getSonTreeGroupByGatherDate());
+        }
+
+        if("020000".equals(nodeId)){
+            treeNodeList = new ArrayList<>(treeService.getSonTreeGroupByMovieReleaseYear());
+        }
+        if("030000".equals(nodeId)){
+            treeNodeList = new ArrayList<>(treeService.getSonTreeGroupByStar());
+        }
+        if("040000".equals(nodeId)){
+            treeNodeList = new ArrayList<>(treeService.getTreeForAdmin());
+        }
+
+        return treeNodeList;
+    }
+
+
+    //弃用
     @GetMapping(value = "/tree")
     public List<TreeNode> listTree(){
         List<TreeNode> treeNodeList = new ArrayList<>();

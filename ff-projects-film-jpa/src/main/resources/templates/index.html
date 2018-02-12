@@ -258,7 +258,7 @@
         $(document).ready(function(){
             /*导航树*/
             $('#userMenu').tree({
-                url: '/tree',
+                url: '/initTree',
                 //method: 'post',
                 //queryParams: {"id" : 0},
                 //url: '/tree.json',
@@ -266,6 +266,9 @@
                 method: 'get',
                 animate: true,
                 checkbox: false,
+                onBeforeExpand:function(node,param){
+                    //$('#taskTree').tree('options').url = ctx + "/rims/rescue/loadRescueTaskTreeRootNodes.do?parentId="+node.id;
+                },
                 onClick: function(node){
                     //用node.id或者其他字段来取grid中的数据，并刷新grid
                     //       refresh(node.id);
